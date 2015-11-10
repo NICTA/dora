@@ -1,86 +1,117 @@
-""" Simple demo using Dora's components as a standalone python library
+"""
+Active Sampling Demo
+
+This demo uses the Dora active sampling module as a python library that can be
+directly called from within the process.
+
+We solve a two dimensional sampling problem using an efficient sampling
+scheme. The underlying problem is to sample the boundaries of a circle, given
+no prior knowledge of its geometry.
+
 """
 
+import numpy as np
+import logging
+import matplotlib.pyplot as pl
+import matplotlib as mpl
+import dora.active_sampling as sampling
+import dora.regressors.gp as gp
 
-def main():
-
-    # Sampler bounds:
-    lower_bounds = [1., 1.]
-    upper_bounds = [3., 3.]
-
-    n_output = 20  # The length of the model's output vector
-    n_pre_train = 40 # The number of evaluations that will be used to train the sampler
-    explore_factor = 0.3
-
-
-    initialiseArgs = {'lower':lower, 'upper':upper,'n_outputs':n_outputs,
-                    'n_pre_train': n_pre_train,
-                    'acquisition_func': 'prodmax', 'explore_factor': explore_factor}
-
-    # initialise sampler
-    sampler_info = requests.post('http://localhost:5000/samplers',
-                            json=initialiseArgs).json()
-    print("Model Info: " + str(sampler_info))
-
-    # evaluate the sampler 70 times:
-    n_runs = 70
-    query_loc = []
-    for i in range(n_runs):
-        print(i)
-
-        #post a request to the sampler for a query location
-        query_loc = (requests.post(sampler_info['obs_uri']).json())
-
-        # Evaluate the sampler's query on the forward model
-        characteristic = np.array(query_loc['query'])
-        uid = query_loc['uid']
-        uid, fitness = plant_fake(characteristic, n_outputs, uid)
-
-        # Update the sampler with the new observation from the forward model
-        r = requests.put(query_loc['uri'], json=fitness.tolist())
+# The plotting subpackage is throwing FutureWarnings
+import warnings
+warnings.simplefilter("ignore", FutureWarning)
 
 
-    # Create three queries for the sampler and print the results
-    distrib_loc = np.array([[1.1, 1.4], [1.3, 1.8], [1.2, 1.9]])
-    pred = requests.get(sampler_info['pred_uri'], json=distrib_loc.tolist()).json()
-    print("Predictive Means: ");print(pred['predictive_mean'])
-    print("Predictive Variances: ");print(pred['predictive_variance'])
+def simulate_measurement(X):
+    """ A binary image of a circle as a test problem for sampling
+    """
+    return (np.sum((X-0.5)**2) < 0.1).astype(float)
 
 
-    # Retrieve Training Data:
-    training_data = requests.get(sampler_info['training_data_uri']).json()
-    print('X:' + str(training_data['X']))
-    print('y:' + str(training_data['y']))
-    print('Virtual X:' + str(training_data['virtual_X']))
-    print('Virtual y:' + str(training_data['virtual_y']))
+def main(method_name):
 
-    # Plot predictions and training data
-    xres = 30
-    yres = 30
-    xeva, yeva = np.meshgrid(np.linspace(lower[0], upper[0], xres), np.linspace(
-        lower[1], upper[1], yres))
-    Xquery = np.array([xeva.flatten(),yeva.flatten()]).T
-    pred=requests.get(sampler_info['pred_uri'], json=Xquery.tolist()).json()
-    pred_mean = pred['predictive_mean']
-    id_matrix = np.reshape(np.arange(Xquery.shape[0])[:,np.newaxis],xeva.shape)
-    vol = np.zeros((n_outputs, xeva.shape[0], xeva.shape[1]))
-    for x in range(xres):
-        for y in range(yres):
-            vol[:,x,y] = pred_mean[id_matrix[x,y]]
-    subplt = vv.subplot(111)
-    plt = vv.volshow(vol, renderStyle='mip',clim=(-0.5, 1.))
-    plt.colormap = vv.CM_JET  #  HOT
-    subplt.axis.xLabel = 'time to disturbance'
-    subplt.axis.yLabel = 'B4 Slope'
-    subplt.axis.zLabel = 'lma'
-    a = ((np.asarray(training_data['X']) - np.array([np.min(xeva),
-            np.min(yeva)])[np.newaxis,:])/ np.array([np.max(xeva) -
-            np.min(xeva),np.max(yeva)-np.min(yeva)])[np.newaxis,:])  \
-            * np.array(xeva.shape)
-    n = a.shape[0]
-    a = np.hstack((a, (n_outputs+0.01)*np.ones((n, 1))))
-    pp = vv.Pointset(a)
-    vv.plot(pp, ms='.', mc='w', mw='9', ls='')
-    vv.use().Run()
+    # Set up a sampling problem:
+    target_samples = 501
+    lower = [0, 0]
+    upper = [1, 1]
+
+    if method_name == 'Delaunay':
+        explore_priority = 0.0001  # relative to the *difference* in stdev
+        sampler = sampling.Delaunay(lower, upper, explore_priority)
+
+    elif method_name == 'Gaussian_Process':
+        n_initial_sample = 50
+        X_train = sampling.random_sample(lower, upper, n_initial_sample)
+        y_train = np.asarray([simulate_measurement(i) for i in X_train])
+        sampler = sampling.Gaussian_Process(lower, upper, X_train, y_train,
+                                            add_train_data=False)
+    else:
+        raise ValueError('Unrecognised method name.')
+
+    # Set up plotting:
+    plots = {'fig': pl.figure(),
+             'count': 0,
+             'shape': (2, 3)}
+    plot_triggers = [8, 9, 10, 50, 100, target_samples-1]
+
+    # Run the active sampling:
+    for i in range(target_samples):
+
+        newX, newId = sampler.pick()
+
+        observation = simulate_measurement(newX)
+
+        sampler.update(newId, observation)
+
+        if i in plot_triggers:
+            plot_progress(plots, sampler)
+
+    pl.show()
 
 
+def plot_progress(plots, sampler):
+    fig = plots['fig']
+    cols = pl.cm.jet(np.linspace(0, 1, 64))
+    custom = mpl.colors.ListedColormap(cols*0.5+0.5)
+    fig.add_subplot(*(plots['shape'] + (1+plots['count'],)))
+    plots['count'] += 1
+    y = np.asarray(sampler.y)
+    w = 4./np.log(1 + len(y))
+
+    if isinstance(sampler, sampling.Delaunay):
+        # todo (AL): only show the measured samples!
+        X = np.asarray(sampler.X)
+
+        pl.tripcolor(X[:, 0], X[:, 1], y, shading='gouraud', edgecolors='k',
+                     linewidth=w, cmap=custom)
+        pl.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
+
+    elif isinstance(sampler, sampling.Gaussian_Process):
+        X = sampler.regressor.X
+        minv = np.min(X, axis=0)
+        maxv = np.max(X, axis=0)
+        res = 400
+        xi = np.linspace(minv[0], maxv[0], res)
+        yi = np.linspace(minv[1], maxv[1], res)
+        xg, yg = np.meshgrid(xi, yi)
+        x_test = np.array([xg.flatten(), yg.flatten()]).T
+        query = gp.query(x_test, sampler.regressor)
+
+        zi = np.reshape(gp.mean(sampler.regressor, query), xg.shape)
+
+        extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
+                  np.max(X, axis=0)[0], y.min()]
+        pl.imshow(zi, vmin=0, vmax=1, extent=extent)
+
+    else:
+        raise(ValueError("Unsupported Sampler!"))
+
+    pl.scatter(X[:, 0], X[:, 1], c=y)
+    pl.axis('image')
+    pl.title('%d Samples' % len(y))
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    # main('Delaunay')
+    main('Gaussian_Process')

@@ -3,7 +3,7 @@ Strategies for active sampling a spatial field.
 """
 import numpy as np
 from scipy.spatial import Delaunay as ScipyDelaunay
-import computers.gp as gp
+import dora.regressors.gp as gp
 import scipy.stats as stats
 import hashlib
 
