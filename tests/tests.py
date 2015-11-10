@@ -3,7 +3,7 @@
 """
 
 import numpy as np
-import computers.gp as gp
+import dora.regressors.gp as gp
 import matplotlib.pyplot as pl
 import scipy.linalg as la
 from mpl_toolkits.mplot3d import Axes3D

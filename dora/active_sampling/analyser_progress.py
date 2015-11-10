@@ -1,6 +1,6 @@
 import numpy as np
-from computers import gp
-from computers.active_sampling import Stacked_Gaussian_Process as StackedGP
+from dora.regressors import gp
+from dora.regressors.active_sampling import Stacked_Gaussian_Process as StackedGP
 import logging
 import pickle
 import visvis

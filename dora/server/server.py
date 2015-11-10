@@ -1,6 +1,9 @@
 import flask as fl
 from response import returns_json
-from computers.active_sampling import Stacked_Gaussian_Process as StackedGP
+
+# TODO(Al) - @simon arent we going to merge GP and StackedGP?
+
+from dora.active_sampling import Stacked_Gaussian_Process as StackedGP
 import numpy as np
 
 app = fl.Flask(__name__)

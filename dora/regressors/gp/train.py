@@ -2,9 +2,9 @@ import operator
 import numpy as np
 import nlopt as nl
 from .types import Folds
-from computers.gp import predict
-from computers.gp import linalg
-from computers.gp import types
+from dora.regressors.gp import predict
+from dora.regressors.gp import linalg
+from dora.regressors.gp import types
 import matplotlib.pyplot as pl
 import sklearn.cluster as skcluster
 import scipy.interpolate as interp

@@ -15,9 +15,9 @@ objects.
 """
 import numpy as np
 from scipy.spatial.distance import cdist
-from computers.gp import predict
-from computers.gp.types import Range
-from computers.gp import train
+from dora.regressors.gp import predict
+from dora.regressors.gp.types import Range
+from dora.regressors.gp import train
 import logging
 log = logging.getLogger(__name__)
 

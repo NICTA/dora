@@ -1,6 +1,6 @@
 import requests
 import numpy as np
-import computers.active_sampling as sampling
+import dora.active_sampling as sampling
 from worker_jobs import plant_fake
 import visvis as vv
 

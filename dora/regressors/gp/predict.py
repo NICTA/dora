@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.linalg as la
-from computers.gp import linalg
-from computers.gp import types
+from dora.regressors.gp import linalg
+from dora.regressors.gp import types
 from time import time
 
 def alpha(Y, L):
