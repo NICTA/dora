@@ -138,16 +138,18 @@ def retrieve_trainingdata(samplerid):
 @returns_json
 def retrieve_settings(samplerid):
     """
-    provides lists of the real and virtual training data used by the sampler.
+    provides lists of the settings used by the sampler.
     """
     lower = fl.current_app.samplers[int(samplerid)].lower.tolist()
     upper = fl.current_app.samplers[int(samplerid)].upper.tolist()
 
     n_stacks = fl.current_app.samplers[int(samplerid)].n_stacks
-    # hyper_params = fl.current_app.samplers[int(samplerid)].hyper_params
-    # regressors = [reg.tolist() for reg in fl.current_app.samplers[int(samplerid)].regressors]
+
     mean = fl.current_app.samplers[int(samplerid)].mean
     trained_flag = fl.current_app.samplers[int(samplerid)].trained_flag
+    # TODO <SIMON> add ability to retrieve full state
+    # hyper_params = fl.current_app.samplers[int(samplerid)].hyper_params
+    # regressors = [reg.tolist() for reg in fl.current_app.samplers[int(samplerid)].regressors]
     # acq_func = [y.tolist() for y in fl.current_app.samplers[int(samplerid)].acq_func]
     # explore_factor = [y.tolist() for y in fl.current_app.samplers[int(samplerid)].explore_factor]
     #
@@ -159,6 +161,7 @@ def retrieve_settings(samplerid):
     #
     # virt_X = [x for x, real in zip(X, real_id) if real is False]
     # virt_y = [y for y, real in zip(y, real_id) if real is False]
+
     response_data = {"lower": lower, "upper": upper, 'n_stacks':n_stacks,
                      "mean":mean,
                      "trained_flag":trained_flag}

@@ -19,16 +19,12 @@ import matplotlib.pyplot as pl
 import matplotlib as mpl
 import dora.active_sampling as sampling
 import dora.regressors.gp as gp
+from example_processes import simulate_measurement
 
 # The plotting subpackage is throwing FutureWarnings
 import warnings
 warnings.simplefilter("ignore", FutureWarning)
 
-
-def simulate_measurement(X):
-    """ A binary image of a circle as a test problem for sampling
-    """
-    return (np.sum((X-0.5)**2) < 0.1).astype(float)
 
 
 def main():

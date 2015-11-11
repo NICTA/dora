@@ -4,6 +4,9 @@ Active Sampling Demo
 This demo interacts uses Dora's REST api to actively sample a model that
  returns a vector.
 
+ The acquisition balances sampler uncertainty with the predicted magnitude of
+ the underlying process' value
+
 
 """
 
@@ -17,34 +20,13 @@ import subprocess
 import requests
 import time
 import visvis as vv
+from example_processes import simulate_measurement_vector
 
 # The plotting subpackage is throwing FutureWarnings
 import warnings
 warnings.simplefilter("ignore", FutureWarning)
 
-def simulate_measurement(X, uid=None):
-    """ The true model is two Gaussian blobs located at centre1 and centre2
-    The model is queried with a 2-D location and returns an vector of length
-    output_len with values corresponding to the underlying function's values
-    along a z-axis
-    """
-    assert X.shape == (2,)
-    measurement_range = [0, 1]
-    centre1 = np.array([1.5, 1.4, 0.3])
-    centre2 = np.array([2.50, 2.0, 0.7])
-    l1 = 0.2
-    l2 = 0.3
-    output_len = 20
 
-    Z = np.arange(measurement_range[0], measurement_range[1],
-                  (measurement_range[1] - measurement_range[0])/output_len)
-    dist1 = [np.sqrt((centre1[0]-X[0])**2+(centre1[1]-X[1])**2
-                     + (centre1[2]-z)**2) for z in Z]
-    dist2 = [np.sqrt((centre2[0]-X[0])**2+(centre2[1]-X[1])**2
-                     + (centre2[2]-z)**2) for z in Z]
-    measurement = np.asarray([np.exp(-dist1[i]/l1) + np.exp(-dist2[i]/l2)
-                          for i in range(len(dist1))])
-    return uid, measurement
 
 
 def main():
@@ -84,7 +66,7 @@ def main():
         # Evaluate the sampler's query on the forward model
         characteristic = np.array(query_loc['query'])
         uid = query_loc['uid']
-        uid, measurement = simulate_measurement(characteristic, uid)
+        uid, measurement = simulate_measurement_vector(characteristic, uid)
 
         # Update the sampler with the new observation from the forward model
         r = requests.put(query_loc['uri'], json=measurement.tolist())
@@ -98,8 +80,9 @@ def main():
     logging.info('y:' + str(training_data['y']))
     logging.info('Virtual X:' + str(training_data['virtual_X']))
     logging.info('Virtual y:' + str(training_data['virtual_y']))
-    vv.use().Run()
     server.terminate()
+    vv.use().Run()
+
 
 
 
@@ -131,9 +114,9 @@ def plot_progress(plots, sampler_info):
             vol[:,x,y] = pred_mean[id_matrix[x,y]]
     plt = vv.volshow(vol, renderStyle='mip',clim=(-0.5, 1))
     plt.colormap = vv.CM_JET  #  HOT
-    subplt.axis.xLabel = 'input_1'
-    subplt.axis.yLabel = 'input_2'
-    subplt.axis.zLabel = 'model_output'
+    subplt.axis.xLabel = 'input 1'
+    subplt.axis.yLabel = 'input 2'
+    subplt.axis.zLabel = 'model output'
     a = ((np.asarray(training_data['X']) - np.array([np.min(xeva),
             np.min(yeva)])[np.newaxis,:])/ np.array([np.max(xeva) -
             np.min(xeva),np.max(yeva)-np.min(yeva)])[np.newaxis,:])  \
