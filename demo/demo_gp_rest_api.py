@@ -29,22 +29,22 @@ def simulate_measurement(X, uid=None):
     along a z-axis
     """
     assert X.shape == (2,)
-    fitness_range = [0, 1]
+    measurement_range = [0, 1]
     centre1 = np.array([1.5, 1.4, 0.3])
     centre2 = np.array([2.50, 2.0, 0.7])
     l1 = 0.2
     l2 = 0.3
     output_len = 20
 
-    Z = np.arange(fitness_range[0], fitness_range[1],
-                  (fitness_range[1] - fitness_range[0])/output_len)
+    Z = np.arange(measurement_range[0], measurement_range[1],
+                  (measurement_range[1] - measurement_range[0])/output_len)
     dist1 = [np.sqrt((centre1[0]-X[0])**2+(centre1[1]-X[1])**2
                      + (centre1[2]-z)**2) for z in Z]
     dist2 = [np.sqrt((centre2[0]-X[0])**2+(centre2[1]-X[1])**2
                      + (centre2[2]-z)**2) for z in Z]
-    fitness = np.asarray([np.exp(-dist1[i]/l1) + np.exp(-dist2[i]/l2)
+    measurement = np.asarray([np.exp(-dist1[i]/l1) + np.exp(-dist2[i]/l2)
                           for i in range(len(dist1))])
-    return uid, fitness
+    return uid, measurement
 
 
 def main():
@@ -53,8 +53,8 @@ def main():
     time.sleep(5)
 
     # Set up a sampling problem:
-    target_samples = 70
-    n_train = 30
+    target_samples = 100
+    n_train = 15
     lower = [1., 1.]
     upper = [3., 3.]
     explore_factor = 0.3
@@ -71,28 +71,26 @@ def main():
     logging.info("Model Info: " + str(sampler_info))
 
     # Set up plotting:
-    plots = {'fig': pl.figure(),
+    plots = {'fig': vv.figure(),
              'count': 0,
              'shape': (2, 3)}
-    plot_triggers = [35, 50, target_samples-1]
+    plot_triggers = [16, 30, 40, 50, 65, target_samples-1]
 
     # Run the active sampling:
-
     for i in range(target_samples):
-        # import ipdb; ipdb.set_trace()
         #post a request to the sampler for a query location
-        query_loc = (requests.post(sampler_info['obs_uri']).json())
+        query_loc = requests.post(sampler_info['obs_uri']).json()
 
         # Evaluate the sampler's query on the forward model
         characteristic = np.array(query_loc['query'])
         uid = query_loc['uid']
-        uid, fitness = simulate_measurement(characteristic, uid)
+        uid, measurement = simulate_measurement(characteristic, uid)
 
         # Update the sampler with the new observation from the forward model
-        r = requests.put(query_loc['uri'], json=fitness.tolist())
+        r = requests.put(query_loc['uri'], json=measurement.tolist())
 
         if i in plot_triggers:
-            plot_progress(sampler_info,lower, upper,n_outputs)
+            plot_progress(plots, sampler_info)
 
     # Retrieve Training Data:
     training_data = requests.get(sampler_info['training_data_uri']).json()
@@ -100,12 +98,22 @@ def main():
     logging.info('y:' + str(training_data['y']))
     logging.info('Virtual X:' + str(training_data['virtual_X']))
     logging.info('Virtual y:' + str(training_data['virtual_y']))
-
+    vv.use().Run()
     server.terminate()
 
 
 
-def plot_progress(sampler_info,lower, upper, n_outputs):
+def plot_progress(plots, sampler_info):
+
+    settings = requests.get(sampler_info['settings']).json()
+    lower = settings['lower']
+    upper = settings['upper']
+    n_outputs = settings['n_stacks']
+
+    fig = plots['fig']
+    subplt =vv.subplot(*(plots['shape'] + (1+plots['count'],)))
+    plots['count'] += 1
+
     # Plot predictions and training data
     training_data = requests.get(sampler_info['training_data_uri']).json()
 
@@ -121,12 +129,11 @@ def plot_progress(sampler_info,lower, upper, n_outputs):
     for x in range(xres):
         for y in range(yres):
             vol[:,x,y] = pred_mean[id_matrix[x,y]]
-    subplt = vv.subplot(111)
     plt = vv.volshow(vol, renderStyle='mip',clim=(-0.5, 1))
     plt.colormap = vv.CM_JET  #  HOT
-    subplt.axis.xLabel = 'time to disturbance'
-    subplt.axis.yLabel = 'B4 Slope'
-    subplt.axis.zLabel = 'lma'
+    subplt.axis.xLabel = 'input_1'
+    subplt.axis.yLabel = 'input_2'
+    subplt.axis.zLabel = 'model_output'
     a = ((np.asarray(training_data['X']) - np.array([np.min(xeva),
             np.min(yeva)])[np.newaxis,:])/ np.array([np.max(xeva) -
             np.min(xeva),np.max(yeva)-np.min(yeva)])[np.newaxis,:])  \
@@ -135,7 +142,7 @@ def plot_progress(sampler_info,lower, upper, n_outputs):
     a = np.hstack((a, (n_outputs+0.01)*np.ones((n, 1))))
     pp = vv.Pointset(a)
     vv.plot(pp, ms='.', mc='w', mw='9', ls='')
-    vv.use().Run()
+
 
 
 
