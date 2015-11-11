@@ -362,7 +362,7 @@ class Stacked_Gaussian_Process(Base_Sampler):
                 # folds.Y.append(y_train[:, stack])
                 folds.flat_y.append(y_train[:, stack]-self.mean)
 
-            hypers = gp.learn_folds(folds, self.kernelFn, opt_config)
+            hypers = gp.train.learn_folds(folds, self.kernelFn, opt_config)
 
         for stack in range(self.n_stacks):
             self.hyper_params.append(hypers)

@@ -8,6 +8,9 @@ We solve a two dimensional sampling problem using an efficient sampling
 scheme. The underlying problem is to sample the boundaries of a circle, given
 no prior knowledge of its geometry.
 
+The sampler uses a Delaunay triangulation to determine where to sample next.
+Edges that transition between labels are prioritised for breaking.
+
 """
 
 import numpy as np
@@ -15,7 +18,6 @@ import logging
 import matplotlib.pyplot as pl
 import matplotlib as mpl
 import dora.active_sampling as sampling
-import dora.regressors.gp as gp
 
 # The plotting subpackage is throwing FutureWarnings
 import warnings
@@ -28,25 +30,15 @@ def simulate_measurement(X):
     return (np.sum((X-0.5)**2) < 0.1).astype(float)
 
 
-def main(method_name):
+def main():
 
     # Set up a sampling problem:
     target_samples = 501
     lower = [0, 0]
     upper = [1, 1]
 
-    if method_name == 'Delaunay':
-        explore_priority = 0.0001  # relative to the *difference* in stdev
-        sampler = sampling.Delaunay(lower, upper, explore_priority)
-
-    elif method_name == 'Gaussian_Process':
-        n_initial_sample = 50
-        X_train = sampling.random_sample(lower, upper, n_initial_sample)
-        y_train = np.asarray([simulate_measurement(i) for i in X_train])
-        sampler = sampling.Gaussian_Process(lower, upper, X_train, y_train,
-                                            add_train_data=False)
-    else:
-        raise ValueError('Unrecognised method name.')
+    explore_priority = 0.0001  # relative to the *difference* in stdev
+    sampler = sampling.Delaunay(lower, upper, explore_priority)
 
     # Set up plotting:
     plots = {'fig': pl.figure(),
@@ -113,5 +105,4 @@ def plot_progress(plots, sampler):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    # main('Delaunay')
-    main('Gaussian_Process')
+    main()
