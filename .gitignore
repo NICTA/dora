@@ -55,3 +55,6 @@ docs/_build/
 
 # PyBuilder
 target/
+docs/node_modules
+docs/_static
+docs/_build
