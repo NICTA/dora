@@ -8,55 +8,107 @@ import scipy.stats as stats
 import hashlib
 
 
-class Base_Sampler:
+class BaseSampler:
+    """
+    Base Sampler Class
+
+    ...
+
+    Attributes
+    ----------
+    lower : numpy.array
+        Lower bounds for each parameter in the parameter space
+    upper : numpy.array
+        Upper bounds for each parameter in the parameter space
+    dims : int
+        Dimension of the parameter space (number of parameters)
+    X : list
+
+    y : list
+
+    virtual_flag : list
+
+    pending_indices : dict
+
+
+
+    Methods
+    -------
+    colorspace(c='rgb')
+        Represent the photo in the given colorspace.
+    gamma(n=1.0)
+        Change the photo's gamma exposure.
+
+    """
+
     def __init__(self, lower, upper):
         """
+        Initialises the BaseSampler class
         Arguments:
         lower (array floats) - min of bounding box
         upper (array floats) - max of bounding box
         explore_priority (float) - value of constant-volume
         """
-        upper = np.asarray(upper)
-        lower = np.asarray(lower)
-        self.dims = len(upper)
-        assert(len(lower) == self.dims)
-        self.lower = lower
-        self.upper = upper
+        self.lower = np.asarray(lower)
+        self.upper = np.asarray(upper)
+        self.dims = self.upper.shape[0]
+        assert self.lower.shape[0] == self.dims
         self.X = []
         self.y = []
-        self.virtual_flag = []  # true = expected. false = measured
-        self.pending_results = {}  # Maps a tuple representation of X
-        self.pending_results_uid = {} # tuple that maps job uid to index
-        # to an int that points to the index of x and y. It only contains
-        # indices of the virtual observations
+        self.virtual_flag = []
+        self.pending_indices = {}
 
     def pick(self):
         """
         Picks the next point to be evaluated.
         It also fills in a dummy point at that location.
         """
-
-        assert(False)
+        assert False
 
     def update(self, X, value):
         """
         Updates the point X with the value y
         """
-        assert(False)
+        assert False
+
+    def _assign(self, new_X, expected_y):
+        """
+        Assign the new job with a new id
+        """
+        # Place a virtual observation onto the collected data
+        n = len(self.X)
+        self.X.append(new_X)
+        self.y.append(expected_y)
+        self.virtual_flag.append(True)
+
+        # Create an uid for this observation
+        m = hashlib.md5()
+        m.update(np.array(np.random.random()))
+        uid = m.hexdigest()
+
+        # Note the index of corresponding to this picked location
+        self.pending_indices[uid] = n
+
+        return uid
 
     def _update(self, job_uid, value):
-        if job_uid not in self.pending_results:
-            raise(ValueError('Result wasnt pending!'))
-        assert(job_uid in self.pending_results)
-        ind = self.pending_results.pop(job_uid)
+
+        # Make sure the job uid given is valid
+        if job_uid not in self.pending_indices:
+            raise ValueError('Result was not pending!')
+        assert job_uid in self.pending_indices
+
+        # Kill the job and update collected data with true observation
+        ind = self.pending_indices.pop(job_uid)
         self.y[ind] = value
         self.virtual_flag[ind] = False
+
         return ind
 
 
-class Delaunay(Base_Sampler):
+class Delaunay(BaseSampler):
     """
-    Inherits from the Base_Sampler class and augments pick and update with the
+    Inherits from the BaseSampler class and augments pick and update with the
     mechanics of the Delanauy triangulation method
     """
     def __init__(self, lower, upper, explore_priority=0.0001):
@@ -66,7 +118,7 @@ class Delaunay(Base_Sampler):
         upper (array floats) - max of bounding box
         explore_priority (float) - value of constant-volume
         """
-        Base_Sampler.__init__(self, lower, upper)
+        BaseSampler.__init__(self, lower, upper)
         self.triangulation = None  # Delaunay model
         self.simplex_cache = {}  # Pre-computed values of simplices
         self.explore_priority = explore_priority
@@ -74,7 +126,7 @@ class Delaunay(Base_Sampler):
     def update(self, job_uid, y):
         """ Applies an observation to a Delaunay active sampling model
         """
-        Base_Sampler._update(self, job_uid, y)
+        BaseSampler._update(self, job_uid, y)
 
     def pick(self):
         """
@@ -126,26 +178,15 @@ class Delaunay(Base_Sampler):
             expected_y = weight.dot(simplex_v)
             self.triangulation.add_points(new_X[np.newaxis, :])  # incremental
 
-        # Place a virtual observation...
-        self.X.append(new_X)
-        self.y.append(expected_y)  # fill with 'expected' value
-        self.virtual_flag.append(True)
-
-        # save it for later
-        m = hashlib.md5()
-        m.update(np.array(np.random.random()))
-        uid = m.hexdigest()
-        self.pending_results[uid] = n
-
+        uid = BaseSampler._assign(self, new_X, expected_y)
         return new_X, uid
 
-
-class Gaussian_Process(Base_Sampler):
+class GaussianProcess(BaseSampler):
     """
-    Inherits from the Base_Sampler class and augments pick and update with the
+    Inherits from the BaseSampler class and augments pick and update with the
     mechanics of the GP method
     """
-    def __init__(self, lower, upper, X_train, y_train, add_train_data=True):
+    def __init__(self, lower, upper, X_train, y_train, add_train_data = True):
         """
         Arguments:
         lower (array floats) - min of bounding box
@@ -153,32 +194,32 @@ class Gaussian_Process(Base_Sampler):
         explore_priority (float) - value of constant-volume
         """
         # import ipdb; ipdb.set_trace()
-        Base_Sampler.__init__(self, lower, upper)
+        BaseSampler.__init__(self, lower, upper)
         self.hyper_params = None
         self.regressor = None
-        self.train_hypers(X_train, y_train, add_train_data)
+        self.train_hypers(X_train, y_train, add_train_data = add_train_data)
 
-    def train_hypers(self, X_train, y_train, add_train_data):
+    def train_hypers(self, X_train, y_train, add_train_data = True):
         # We will be using the Matern 3/2 Kernel
-        minLength = 1e-2*np.ones(1)
-        maxLength = 1e3*np.ones(1)
-        initLength = np.array([0.5])
-        kernel = lambda h, k: (h(1e-3, 1e2, 2.321) *
+        min_length = 1e-2*np.ones(1)
+        max_length = 1e3*np.ones(1)
+        init_length = np.array([0.5])
+        kerneldef = lambda h, k: (h(1e-3, 1e2, 2.321) *
                                k('matern3on2',
-                                 h(minLength, maxLength, initLength)))
+                                 h(min_length, max_length, init_length)))
         # Set up optimisation
         opt_config = gp.OptConfig()
-        opt_config.sigma = gp.auto_range(kernel)
+        opt_config.sigma = gp.auto_range(kerneldef)
         opt_config.noise = gp.Range([0.0001], [0.5], [0.05])
         opt_config.walltime = 50.0
         opt_config.global_opt = False
 
-        self.kernelFn = gp.compose(kernel)
-        self.printKernFn = gp.describer(kernel)
+        self.kernel = gp.compose(kerneldef)
+        self.print_kernel = gp.describer(kerneldef)
 
-        self.hyper_params = gp.learn(X_train, y_train, self.kernelFn, 
+        self.hyper_params = gp.learn(X_train, y_train, self.kernel, 
                                      opt_config)
-        print('Final kernel:', self.printKernFn(self.hyper_params), '+ noise',
+        print('Final kernel:', self.print_kernel(self.hyper_params), '+ noise',
               self.hyper_params[1])
 
         if add_train_data:  # adds this sampled data to the model
@@ -187,7 +228,7 @@ class Gaussian_Process(Base_Sampler):
             self.virtual_flag = [False for i in X_train]
             self.regressor = gp.condition(np.asarray(self.X),
                                           np.asarray(self.y),
-                                          self.kernelFn, self.hyper_params)
+                                          self.kernel, self.hyper_params)
 
     def update(self, job_uid, value):
         """ Applies an observation to a Gaussian process active sampling model
@@ -234,19 +275,11 @@ class Gaussian_Process(Base_Sampler):
 
             expected_y = post_mu[new_point_ID]
 
-        # Place a virtual observation...
-        m = hashlib.md5()
-        m.update(np.array(np.random.random()))
-        uid = m.hexdigest()
-        self.X.append(new_X)
-        self.y.append(expected_y)  # fill with 'expected' value
-        self.virtual_flag.append(True)
-        # save it for later
-        self.pending_results[uid] = n
+        uid = BaseSampler._assign(self, new_X, expected_y)
 
         if not self.regressor:
             self.regressor = gp.condition(np.asarray(self.X),
-                                          np.asarray(self.y), self.kernelFn,
+                                          np.asarray(self.y), self.kernel,
                                           self.hyper_params)
         else:
             gp.add_data(np.asarray(new_X[np.newaxis, :]),
@@ -271,7 +304,7 @@ class Gaussian_Process(Base_Sampler):
         real_X = np.asarray(real_X)
         real_y = np.asarray(real_y)-self.mean
 
-        regressor = gp.condition(real_X, real_y, self.kernelFn,
+        regressor = gp.condition(real_X, real_y, self.kernel,
                                  self.hyper_params)
         query_object = gp.query(query_points,regressor)
         post_mu = gp.mean(regressor,query_object)
@@ -280,9 +313,9 @@ class Gaussian_Process(Base_Sampler):
         return post_mu + self.mean, post_var
 
 
-class Stacked_Gaussian_Process(Base_Sampler):
+class StackedGaussianProcess(BaseSampler):
     """
-    Inherits from the Base_Sampler class and augments pick and update with the
+    Inherits from the BaseSampler class and augments pick and update with the
     mechanics of the GP method
     """
     def __init__(self, lower, upper, X_train=None, y_train=None, n_stacks=None,
@@ -295,7 +328,7 @@ class Stacked_Gaussian_Process(Base_Sampler):
         """
         # import ipdb; ipdb.set_trace()
 
-        Base_Sampler.__init__(self, lower, upper)
+        BaseSampler.__init__(self, lower, upper)
         self.n_stacks = n_stacks
         self.hyper_params = []
         self.regressors = None
@@ -329,7 +362,7 @@ class Stacked_Gaussian_Process(Base_Sampler):
                 for ind in range(n_stacks):
                     self.regressors.append(
                         gp.condition(np.asarray(self.X), np.asarray(self.y)[:,ind]-self.mean,
-                                     self.kernelFn, self.hyper_params[ind]))
+                                     self.kernel, self.hyper_params[ind]))
 
     def train_data(self, X_train, y_train, hypers=None):
         """
@@ -343,11 +376,11 @@ class Stacked_Gaussian_Process(Base_Sampler):
         minL = 1e-2*np.ones(2)
         maxL = 1e3*np.ones(2)
         initL = np.array([0.5, 0.5])
-        kernel = lambda h, k: \
+        kerneldef = lambda h, k: \
             h(1e-3, 1e2, 2.321) * k('matern3on2', h(minL, maxL, initL))
-        self.kernelFn = gp.compose(kernel)
+        self.kernel = gp.compose(kerneldef)
         opt_config = gp.OptConfig()
-        opt_config.sigma = gp.auto_range(kernel)
+        opt_config.sigma = gp.auto_range(kerneldef)
         opt_config.noise = gp.Range([0.0001], [0.5], [0.05])
         opt_config.walltime = 50.0
         opt_config.global_opt = False
@@ -362,7 +395,7 @@ class Stacked_Gaussian_Process(Base_Sampler):
                 # folds.Y.append(y_train[:, stack])
                 folds.flat_y.append(y_train[:, stack]-self.mean)
 
-            hypers = gp.train.learn_folds(folds, self.kernelFn, opt_config)
+            hypers = gp.train.learn_folds(folds, self.kernel, opt_config)
 
         for stack in range(self.n_stacks):
             self.hyper_params.append(hypers)
@@ -420,13 +453,7 @@ class Stacked_Gaussian_Process(Base_Sampler):
 
 
         # Place a virtual observation...
-        m = hashlib.md5()
-        m.update(np.array(np.random.random()))
-        uid = m.hexdigest()
-        self.X.append(new_X)
-        self.y.append(expected_y)
-        self.virtual_flag.append(True)
-        self.pending_results[uid] = n
+        uid = BaseSampler._assign(self, new_X, expected_y)
 
         if not self.trained_flag and np.sum([not i for i in self.virtual_flag]) \
                 >= self.n_train_threshold:
@@ -445,7 +472,7 @@ class Stacked_Gaussian_Process(Base_Sampler):
                 for ind in range(self.n_stacks):
                     self.regressors.append(
                         gp.condition(arrX, arrY[:, ind]-self.mean,
-                                     self.kernelFn, self.hyper_params[ind]))
+                                     self.kernel, self.hyper_params[ind]))
             else:
                 for ind in range(self.n_stacks):
                     gp.add_data(np.asarray(new_X[np.newaxis, :]),
@@ -478,7 +505,7 @@ class Stacked_Gaussian_Process(Base_Sampler):
         post_var = []
 
         for ind in range(self.n_stacks):
-            regressor = gp.condition(real_X, real_y[:,ind], self.kernelFn,
+            regressor = gp.condition(real_X, real_y[:,ind], self.kernel,
                                      self.hyper_params[ind])
             query_object = gp.query(query_points,regressor)
             post_mu.append(gp.mean(regressor,query_object))
@@ -517,7 +544,7 @@ def random_sample(lower, upper, n):
     return X_shifted
 
 
-class candidates:
+class Candidates:
     def __init__(self, X_test=None, mu=None, var=None):
         self.X_test = X_test
         self.mu = mu

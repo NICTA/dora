@@ -40,7 +40,7 @@ def main():
     y_train = np.asarray([simulate_measurement(i) for i in X_train])
 
     logging.info('Initialising and training sampler.')
-    sampler = sampling.Gaussian_Process(lower, upper, X_train, y_train,
+    sampler = sampling.GaussianProcess(lower, upper, X_train, y_train,
                                         add_train_data=False)
 
     # Set up plotting:
@@ -82,7 +82,7 @@ def plot_progress(plots, sampler):
                      linewidth=w, cmap=custom)
         pl.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
 
-    elif isinstance(sampler, sampling.Gaussian_Process):
+    elif isinstance(sampler, sampling.GaussianProcess):
         X = sampler.regressor.X
         minv = np.min(X, axis=0)
         maxv = np.max(X, axis=0)

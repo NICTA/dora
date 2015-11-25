@@ -44,6 +44,7 @@ def main():
 
     # Run the active sampling:
     for i in range(target_samples):
+        print(i)
         newX, newId = sampler.pick()
 
         observation = simulate_measurement(newX)
@@ -73,7 +74,7 @@ def plot_progress(plots, sampler):
                      linewidth=w, cmap=custom)
         pl.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
 
-    elif isinstance(sampler, sampling.Gaussian_Process):
+    elif isinstance(sampler, sampling.GaussianProcess):
         X = sampler.regressor.X
         minv = np.min(X, axis=0)
         maxv = np.max(X, axis=0)
