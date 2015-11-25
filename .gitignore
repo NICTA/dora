@@ -58,3 +58,4 @@ target/
 docs/node_modules
 docs/_static
 docs/_build
+docs/generated
