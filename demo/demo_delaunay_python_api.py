@@ -34,7 +34,7 @@ def main():
     upper = [1, 1]
 
     explore_priority = 0.0001  # relative to the *difference* in stdev
-    sampler = sampling.Delaunay(lower, upper, explore_priority)
+    sampler = sampling.DelaunaySampler(lower, upper, explore_priority)
 
     # Set up plotting:
     plots = {'fig': pl.figure(),
@@ -44,9 +44,8 @@ def main():
 
     # Run the active sampling:
     for i in range(target_samples):
-        print(i)
         newX, newId = sampler.pick()
-        print(type(newX))
+        
         observation = simulate_measurement(newX)
 
         sampler.update(newId, observation)

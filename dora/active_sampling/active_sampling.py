@@ -47,10 +47,9 @@ class BaseSampler:
         Parameters
         ----------
         lower : array_like
-            lower or minimum bounds for the parameter space
+            Lower or minimum bounds for the parameter space
         upper : array_like
-            upper or maximum bounds for the parameter space
-
+            Upper or maximum bounds for the parameter space
         """
         self.lower = np.asarray(lower)
         self.upper = np.asarray(upper)
@@ -177,17 +176,41 @@ class BaseSampler:
         return ind
 
 
-class Delaunay(BaseSampler):
+class DelaunaySampler(BaseSampler):
     """
+    DelaunaySampler Class
+
     Inherits from the BaseSampler class and augments pick and update with the
     mechanics of the Delanauy triangulation method
+
+    Attributes
+    ----------
+    triangulation : scipy.spatial.qhull.Delaunay
+        The Delaunay triangulation model object
+    simplex_cache : dict
+        Cached values of simplices for Delaunay triangulation
+    explore_priority : float
+        The priority of exploration against exploitation
+
+    See Also
+    --------
+    BaseSampler : Base Class
     """
     def __init__(self, lower, upper, explore_priority=0.0001):
         """
-        Arguments:
-        lower (array floats) - min of bounding box
-        upper (array floats) - max of bounding box
-        explore_priority (float) - value of constant-volume
+        Initialises the DelaunaySampler class
+
+        .. note:: Currently only supports rectangular type restrictions on the
+        parameter space
+
+        Parameters
+        ----------
+        lower : array_like
+            Lower or minimum bounds for the parameter space
+        upper : array_like
+            Upper or maximum bounds for the parameter space
+        explore_priority : float, optional
+            The priority of exploration against exploitation
         """
         BaseSampler.__init__(self, lower, upper)
         self.triangulation = None  # Delaunay model
@@ -195,26 +218,50 @@ class Delaunay(BaseSampler):
         self.explore_priority = explore_priority
 
     def update(self, uid, y_true):
-        """ Applies an observation to a Delaunay active sampling model
+        """
+        Updates a job with its observed value
+
+        Parameters
+        ----------
+        uid : str
+            A hexadecimal ID that identifies the job to be updated
+        y_true : float
+            The observed value corresponding to the job identified by 'uid'
+
+        Returns
+        -------
+        int
+            Index location in the data lists 'DelaunaySampler.X' and
+            'DelaunaySampler.y' corresponding to the job being updated
         """
         BaseSampler._update(self, uid, y_true)
 
     def pick(self):
         """
-        Picks a new point using the recursive Delaunay subdivision algorithm
+        Picks the next location in parameter space for the next observation
+        to be taken, using the recursive Delaunay subdivision algorithm
+
         Returns
-            X - the new search to sample
+        -------
+        numpy.ndarray
+            Location in the parameter space for the next observation to be
+            taken
+        str
+            A random hexadecimal ID to identify the corresponding job
         """
         n = len(self.X)
-        n_corners = 2**self.dims
+        n_corners = 2 ** self.dims
         if n < n_corners + 1:
+
             # Bootstrap with a regular sampling strategy to get it started
             xq = grid_sample(self.lower, self.upper, n)
             yq_exp = 0.
         else:
+
             # Otherwise, recursive subdivide the edges with the Delaunay model
             if not self.triangulation:
                 self.triangulation = ScipyDelaunay(self.X, incremental=True)
+
             points = self.triangulation.points
             yvals = np.asarray(self.y)
             virtual = np.asarray(self.virtual_flag)
@@ -224,8 +271,9 @@ class Delaunay(BaseSampler):
             cache = self.simplex_cache
 
             def get_value(s):
-                # computes the sample value as:
-                # hyper-volume of simplex * variance of values in simplex
+
+                # Computes the sample value as:
+                #   hyper-volume of simplex * variance of values in simplex
                 ind = list(s)
                 value = (np.var(yvals[ind]) + self.explore_priority) * \
                     np.linalg.det((points[ind] - points[ind[0]])[1:])
@@ -252,32 +300,87 @@ class Delaunay(BaseSampler):
         uid = BaseSampler._assign(self, xq, yq_exp)
         return xq, uid
 
-class GaussianProcess(BaseSampler):
+
+class GaussianProcessSampler(BaseSampler):
     """
+    GaussianProcessSampler Class
+
     Inherits from the BaseSampler class and augments pick and update with the
     mechanics of the GP method
+
+    Attributes
+    ----------
+    hyper_params : numpy.ndarray
+        The hyperparameters of the Gaussian Process Inference Model
+    regressor : dict
+        Cached values of simplices for Delaunay triangulation
+    explore_priority : float
+        The priority of exploration against exploitation
+    kernel : function
+        The learned kernel covariance function of the Gaussian process
+    print_kernel : function
+        A convenient print function for displaying the learned kernel
+    explore_priority : float
+        The priority of exploration against exploitation
+
+    See Also
+    --------
+    BaseSampler : Base Class
     """
-    def __init__(self, lower, upper, X_train, y_train, add_train_data = True):
+    def __init__(self, lower, upper, X_train, y_train,
+                 kerneldef=None, add_train_data=True, explore_priority=0.01):
         """
-        Arguments:
-        lower (array floats) - min of bounding box
-        upper (array floats) - max of bounding box
-        explore_priority (float) - value of constant-volume
+        Initialises the GaussianProcessSampler class
+
+        .. note:: Currently only supports rectangular type restrictions on the
+        parameter space
+
+        Parameters
+        ----------
+        lower : array_like
+            Lower or minimum bounds for the parameter space
+        upper : array_like
+            Upper or maximum bounds for the parameter space
+        X_train : numpy.ndarray
+            Training features for the Gaussian process model
+        y_train : numpy.ndarray
+            Training targets for the Gaussian process model
+        kerneldef : function, optional
+            Kernel covariance definition
+        add_train_data : boolean
+            Whether to add training data to the sampler or not
+        explore_priority : float, optional
+            The priority of exploration against exploitation
         """
-        # import ipdb; ipdb.set_trace()
         BaseSampler.__init__(self, lower, upper)
         self.hyper_params = None
         self.regressor = None
-        self.train_hypers(X_train, y_train, add_train_data = add_train_data)
+        self.kernel = None
+        self.print_kernel = None
+        self.explore_priority = explore_priority
+        self._train(X_train, y_train,
+                    kerneldef=kerneldef, add_train_data=add_train_data)
 
-    def train_hypers(self, X_train, y_train, add_train_data = True):
-        # We will be using the Matern 3/2 Kernel
-        min_length = 1e-2*np.ones(1)
-        max_length = 1e3*np.ones(1)
-        init_length = np.array([0.5])
-        kerneldef = lambda h, k: (h(1e-3, 1e2, 2.321) *
-                               k('matern3on2',
-                                 h(min_length, max_length, init_length)))
+    def _train(self, X_train, y_train,
+               kerneldef=None, add_train_data=True):
+        """
+        Trains the Gaussian process used for the sampler
+
+        Parameters
+        ----------
+        X_train : numpy.ndarray
+            Training features for the Gaussian process model
+        y_train : numpy.ndarray
+            Training targets for the Gaussian process model
+        kerneldef : function, optional
+            Kernel covariance definition
+        add_train_data : boolean
+            Whether to add training data to the sampler or not
+        """
+        # If 'kerneldef' is not provided, define a default 'kerneldef'
+        if kerneldef is None:
+            kerneldef = lambda h, k: (h(1e-3, 1e2, 1) *
+                                      k('matern3on2', h(1e-2, 1e3, 1)))
         # Set up optimisation
         opt_config = gp.OptConfig()
         opt_config.sigma = gp.auto_range(kerneldef)
@@ -285,41 +388,75 @@ class GaussianProcess(BaseSampler):
         opt_config.walltime = 50.0
         opt_config.global_opt = False
 
+        # Prepare Kernel Covariance
         self.kernel = gp.compose(kerneldef)
         self.print_kernel = gp.describer(kerneldef)
 
-        self.hyper_params = gp.learn(X_train, y_train, self.kernel, 
-                                     opt_config)
-        print('Final kernel:', self.print_kernel(self.hyper_params), '+ noise',
-              self.hyper_params[1])
+        # Learn the GP
+        self.hyper_params = gp.learn(X_train, y_train, self.kernel, opt_config)
 
-        if add_train_data:  # adds this sampled data to the model
-            self.X = [i for i in X_train]
-            self.y = [i for i in y_train]
-            self.virtual_flag = [False for i in X_train]
+        # Adds sampled data to the model
+        if add_train_data:
+            self.X = X_train.copy()
+            self.y = y_train.copy()
+            self.virtual_flag = [False for y in y_train]
             self.regressor = gp.condition(np.asarray(self.X),
                                           np.asarray(self.y),
                                           self.kernel, self.hyper_params)
 
     def update(self, uid, y_true):
-        """ Applies an observation to a Gaussian process active sampling model
+        """
+        Updates a job with its observed value
+
+        Parameters
+        ----------
+        uid : str
+            A hexadecimal ID that identifies the job to be updated
+        y_true : float
+            The observed value corresponding to the job identified by 'uid'
+
+        Returns
+        -------
+        int
+            Index location in the data lists 'GaussianProcessSampler.X' and
+            'GaussianProcessSampler.y' corresponding to the job being updated
         """
         ind = self._update(uid, y_true)
-        self.regressor.y[ind] = y_true
-        self.regressor.alpha = gp.predict.alpha(self.regressor.y,
-                                                self.regressor.L)
+        if self.regressor:
+            self.regressor.y[ind] = y_true
+            self.regressor.alpha = gp.predict.alpha(self.regressor.y,
+                                                    self.regressor.L)
+        return ind
 
-    def pick(self, n_test=500):
+    def pick(self, n_test=500, acq_fn='sigmoid'):
         """
+        Picks the next location in parameter space for the next observation
+        to be taken, with a Gaussian process model
 
+        Parameters
+        ----------
+        n_test : int, optional
+            The number of random query points across the search space to pick
+            from
+        acq_fn : str, optional
+            The type of acquisition function used
+
+        Returns
+        -------
+        numpy.ndarray
+            Location in the parameter space for the next observation to be
+            taken
+        str
+            A random hexadecimal ID to identify the corresponding job
         """
-        # import ipdb; ipdb.set_trace()
         n = len(self.X)
-        n_corners = 2**self.dims
+        n_corners = 2 ** self.dims
         if n < n_corners + 1:
+
             # Bootstrap with a regular sampling strategy to get it started
             xq = grid_sample(self.lower, self.upper, n)
             yq_exp = 0.
+
         else:
 
             # Randomly sample the volume.
@@ -328,63 +465,56 @@ class GaussianProcess(BaseSampler):
             post_mu = gp.mean(self.regressor, query)
             post_var = gp.variance(self.regressor, query)
 
-            explore = 0.01  # an exploration factor for the acquisition funcs
             acq_func_dict = {
                 'maxvar': lambda u, v: np.argmax(v, axis=0),
                 'predmax': lambda u, v: np.argmax(u + np.sqrt(v), axis=0),
-                'entropyvar': lambda u, v: np.argmax((explore + np.sqrt(v)) *
-                                                     u*(1-u), axis=0),
-                'sigmoid': lambda u, v: np.argmax(
-                    np.abs(stats.logistic.cdf(u+np.sqrt(v), loc=0.5,
-                                              scale=explore) -
-                           stats.logistic.cdf(u-np.sqrt(v), loc=0.5,
-                                              scale=explore)), axis=0)
+                'entropyvar': lambda u, v:
+                    np.argmax((self.explore_priority + np.sqrt(v)) *
+                              u * (1 - u), axis=0),
+                'sigmoid': lambda u, v:
+                    np.argmax(np.abs(stats.logistic.cdf(u + np.sqrt(v),
+                              loc=0.5, scale=self.explore_priority) -
+                              stats.logistic.cdf(u - np.sqrt(v),
+                              loc=0.5, scale=self.explore_priority)), axis=0)
             }
 
-            new_point_ID = acq_func_dict['sigmoid'](post_mu, post_var)
-            xq = X_test[new_point_ID, :]
-
-            yq_exp = post_mu[new_point_ID]
+            iq = acq_func_dict[acq_fn](post_mu, post_var)
+            xq = X_test[iq, :]
+            yq_exp = post_mu[iq]
 
         uid = BaseSampler._assign(self, xq, yq_exp)
 
-        if not self.regressor:
-            self.regressor = gp.condition(np.asarray(self.X),
-                                          np.asarray(self.y), self.kernel,
-                                          self.hyper_params)
-        else:
+        if self.regressor:
             gp.add_data(np.asarray(xq[np.newaxis, :]),
                         np.asarray(yq_exp)[np.newaxis],
                         self.regressor)
+        else:
+            self.regressor = gp.condition(np.asarray(self.X),
+                                          np.asarray(self.y), self.kernel,
+                                          self.hyper_params)
 
         return xq, uid
 
-    def predict(self, query_points):
-        """
-        method to query the probabilistic model at locations
-        :param query_points: n x d array of points in the region of interest
-        :return: post_mu: n x n_stacks array of predicted mean values
-                 post_var: n x n_stacks array of predicted variance values
-        """
+    # def predict(self, Xq):
 
-        # extract only the real observations for conditioning the predictor
-        #TODO Consider moving real_y inside of the for loop use regressor.y
-        real_id = [not i for i in self.virtual_flag]
-        real_X = [x for x, real in zip(self.X, real_id) if real is True]
-        real_y = [y for y, real in zip(self.y, real_id) if real is True]
-        real_X = np.asarray(real_X)
-        real_y = np.asarray(real_y)-self.mean
+    #     # extract only the real observations for conditioning the predictor
+    #     # TODO Consider moving real_y inside of the for loop use regressor.y
+    #     real_id = [not i for i in self.virtual_flag]
+    #     real_X = [x for x, real in zip(self.X, real_id) if real is True]
+    #     real_y = [y for y, real in zip(self.y, real_id) if real is True]
+    #     real_X = np.asarray(real_X)
+    #     real_y = np.asarray(real_y) - self.mean # <- where is self.mean?
 
-        regressor = gp.condition(real_X, real_y, self.kernel,
-                                 self.hyper_params)
-        query_object = gp.query(query_points,regressor)
-        post_mu = gp.mean(regressor,query_object)
-        post_var = gp.variance(regressor,query_object)
+    #     regressor = gp.condition(real_X, real_y, self.kernel,
+    #                              self.hyper_params)
+    #     predictor = gp.query(Xq, regressor)
+    #     post_mu = gp.mean(regressor, predictor)
+    #     post_var = gp.variance(regressor, predictor)
 
-        return post_mu + self.mean, post_var
+    #     return post_mu + self.mean, post_var
 
 
-class StackedGaussianProcess(BaseSampler):
+class StackedGaussianProcessSampler(BaseSampler):
     """
     Inherits from the BaseSampler class and augments pick and update with the
     mechanics of the GP method
@@ -397,7 +527,6 @@ class StackedGaussianProcess(BaseSampler):
         lower (array floats) - min of bounding box
         upper (array floats) - max of bounding box
         """
-        # import ipdb; ipdb.set_trace()
 
         BaseSampler.__init__(self, lower, upper)
         self.n_stacks = n_stacks
@@ -518,9 +647,9 @@ class StackedGaussianProcess(BaseSampler):
                                                          axis=0))
             }
 
-            new_point_ID = acq_func_dict[self.acq_func](post_mu, post_var)
-            xq = X_test[new_point_ID, :]
-            yq_exp = post_mu[:, new_point_ID]
+            iq = acq_func_dict[self.acq_func](post_mu, post_var)
+            xq = X_test[iq, :]
+            yq_exp = post_mu[:, iq]
 
 
         # Place a virtual observation...
@@ -552,10 +681,10 @@ class StackedGaussianProcess(BaseSampler):
 
         return xq, uid
 
-    def predict(self, query_points):
+    def predict(self, Xq):
         """
         method to query the probabilistic model at locations
-        :param query_points: n x d array of points in the region of interest
+        :param Xq: n x d array of points in the region of interest
         :return: post_mu: n x n_stacks array of predicted mean values
                  post_var: n x n_stacks array of predicted variance values
         """
@@ -578,12 +707,11 @@ class StackedGaussianProcess(BaseSampler):
         for ind in range(self.n_stacks):
             regressor = gp.condition(real_X, real_y[:,ind], self.kernel,
                                      self.hyper_params[ind])
-            query_object = gp.query(query_points,regressor)
+            query_object = gp.query(Xq,regressor)
             post_mu.append(gp.mean(regressor,query_object))
             post_var.append(gp.variance(regressor,query_object))
 
         return np.asarray(post_mu).T + self.mean, np.asarray(post_var).T
-
 
 
 def grid_sample(lower, upper, n):
@@ -591,12 +719,12 @@ def grid_sample(lower, upper, n):
     the centre. Provide search parameters and the index.
     """
     dims = len(lower)
-    n_corners = 2**dims
+    n_corners = 2 ** dims
     if n < n_corners:  # Sample the corners
         xq = lower + (upper - lower) * \
-            (n & 2**np.arange(dims) > 0).astype(float)
+            (n & 2 ** np.arange(dims) > 0).astype(float)
     elif n == n_corners:  # Then sample the centre
-        xq = lower + 0.5*(upper-lower)
+        xq = lower + 0.5 * (upper - lower)
     else:
         assert(False)
     return xq
@@ -620,4 +748,3 @@ class Candidates:
         self.X_test = X_test
         self.mu = mu
         self.var = var
-

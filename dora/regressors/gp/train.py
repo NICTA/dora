@@ -93,7 +93,7 @@ def make_folds(X,y, target_size, method='random'):
 
 # Extended to allow lists of arrays of opt_config_copyeters for sigma, signal and noise so we can use multiple kernels etc
 # unlike unpack, this doesn't need to be super efficient - its only called once
-def  pack(theta, noisepar):
+def pack(theta, noisepar):
     unpackinfo = [[], []]
     aopt_config_copys = []
     count = 0

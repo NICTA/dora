@@ -40,8 +40,11 @@ def main():
     y_train = np.asarray([simulate_measurement(i) for i in X_train])
 
     logging.info('Initialising and training sampler.')
-    sampler = sampling.GaussianProcess(lower, upper, X_train, y_train,
+    sampler = sampling.GaussianProcessSampler(lower, upper, X_train, y_train,
                                         add_train_data=False)
+
+    print('Final kernel:', sampler.print_kernel(sampler.hyper_params), '+ noise',
+          sampler.hyper_params[1])
 
     # Set up plotting:
     plots = {'fig': pl.figure(),
@@ -74,7 +77,7 @@ def plot_progress(plots, sampler):
     y = np.asarray(sampler.y)
     w = 4./np.log(1 + len(y))
 
-    if isinstance(sampler, sampling.Delaunay):
+    if isinstance(sampler, sampling.DelaunaySampler):
         # todo (AL): only show the measured samples!
         X = np.asarray(sampler.X)
 
@@ -82,7 +85,7 @@ def plot_progress(plots, sampler):
                      linewidth=w, cmap=custom)
         pl.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
 
-    elif isinstance(sampler, sampling.GaussianProcess):
+    elif isinstance(sampler, sampling.GaussianProcessSampler):
         X = sampler.regressor.X
         minv = np.min(X, axis=0)
         maxv = np.max(X, axis=0)
