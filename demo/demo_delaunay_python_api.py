@@ -46,7 +46,7 @@ def main():
     for i in range(target_samples):
         print(i)
         newX, newId = sampler.pick()
-
+        print(type(newX))
         observation = simulate_measurement(newX)
 
         sampler.update(newId, observation)

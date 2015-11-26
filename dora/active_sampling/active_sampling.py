@@ -10,44 +10,47 @@ import hashlib
 
 class BaseSampler:
     """
-    Base Sampler Class
+    BaseSampler Class
 
-    ...
+    Provides a basic template and interface to a Sampler class
 
     Attributes
     ----------
-    lower : numpy.array
+    lower : numpy.ndarray
         Lower bounds for each parameter in the parameter space
-    upper : numpy.array
+    upper : numpy.ndarray
         Upper bounds for each parameter in the parameter space
     dims : int
         Dimension of the parameter space (number of parameters)
     X : list
-
+        List of feature vectors representing observed locations in the
+        parameter space
     y : list
-
+        List of target outputs or expected (virtual) target outputs
+        corresponding to the feature vectors 'X'
     virtual_flag : list
-
+        A list of boolean flags indicating the virtual elements of 'y'
+            True: Corresponding target output is virtual
+            False: Corresponding target output is observed
     pending_indices : dict
-
-
-
-    Methods
-    -------
-    colorspace(c='rgb')
-        Represent the photo in the given colorspace.
-    gamma(n=1.0)
-        Change the photo's gamma exposure.
-
+        A dictionary that maps the job ID to the corresponding index in both
+        'X' and 'y'
     """
 
     def __init__(self, lower, upper):
         """
         Initialises the BaseSampler class
-        Arguments:
-        lower (array floats) - min of bounding box
-        upper (array floats) - max of bounding box
-        explore_priority (float) - value of constant-volume
+
+        .. note:: Currently only supports rectangular type restrictions on the
+        parameter space
+
+        Parameters
+        ----------
+        lower : array_like
+            lower or minimum bounds for the parameter space
+        upper : array_like
+            upper or maximum bounds for the parameter space
+
         """
         self.lower = np.asarray(lower)
         self.upper = np.asarray(upper)
@@ -60,25 +63,77 @@ class BaseSampler:
 
     def pick(self):
         """
-        Picks the next point to be evaluated.
-        It also fills in a dummy point at that location.
+        Picks the next location in parameter space for the next observation
+        to be taken
+
+        .. note:: Currently a dummy function whose functionality will be
+        filled by subclasses of the BaseSampler class
+
+        Returns
+        -------
+        numpy.ndarray
+            Location in the parameter space for the next observation to be
+            taken
+        str
+            A random hexadecimal ID to identify the corresponding job
+
+        Raises
+        ------
+        AssertionError
+            Under all circumstances. See note above.
         """
         assert False
 
-    def update(self, X, value):
+    def update(self, uid, y_true):
         """
-        Updates the point X with the value y
+        Updates a job with its observed value
+
+        .. note:: Currently a dummy function whose functionality will be
+        filled by subclasses of the BaseSampler class
+
+        Parameters
+        ----------
+        uid : str
+            A hexadecimal ID that identifies the job to be updated
+        y_true : float
+            The observed value corresponding to the job identified by 'uid'
+
+        Returns
+        -------
+        int
+            Index location in the data lists 'BaseSampler.X' and
+            'BaseSampler.y' corresponding to the job being updated
+
+        Raises
+        ------
+        AssertionError
+            Under all circumstances. See note above.
         """
         assert False
 
-    def _assign(self, new_X, expected_y):
+    def _assign(self, xq, yq_exp):
         """
-        Assign the new job with a new id
+        Assigns a pair of picked location in parameter space and virtual
+        targets a job ID
+
+        Parameters
+        ----------
+        xq : numpy.ndarray
+            Location in the parameter space for the next observation to be
+            taken
+        yq_exp : float
+            The virtual target output at that parameter location
+
+        Returns
+        -------
+        str
+            A random hexadecimal ID to identify the corresponding job
         """
+
         # Place a virtual observation onto the collected data
         n = len(self.X)
-        self.X.append(new_X)
-        self.y.append(expected_y)
+        self.X.append(xq)
+        self.y.append(yq_exp)
         self.virtual_flag.append(True)
 
         # Create an uid for this observation
@@ -91,16 +146,32 @@ class BaseSampler:
 
         return uid
 
-    def _update(self, job_uid, value):
+    def _update(self, uid, y_true):
+        """
+        Updates a job with its observed value
+
+        Parameters
+        ----------
+        uid : str
+            A hexadecimal ID that identifies the job to be updated
+        y_true : float
+            The observed value corresponding to the job identified by 'uid'
+
+        Returns
+        -------
+        int
+            Index location in the data lists 'BaseSampler.X' and
+            'BaseSampler.y' corresponding to the job being updated
+        """
 
         # Make sure the job uid given is valid
-        if job_uid not in self.pending_indices:
+        if uid not in self.pending_indices:
             raise ValueError('Result was not pending!')
-        assert job_uid in self.pending_indices
+        assert uid in self.pending_indices
 
         # Kill the job and update collected data with true observation
-        ind = self.pending_indices.pop(job_uid)
-        self.y[ind] = value
+        ind = self.pending_indices.pop(uid)
+        self.y[ind] = y_true
         self.virtual_flag[ind] = False
 
         return ind
@@ -123,10 +194,10 @@ class Delaunay(BaseSampler):
         self.simplex_cache = {}  # Pre-computed values of simplices
         self.explore_priority = explore_priority
 
-    def update(self, job_uid, y):
+    def update(self, uid, y_true):
         """ Applies an observation to a Delaunay active sampling model
         """
-        BaseSampler._update(self, job_uid, y)
+        BaseSampler._update(self, uid, y_true)
 
     def pick(self):
         """
@@ -138,8 +209,8 @@ class Delaunay(BaseSampler):
         n_corners = 2**self.dims
         if n < n_corners + 1:
             # Bootstrap with a regular sampling strategy to get it started
-            new_X = grid_sample(self.lower, self.upper, n)
-            expected_y = 0.
+            xq = grid_sample(self.lower, self.upper, n)
+            yq_exp = 0.
         else:
             # Otherwise, recursive subdivide the edges with the Delaunay model
             if not self.triangulation:
@@ -174,12 +245,12 @@ class Delaunay(BaseSampler):
             # Weight based on deviation from the mean
             weight = 1e-3 + np.abs(simplex_v - np.mean(simplex_v))
             weight /= np.sum(weight)
-            new_X = weight.dot(simplex)
-            expected_y = weight.dot(simplex_v)
-            self.triangulation.add_points(new_X[np.newaxis, :])  # incremental
+            xq = weight.dot(simplex)
+            yq_exp = weight.dot(simplex_v)
+            self.triangulation.add_points(xq[np.newaxis, :])  # incremental
 
-        uid = BaseSampler._assign(self, new_X, expected_y)
-        return new_X, uid
+        uid = BaseSampler._assign(self, xq, yq_exp)
+        return xq, uid
 
 class GaussianProcess(BaseSampler):
     """
@@ -230,11 +301,11 @@ class GaussianProcess(BaseSampler):
                                           np.asarray(self.y),
                                           self.kernel, self.hyper_params)
 
-    def update(self, job_uid, value):
+    def update(self, uid, y_true):
         """ Applies an observation to a Gaussian process active sampling model
         """
-        ind = self._update(job_uid, value)
-        self.regressor.y[ind] = value
+        ind = self._update(uid, y_true)
+        self.regressor.y[ind] = y_true
         self.regressor.alpha = gp.predict.alpha(self.regressor.y,
                                                 self.regressor.L)
 
@@ -247,8 +318,8 @@ class GaussianProcess(BaseSampler):
         n_corners = 2**self.dims
         if n < n_corners + 1:
             # Bootstrap with a regular sampling strategy to get it started
-            new_X = grid_sample(self.lower, self.upper, n)
-            expected_y = 0.
+            xq = grid_sample(self.lower, self.upper, n)
+            yq_exp = 0.
         else:
 
             # Randomly sample the volume.
@@ -271,22 +342,22 @@ class GaussianProcess(BaseSampler):
             }
 
             new_point_ID = acq_func_dict['sigmoid'](post_mu, post_var)
-            new_X = X_test[new_point_ID, :]
+            xq = X_test[new_point_ID, :]
 
-            expected_y = post_mu[new_point_ID]
+            yq_exp = post_mu[new_point_ID]
 
-        uid = BaseSampler._assign(self, new_X, expected_y)
+        uid = BaseSampler._assign(self, xq, yq_exp)
 
         if not self.regressor:
             self.regressor = gp.condition(np.asarray(self.X),
                                           np.asarray(self.y), self.kernel,
                                           self.hyper_params)
         else:
-            gp.add_data(np.asarray(new_X[np.newaxis, :]),
-                        np.asarray(expected_y)[np.newaxis],
+            gp.add_data(np.asarray(xq[np.newaxis, :]),
+                        np.asarray(yq_exp)[np.newaxis],
                         self.regressor)
 
-        return new_X, uid
+        return xq, uid
 
     def predict(self, query_points):
         """
@@ -402,10 +473,10 @@ class StackedGaussianProcess(BaseSampler):
 
         self.trained_flag = True
 
-    def update(self, job_uid, value):
+    def update(self, uid, y_true):
         """ Applies an observation to a Gaussian process active sampling model
         """
-        self._update(job_uid, value)
+        self._update(uid, y_true)
         if self.trained_flag:
             full_y = np.asarray(self.y)
             for i, regressor in enumerate(self.regressors):
@@ -417,13 +488,13 @@ class StackedGaussianProcess(BaseSampler):
         n_corners = 2**self.dims
 
         if not self.trained_flag:
-            new_X = random_sample(self.lower, self.upper, 1)[0,:]
-            expected_y = 0. * np.ones(self.n_stacks) + self.mean
+            xq = random_sample(self.lower, self.upper, 1)[0,:]
+            yq_exp = 0. * np.ones(self.n_stacks) + self.mean
 
         elif n < n_corners + 1:
             # Bootstrap with a regular sampling strategy to get it started
-            new_X = grid_sample(self.lower, self.upper, n)
-            expected_y = 0. * np.ones(self.n_stacks) + self.mean
+            xq = grid_sample(self.lower, self.upper, n)
+            yq_exp = 0. * np.ones(self.n_stacks) + self.mean
 
         else:
             # Randomly sample the volume.
@@ -448,12 +519,12 @@ class StackedGaussianProcess(BaseSampler):
             }
 
             new_point_ID = acq_func_dict[self.acq_func](post_mu, post_var)
-            new_X = X_test[new_point_ID, :]
-            expected_y = post_mu[:, new_point_ID]
+            xq = X_test[new_point_ID, :]
+            yq_exp = post_mu[:, new_point_ID]
 
 
         # Place a virtual observation...
-        uid = BaseSampler._assign(self, new_X, expected_y)
+        uid = BaseSampler._assign(self, xq, yq_exp)
 
         if not self.trained_flag and np.sum([not i for i in self.virtual_flag]) \
                 >= self.n_train_threshold:
@@ -475,11 +546,11 @@ class StackedGaussianProcess(BaseSampler):
                                      self.kernel, self.hyper_params[ind]))
             else:
                 for ind in range(self.n_stacks):
-                    gp.add_data(np.asarray(new_X[np.newaxis, :]),
-                                np.asarray(expected_y[ind])[np.newaxis] - self.mean,
+                    gp.add_data(np.asarray(xq[np.newaxis, :]),
+                                np.asarray(yq_exp[ind])[np.newaxis] - self.mean,
                                 self.regressors[ind])
 
-        return new_X, uid
+        return xq, uid
 
     def predict(self, query_points):
         """
@@ -522,13 +593,13 @@ def grid_sample(lower, upper, n):
     dims = len(lower)
     n_corners = 2**dims
     if n < n_corners:  # Sample the corners
-        new_X = lower + (upper - lower) * \
+        xq = lower + (upper - lower) * \
             (n & 2**np.arange(dims) > 0).astype(float)
     elif n == n_corners:  # Then sample the centre
-        new_X = lower + 0.5*(upper-lower)
+        xq = lower + 0.5*(upper-lower)
     else:
         assert(False)
-    return new_X
+    return xq
 
 
 def random_sample(lower, upper, n):
