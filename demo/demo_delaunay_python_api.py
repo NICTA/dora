@@ -34,7 +34,7 @@ def main():
     upper = [1, 1]
 
     explore_priority = 0.0001  # relative to the *difference* in stdev
-    sampler = sampling.DelaunaySampler(lower, upper, explore_priority)
+    sampler = sampling.Delaunay(lower, upper, explore_priority)
 
     # Set up plotting:
     plots = {'fig': pl.figure(),

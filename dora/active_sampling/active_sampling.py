@@ -1,5 +1,8 @@
-""" Active Sampling module
-Strategies for active sampling a spatial field.
+"""
+Active Sampling module
+
+Provides the Active Sampler Classes which contains strategies for
+active sampling a spatial field
 """
 import numpy as np
 from scipy.spatial import Delaunay as ScipyDelaunay
@@ -8,11 +11,11 @@ import scipy.stats as stats
 import hashlib
 
 
-class BaseSampler:
+class Sampler:
     """
-    BaseSampler Class
+    Sampler Class
 
-    Provides a basic template and interface to a Sampler class
+    Provides a basic template and interface to specific Sampler subclasses
 
     Attributes
     ----------
@@ -39,7 +42,7 @@ class BaseSampler:
 
     def __init__(self, lower, upper):
         """
-        Initialises the BaseSampler class
+        Initialises the Sampler class
 
         .. note:: Currently only supports rectangular type restrictions on the
         parameter space
@@ -66,7 +69,7 @@ class BaseSampler:
         to be taken
 
         .. note:: Currently a dummy function whose functionality will be
-        filled by subclasses of the BaseSampler class
+        filled by subclasses of the Sampler class
 
         Returns
         -------
@@ -88,7 +91,7 @@ class BaseSampler:
         Updates a job with its observed value
 
         .. note:: Currently a dummy function whose functionality will be
-        filled by subclasses of the BaseSampler class
+        filled by subclasses of the Sampler class
 
         Parameters
         ----------
@@ -100,8 +103,8 @@ class BaseSampler:
         Returns
         -------
         int
-            Index location in the data lists 'BaseSampler.X' and
-            'BaseSampler.y' corresponding to the job being updated
+            Index location in the data lists 'Sampler.X' and
+            'Sampler.y' corresponding to the job being updated
 
         Raises
         ------
@@ -128,7 +131,6 @@ class BaseSampler:
         str
             A random hexadecimal ID to identify the corresponding job
         """
-
         # Place a virtual observation onto the collected data
         n = len(self.X)
         self.X.append(xq)
@@ -159,10 +161,9 @@ class BaseSampler:
         Returns
         -------
         int
-            Index location in the data lists 'BaseSampler.X' and
-            'BaseSampler.y' corresponding to the job being updated
+            Index location in the data lists 'Sampler.X' and
+            'Sampler.y' corresponding to the job being updated
         """
-
         # Make sure the job uid given is valid
         if uid not in self.pending_indices:
             raise ValueError('Result was not pending!')
@@ -176,11 +177,11 @@ class BaseSampler:
         return ind
 
 
-class DelaunaySampler(BaseSampler):
+class Delaunay(Sampler):
     """
-    DelaunaySampler Class
+    Delaunay Class
 
-    Inherits from the BaseSampler class and augments pick and update with the
+    Inherits from the Sampler class and augments pick and update with the
     mechanics of the Delanauy triangulation method
 
     Attributes
@@ -194,11 +195,11 @@ class DelaunaySampler(BaseSampler):
 
     See Also
     --------
-    BaseSampler : Base Class
+    Sampler : Base Class
     """
     def __init__(self, lower, upper, explore_priority=0.0001):
         """
-        Initialises the DelaunaySampler class
+        Initialises the Delaunay class
 
         .. note:: Currently only supports rectangular type restrictions on the
         parameter space
@@ -212,7 +213,7 @@ class DelaunaySampler(BaseSampler):
         explore_priority : float, optional
             The priority of exploration against exploitation
         """
-        BaseSampler.__init__(self, lower, upper)
+        Sampler.__init__(self, lower, upper)
         self.triangulation = None  # Delaunay model
         self.simplex_cache = {}  # Pre-computed values of simplices
         self.explore_priority = explore_priority
@@ -231,10 +232,10 @@ class DelaunaySampler(BaseSampler):
         Returns
         -------
         int
-            Index location in the data lists 'DelaunaySampler.X' and
-            'DelaunaySampler.y' corresponding to the job being updated
+            Index location in the data lists 'Delaunay.X' and
+            'Delaunay.y' corresponding to the job being updated
         """
-        BaseSampler._update(self, uid, y_true)
+        Sampler._update(self, uid, y_true)
 
     def pick(self):
         """
@@ -297,15 +298,15 @@ class DelaunaySampler(BaseSampler):
             yq_exp = weight.dot(simplex_v)
             self.triangulation.add_points(xq[np.newaxis, :])  # incremental
 
-        uid = BaseSampler._assign(self, xq, yq_exp)
+        uid = Sampler._assign(self, xq, yq_exp)
         return xq, uid
 
 
-class GaussianProcessSampler(BaseSampler):
+class GaussianProcess(Sampler):
     """
-    GaussianProcessSampler Class
+    GaussianProcess Class
 
-    Inherits from the BaseSampler class and augments pick and update with the
+    Inherits from the Sampler class and augments pick and update with the
     mechanics of the GP method
 
     Attributes
@@ -325,12 +326,12 @@ class GaussianProcessSampler(BaseSampler):
 
     See Also
     --------
-    BaseSampler : Base Class
+    Sampler : Base Class
     """
     def __init__(self, lower, upper, X_train, y_train,
                  kerneldef=None, add_train_data=True, explore_priority=0.01):
         """
-        Initialises the GaussianProcessSampler class
+        Initialises the GaussianProcess class
 
         .. note:: Currently only supports rectangular type restrictions on the
         parameter space
@@ -352,7 +353,7 @@ class GaussianProcessSampler(BaseSampler):
         explore_priority : float, optional
             The priority of exploration against exploitation
         """
-        BaseSampler.__init__(self, lower, upper)
+        Sampler.__init__(self, lower, upper)
         self.hyper_params = None
         self.regressor = None
         self.kernel = None
@@ -418,8 +419,8 @@ class GaussianProcessSampler(BaseSampler):
         Returns
         -------
         int
-            Index location in the data lists 'GaussianProcessSampler.X' and
-            'GaussianProcessSampler.y' corresponding to the job being updated
+            Index location in the data lists 'GaussianProcess.X' and
+            'GaussianProcess.y' corresponding to the job being updated
         """
         ind = self._update(uid, y_true)
         if self.regressor:
@@ -482,7 +483,7 @@ class GaussianProcessSampler(BaseSampler):
             xq = X_test[iq, :]
             yq_exp = post_mu[iq]
 
-        uid = BaseSampler._assign(self, xq, yq_exp)
+        uid = Sampler._assign(self, xq, yq_exp)
 
         if self.regressor:
             gp.add_data(np.asarray(xq[np.newaxis, :]),
@@ -495,54 +496,65 @@ class GaussianProcessSampler(BaseSampler):
 
         return xq, uid
 
-    # def predict(self, Xq):
+    def predict(self, Xq):
+        """
+        Infers the mean and variance of the Gaussian process at given locations
+        using the data collected so far
 
-    #     # extract only the real observations for conditioning the predictor
-    #     # TODO Consider moving real_y inside of the for loop use regressor.y
-    #     real_id = [not i for i in self.virtual_flag]
-    #     real_X = [x for x, real in zip(self.X, real_id) if real is True]
-    #     real_y = [y for y, real in zip(self.y, real_id) if real is True]
-    #     real_X = np.asarray(real_X)
-    #     real_y = np.asarray(real_y) - self.mean # <- where is self.mean?
+        Parameters
+        ----------
+        Xq : Query points
 
-    #     regressor = gp.condition(real_X, real_y, self.kernel,
-    #                              self.hyper_params)
-    #     predictor = gp.query(Xq, regressor)
-    #     post_mu = gp.mean(regressor, predictor)
-    #     post_var = gp.variance(regressor, predictor)
+        Returns
+        -------
+        numpy.ndarray
+            Expectance of the prediction at the given locations
+        numpy.ndarray
+            Variance of the prediction at the given locations
+        """
+        real_flag = ~np.asarray(self.virtual_flag)
+        X_real = np.asarray(self.X)[real_flag]
+        y_real = np.asarray(self.y)[real_flag]
+        y_mean = y_real.mean()
 
-    #     return post_mu + self.mean, post_var
+        regressor = gp.condition(X_real, y_real - y_mean, self.kernel,
+                                 self.hyper_params)
+        predictor = gp.query(Xq, regressor)
+        yq_exp = gp.mean(regressor, predictor) + y_mean
+        yq_var = gp.variance(regressor, predictor)
 
+        return yq_exp, yq_var
 
-class StackedGaussianProcessSampler(BaseSampler):
+# NOTE: StackedGaussianProcess is to be merged with GaussianProcess!
+class StackedGaussianProcess(Sampler):
     """
-    Inherits from the BaseSampler class and augments pick and update with the
+    Inherits from the Sampler class and augments pick and update with the
     mechanics of the GP method
     """
     def __init__(self, lower, upper, X_train=None, y_train=None, n_stacks=None,
                  add_train_data=True, hypers=None, n_train_threshold=None,
-                 mean=0, acq_func='maxvar', explore_factor=0.3):
+                 mean=0, acq_func='maxvar', explore_priority=0.3):
         """
         Arguments:
         lower (array floats) - min of bounding box
         upper (array floats) - max of bounding box
         """
 
-        BaseSampler.__init__(self, lower, upper)
+        Sampler.__init__(self, lower, upper)
         self.n_stacks = n_stacks
         self.hyper_params = []
         self.regressors = None
         self.mean = mean
         self.trained_flag = False
         self.acq_func = acq_func
-        self.explore_factor=explore_factor
+        self.explore_priority = explore_priority
 
         # sets the number of training samples needed to be observed
         # before the sampler is trained
         if n_train_threshold is not None:
             self.n_train_threshold = n_train_threshold
         else:
-            self.n_train_threshold = 7**len(lower)
+            self.n_train_threshold = 7 ** len(lower)
 
         # Train the hyperparameters if there are sufficient training points provided
         if X_train is not None:
@@ -571,10 +583,10 @@ class StackedGaussianProcessSampler(BaseSampler):
         :param hypers:
         :return:
         """
-         # Set up the GP training and kernel
+        # Set up the GP training and kernel
         self.mean = np.mean(y_train)
-        minL = 1e-2*np.ones(2)
-        maxL = 1e3*np.ones(2)
+        minL = 1e-2 * np.ones(2)
+        maxL = 1e3 * np.ones(2)
         initL = np.array([0.5, 0.5])
         kerneldef = lambda h, k: \
             h(1e-3, 1e2, 2.321) * k('matern3on2', h(minL, maxL, initL))
@@ -587,7 +599,7 @@ class StackedGaussianProcessSampler(BaseSampler):
 
         # We need to train a regressor for each of the stacks
         # Lets use a common length scale by using folds
-        if hypers==None:
+        if hypers == None:
             folds = gp.Folds(self.n_stacks, [], [], [])
             # import ipdb; ipdb.set_trace()
             for stack in range(self.n_stacks):
@@ -635,15 +647,15 @@ class StackedGaussianProcessSampler(BaseSampler):
                                    zip(self.regressors, query_list)])
 
             # Aquisition Functions
-            explore_factor = 0.3
+            explore_priority = 0.3
             acq_func_dict = {
                 'maxvar': lambda u, v: np.argmax(np.sum(v, axis=0)),
                 'predmax': lambda u, v: np.argmax(np.max(u + 3*np.sqrt(v),
                                                          axis=0)),
-                'prodmax': lambda u, v: np.argmax(np.max((u + (self.mean+explore_factor/3.0)) * np.sqrt(v),
+                'prodmax': lambda u, v: np.argmax(np.max((u + (self.mean+explore_priority/3.0)) * np.sqrt(v),
                                                          axis=0)),
                 'probGreaterThan': lambda u, v: np.argmax(np.max((1-stats.norm.cdf
-                                        (explore_factor * np.ones(u.shape),u, np.sqrt(v))),
+                                        (explore_priority * np.ones(u.shape),u, np.sqrt(v))),
                                                          axis=0))
             }
 
@@ -653,14 +665,14 @@ class StackedGaussianProcessSampler(BaseSampler):
 
 
         # Place a virtual observation...
-        uid = BaseSampler._assign(self, xq, yq_exp)
+        uid = Sampler._assign(self, xq, yq_exp)
 
         if not self.trained_flag and np.sum([not i for i in self.virtual_flag]) \
                 >= self.n_train_threshold:
-            real_id = [not i for i in self.virtual_flag]
-            real_X = [x for x, real in zip(self.X, real_id) if real is True]
-            real_y = [y for y, real in zip(self.y, real_id) if real is True]
-            self.train_data(np.asarray(real_X), np.asarray(real_y))
+            real_flag = [not i for i in self.virtual_flag]
+            X_real = [x for x, real in zip(self.X, real_flag) if real is True]
+            y_real = [y for y, real in zip(self.y, real_flag) if real is True]
+            self.train_data(np.asarray(X_real), np.asarray(y_real))
 
         # if we are still grid sampling and havent initialised the
         # regressors... then create them
@@ -690,22 +702,22 @@ class StackedGaussianProcessSampler(BaseSampler):
         """
 
         # extract only the real observations for conditioning the predictor
-        #TODO Consider moving real_y inside of the for loop use regressor.y
+        #TODO Consider moving y_real inside of the for loop use regressor.y
 
         assert self.trained_flag, "Sampler is not trained yet. " \
                                   "Possibly not enough observations provided."
 
-        real_id = [not i for i in self.virtual_flag]
-        real_X = [x for x, real in zip(self.X, real_id) if real is True]
-        real_y = [y for y, real in zip(self.y, real_id) if real is True]
-        real_X = np.asarray(real_X)
-        real_y = np.asarray(real_y)-self.mean
+        real_flag = [not i for i in self.virtual_flag]
+        X_real = [x for x, real in zip(self.X, real_flag) if real is True]
+        y_real = [y for y, real in zip(self.y, real_flag) if real is True]
+        X_real = np.asarray(X_real)
+        y_real = np.asarray(y_real)-self.mean
 
         post_mu = []
         post_var = []
 
         for ind in range(self.n_stacks):
-            regressor = gp.condition(real_X, real_y[:,ind], self.kernel,
+            regressor = gp.condition(X_real, y_real[:,ind], self.kernel,
                                      self.hyper_params[ind])
             query_object = gp.query(Xq,regressor)
             post_mu.append(gp.mean(regressor,query_object))
