@@ -25,30 +25,31 @@ import warnings
 warnings.simplefilter("ignore", FutureWarning)
 
 
-
 def main():
 
-    # Set up a sampling problem:
+    # Set up a sampling problem
     target_samples = 501
     lower = [0, 0]
     upper = [1, 1]
 
-    explore_priority = 0.0001  # relative to the *difference* in stdev
-    sampler = sampling.Delaunay(lower, upper, explore_priority)
+    # Determine the priority of exploration against exploitation
+    # This is relative to the *difference* in stdev
+    explore_priority = 0.0001
+    sampler = sampling.Delaunay(lower, upper,
+                                explore_priority=explore_priority)
 
     # Set up plotting:
     plots = {'fig': pl.figure(),
              'count': 0,
              'shape': (2, 3)}
-    plot_triggers = [8, 9, 10, 50, 100, target_samples-1]
+    plot_triggers = [8, 9, 10, 50, 100, target_samples - 1]
 
     # Run the active sampling:
     for i in range(target_samples):
-        newX, newId = sampler.pick()
-        
-        observation = simulate_measurement(newX)
 
-        sampler.update(newId, observation)
+        xq, uid = sampler.pick()
+        observation = simulate_measurement(xq)
+        sampler.update(uid, observation)
 
         if i in plot_triggers:
             plot_progress(plots, sampler)
@@ -59,11 +60,11 @@ def main():
 def plot_progress(plots, sampler):
     fig = plots['fig']
     cols = pl.cm.jet(np.linspace(0, 1, 64))
-    custom = mpl.colors.ListedColormap(cols*0.5+0.5)
-    fig.add_subplot(*(plots['shape'] + (1+plots['count'],)))
+    custom = mpl.colors.ListedColormap(cols * 0.5 + 0.5)
+    fig.add_subplot(*(plots['shape'] + (1 + plots['count'],)))
     plots['count'] += 1
     y = np.asarray(sampler.y)
-    w = 4./np.log(1 + len(y))
+    w = 4. / np.log(1 + len(y))
 
     if isinstance(sampler, sampling.Delaunay):
         # todo (AL): only show the measured samples!

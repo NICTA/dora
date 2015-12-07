@@ -235,7 +235,7 @@ class Delaunay(Sampler):
             Index location in the data lists 'Delaunay.X' and
             'Delaunay.y' corresponding to the job being updated
         """
-        Sampler._update(self, uid, y_true)
+        return Sampler._update(self, uid, y_true)
 
     def pick(self):
         """
