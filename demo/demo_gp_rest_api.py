@@ -31,12 +31,12 @@ warnings.simplefilter("ignore", FutureWarning)
 
 def main():
 
-    server = subprocess.Popen(['python3', '../dora/server/server.py'])
+    server = subprocess.Popen(['python', '../dora/server/server.py'])
     time.sleep(5)
 
     # Set up a sampling problem:
     target_samples = 100
-    n_train = 15
+    n_train = 12
     lower = [1., 1.]
     upper = [3., 3.]
     explore_factor = 0.3
@@ -60,14 +60,18 @@ def main():
 
     # Run the active sampling:
     for i in range(target_samples):
+        logging.info('Samples: %d' % i)
         #post a request to the sampler for a query location
-        query_loc = requests.post(sampler_info['obs_uri']).json()
+        r = requests.post(sampler_info['obs_uri'])
+        r.raise_for_status()
+
+        query_loc = r.json()
 
         # Evaluate the sampler's query on the forward model
         characteristic = np.array(query_loc['query'])
         uid = query_loc['uid']
         uid, measurement = simulate_measurement_vector(characteristic, uid)
-
+        print(measurement)
         # Update the sampler with the new observation from the forward model
         r = requests.put(query_loc['uri'], json=measurement.tolist())
 
@@ -105,7 +109,9 @@ def plot_progress(plots, sampler_info):
     xeva, yeva = np.meshgrid(np.linspace(lower[0], upper[0], xres), np.linspace(
         lower[1], upper[1], yres))
     Xquery = np.array([xeva.flatten(),yeva.flatten()]).T
-    pred=requests.get(sampler_info['pred_uri'], json=Xquery.tolist()).json()
+    r=requests.get(sampler_info['pred_uri'], json=Xquery.tolist())
+    r.raise_for_status()
+    pred = r.json()
     pred_mean = pred['predictive_mean']
     id_matrix = np.reshape(np.arange(Xquery.shape[0])[:,np.newaxis],xeva.shape)
     vol = np.zeros((n_outputs, xeva.shape[0], xeva.shape[1]))

@@ -607,13 +607,6 @@ class StackedGaussianProcess(Sampler):
         else:
             self.n_train_threshold = 7 ** len(lower)
 
-        # Train the hyperparameters if there are
-        # sufficient training points provided
-        if X is not None:
-            assert y.shape[0] == X.shape[0]
-            if X.shape[0] >= self.n_train_threshold:
-                self.train_data(X, y, hypers)
-
         if add_train_data and X is not None:
             assert y.shape[0] == X.shape[0]
             # Convert to lists
@@ -628,6 +621,13 @@ class StackedGaussianProcess(Sampler):
                         gp.condition(np.asarray(self.X),
                                      np.asarray(self.y)[:, ind] - self.mean,
                                      self.kernel, self.hyper_params[ind]))
+
+        # Train the hyperparameters if there are
+        # sufficient training points provided
+        if X is not None:
+            assert y.shape[0] == X.shape[0]
+            if X.shape[0] >= self.n_train_threshold:
+                self.train_data(X, y, hypers)
 
     def train_data(self, X, y, hypers=None):
         """
@@ -666,7 +666,7 @@ class StackedGaussianProcess(Sampler):
                 folds.X.append(X)
                 folds.flat_y.append(y[:, stack] - self.mean)
 
-            hypers = gp.learn_folds(folds, self.kernel, opt_config)
+            hypers = gp.train.learn_folds(folds, self.kernel, opt_config)
 
         for stack in range(self.n_stacks):
             self.hyper_params.append(hypers)
@@ -693,6 +693,9 @@ class StackedGaussianProcess(Sampler):
         ind = self._update(uid, y_true)
         if self.trained_flag:
             full_y = np.asarray(self.y)
+            print(self.y)
+            print(full_y)
+            print(self.mean)
             for i, regressor in enumerate(self.regressors):
                 regressor.y = full_y[:, i] - self.mean
                 regressor.alpha = gp.predict.alpha(regressor.y, regressor.L)

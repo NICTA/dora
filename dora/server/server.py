@@ -1,5 +1,5 @@
 import flask as fl
-from .response import returns_json
+from dora.server.response import returns_json
 from computers.active_sampling import Stacked_Gaussian_Process as StackedGP
 import numpy as np
 
