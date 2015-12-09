@@ -37,14 +37,13 @@ def main():
     logging.info('Randomly sampling for training data.')
     n_initial_sample = 50
     X_train = sampling.random_sample(lower, upper, n_initial_sample)
-    y_train = np.asarray([simulate_measurement(i) for i in X_train])
+    y_train = np.asarray([simulate_measurement(i) for i in X_train])[:, np.newaxis]
 
     logging.info('Initialising and training sampler.')
-    sampler = sampling.GaussianProcess(lower, upper, X_train, y_train,
-                                        add_train_data=False)
-
-    print('Final kernel:', sampler.print_kernel(sampler.hyperparams), '+ noise',
-          sampler.hyperparams[1])
+    sampler = sampling.StackedGaussianProcess(lower, upper,
+                                              X = X_train, y = y_train,
+                                              add_train_data=False,
+                                              acq_func = 'prod_max')
 
     # Set up plotting:
     plots = {'fig': pl.figure(),
@@ -58,7 +57,7 @@ def main():
 
         newX, newId = sampler.pick()
 
-        observation = simulate_measurement(newX)
+        observation = np.asarray([simulate_measurement(newX)])
 
         sampler.update(newId, observation)
 
@@ -97,6 +96,23 @@ def plot_progress(plots, sampler):
         query = gp.query(x_test, sampler.regressor)
 
         zi = np.reshape(gp.mean(sampler.regressor, query), xg.shape)
+
+        extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
+                  np.max(X, axis=0)[0], y.min()]
+        pl.imshow(zi, vmin=0, vmax=1, extent=extent)
+
+    elif isinstance(sampler, sampling.StackedGaussianProcess):
+        X = sampler.regressors[0].X
+        minv = np.min(X, axis=0)
+        maxv = np.max(X, axis=0)
+        res = 400
+        xi = np.linspace(minv[0], maxv[0], res)
+        yi = np.linspace(minv[1], maxv[1], res)
+        xg, yg = np.meshgrid(xi, yi)
+        x_test = np.array([xg.flatten(), yg.flatten()]).T
+        query = gp.query(x_test, sampler.regressors[0])
+
+        zi = np.reshape(gp.mean(sampler.regressors[0], query), xg.shape)
 
         extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
                   np.max(X, axis=0)[0], y.min()]

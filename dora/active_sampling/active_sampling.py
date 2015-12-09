@@ -32,11 +32,11 @@ class Sampler:
         List of target outputs or expected (virtual) target outputs
         corresponding to the feature vectors 'X'
     virtual_flag : list
-        A list of boolean flags indicating the virtual elements of 'y'
+        A list of boolean flags i_stackicating the virtual elements of 'y'
             True: Corresponding target output is virtual
             False: Corresponding target output is observed
     pending_indices : dict
-        A dictionary that maps the job ID to the corresponding index in both
+        A dictionary that maps the job ID to the corresponding indices in both
         'X' and 'y'
     """
 
@@ -56,8 +56,8 @@ class Sampler:
         """
         self.lower = np.asarray(lower)
         self.upper = np.asarray(upper)
-        self.dims = self.upper.shape[0]
-        assert self.lower.shape[0] == self.dims
+        self.n_dims = self.upper.shape[0]
+        assert self.lower.shape[0] == self.n_dims
         self.X = []
         self.y = []
         self.virtual_flag = []
@@ -142,7 +142,7 @@ class Sampler:
         m.update(np.array(np.random.random()))
         uid = m.hexdigest()
 
-        # Note the index of corresponding to this picked location
+        # Note the i_stackex of corresponding to this picked location
         self.pending_indices[uid] = n
 
         return uid
@@ -170,11 +170,11 @@ class Sampler:
         assert uid in self.pending_indices
 
         # Kill the job and update collected data with true observation
-        ind = self.pending_indices.pop(uid)
-        self.y[ind] = y_true
-        self.virtual_flag[ind] = False
+        i_stack = self.pending_indices.pop(uid)
+        self.y[i_stack] = y_true
+        self.virtual_flag[i_stack] = False
 
-        return ind
+        return i_stack
 
 
 class Delaunay(Sampler):
@@ -251,7 +251,7 @@ class Delaunay(Sampler):
             A random hexadecimal ID to identify the corresponding job
         """
         n = len(self.X)
-        n_corners = 2 ** self.dims
+        n_corners = 2 ** self.n_dims
         if n < n_corners + 1:
 
             # Bootstrap with a regular sampling strategy to get it started
@@ -275,10 +275,10 @@ class Delaunay(Sampler):
 
                 # Computes the sample value as:
                 #   hyper-volume of simplex * variance of values in simplex
-                ind = list(s)
-                value = (np.var(yvals[ind]) + self.explore_priority) * \
-                    np.linalg.det((points[ind] - points[ind[0]])[1:])
-                if not np.max(virtual[ind]):
+                i_stack = list(s)
+                value = (np.var(yvals[i_stack]) + self.explore_priority) * \
+                    np.linalg.det((points[i_stack] - points[i_stack[0]])[1:])
+                if not np.max(virtual[i_stack]):
                     cache[s] = value
                 return value
 
@@ -286,10 +286,10 @@ class Delaunay(Sampler):
             sample_value = [cache[s] if s in cache else get_value(s)
                             for s in simplices]
 
-            # Find the points in the highest value simplex
-            simplex_indices = list(simplices[np.argmax(sample_value)])
-            simplex = points[simplex_indices]
-            simplex_v = yvals[simplex_indices]
+            # Fi_stack the points in the highest value simplex
+            simplex_i_stackices = list(simplices[np.argmax(sample_value)])
+            simplex = points[simplex_i_stackices]
+            simplex_v = yvals[simplex_i_stackices]
 
             # Weight based on deviation from the mean
             weight = 1e-3 + np.abs(simplex_v - np.mean(simplex_v))
@@ -311,7 +311,7 @@ class GaussianProcess(Sampler):
 
     Attributes
     ----------
-    hyper_params : numpy.ndarray
+    hyperparams : numpy.ndarray
         The hyperparameters of the Gaussian Process Inference Model
     regressor : dict
         Cached values of simplices for Delaunay triangulation
@@ -354,7 +354,7 @@ class GaussianProcess(Sampler):
             The priority of exploration against exploitation
         """
         Sampler.__init__(self, lower, upper)
-        self.hyper_params = None
+        self.hyperparams = None
         self.regressor = None
         self.kernel = None
         self.print_kernel = None
@@ -394,16 +394,16 @@ class GaussianProcess(Sampler):
         self.print_kernel = gp.describer(kerneldef)
 
         # Learn the GP
-        self.hyper_params = gp.learn(X, y, self.kernel, opt_config)
+        self.hyperparams = gp.learn(X, y, self.kernel, opt_config)
 
         # Adds sampled data to the model
         if add_train_data:
             self.X = X.copy()
             self.y = y.copy()
-            self.virtual_flag = [False for y in y]
+            self.virtual_flag = [False for y_i in y]
             self.regressor = gp.condition(np.asarray(self.X),
                                           np.asarray(self.y),
-                                          self.kernel, self.hyper_params)
+                                          self.kernel, self.hyperparams)
 
     def update(self, uid, y_true):
         """
@@ -422,12 +422,12 @@ class GaussianProcess(Sampler):
             Index location in the data lists 'GaussianProcess.X' and
             'GaussianProcess.y' corresponding to the job being updated
         """
-        ind = self._update(uid, y_true)
+        i_stack = self._update(uid, y_true)
         if self.regressor:
-            self.regressor.y[ind] = y_true
+            self.regressor.y[i_stack] = y_true
             self.regressor.alpha = gp.predict.alpha(self.regressor.y,
                                                     self.regressor.L)
-        return ind
+        return i_stack
 
     def pick(self, n_test=500, acq_fn='sigmoid'):
         """
@@ -451,7 +451,7 @@ class GaussianProcess(Sampler):
             A random hexadecimal ID to identify the corresponding job
         """
         n = len(self.X)
-        n_corners = 2 ** self.dims
+        n_corners = 2 ** self.n_dims
         if n < n_corners + 1:
 
             # Bootstrap with a regular sampling strategy to get it started
@@ -467,9 +467,9 @@ class GaussianProcess(Sampler):
             post_var = gp.variance(self.regressor, query)
 
             acq_func_dict = {
-                'maxvar': lambda u, v: np.argmax(v, axis=0),
-                'predmax': lambda u, v: np.argmax(u + np.sqrt(v), axis=0),
-                'entropyvar': lambda u, v:
+                'var_max': lambda u, v: np.argmax(v, axis=0),
+                'pred_max': lambda u, v: np.argmax(u + np.sqrt(v), axis=0),
+                'entropy_var': lambda u, v:
                     np.argmax((self.explore_priority + np.sqrt(v)) *
                               u * (1 - u), axis=0),
                 'sigmoid': lambda u, v:
@@ -492,7 +492,7 @@ class GaussianProcess(Sampler):
         else:
             self.regressor = gp.condition(np.asarray(self.X),
                                           np.asarray(self.y), self.kernel,
-                                          self.hyper_params)
+                                          self.hyperparams)
 
         return xq, uid
 
@@ -518,7 +518,7 @@ class GaussianProcess(Sampler):
         y_mean = y_real.mean()
 
         regressor = gp.condition(X_real, y_real - y_mean, self.kernel,
-                                 self.hyper_params)
+                                 self.hyperparams)
         predictor = gp.query(Xq, regressor)
         yq_exp = gp.mean(regressor, predictor) + y_mean
         yq_var = gp.variance(regressor, predictor)
@@ -539,7 +539,7 @@ class StackedGaussianProcess(Sampler):
     n_stacks : int
         The number of Gaussian process 'stacks', which is also the
         dimensionality of the target output
-    hyper_params : numpy.ndarray
+    hyperparams : numpy.ndarray
         The hyperparameters of the Gaussian Process Inference Model
     regressors : list
         List of regressor objects. See 'gp.types.RegressionParams'
@@ -551,16 +551,17 @@ class StackedGaussianProcess(Sampler):
         A string specifying the type of acquisition function used
     explore_priority : float
         The priority of exploration against exploitation
-    n_train_threshold : int
+    n_min : int
         Number of training samples required before sampler can be trained
 
     See Also
     --------
     Sampler : Base Class
     """
-    def __init__(self, lower, upper, X=None, y=None, n_stacks=None,
-                 add_train_data=True, hypers=None, n_train_threshold=None,
-                 mean=0, acq_func='maxvar', explore_priority=0.3):
+    def __init__(self, lower, upper, X = None, y = None, n_stacks = None,
+                 y_mean = 0, add_train_data = True, kerneldef = None,
+                 hyperparams = None, n_min = None, acq_func = 'var_max',
+                 explore_priority = 0.01):
         """
         Initialises the GaussianProcess class
 
@@ -582,11 +583,11 @@ class StackedGaussianProcess(Sampler):
             dimensionality of the target output
         add_train_data : boolean
             Whether to add training data to the sampler or not
-        hypers : tuple
+        hyperparams : tuple
             Hyperparameters of the Gaussian process
-        n_train_threshold : int
+        n_min : int
             Number of training samples required before sampler can be trained
-        mean : float
+        y_mean : float
             Mean of the training target outputs
         acq_func : str
             A string specifying the type of acquisition function used
@@ -594,42 +595,48 @@ class StackedGaussianProcess(Sampler):
             The priority of exploration against exploitation
         """
         Sampler.__init__(self, lower, upper)
-        self.n_stacks = n_stacks
-        self.hyper_params = []
+
+        self.hyperparams = hyperparams
         self.regressors = None
-        self.mean = mean
+        self.kernel = None
+
+        # If the training data is not supplied, the mean of the target output
+        # is specified by the keyword argument
+        self.y_mean = y_mean
         self.trained_flag = False
         self.acq_func = acq_func
         self.explore_priority = explore_priority
 
-        if n_train_threshold is not None:
-            self.n_train_threshold = n_train_threshold
-        else:
-            self.n_train_threshold = 7 ** len(lower)
+        self.n_stacks = n_stacks if y is None else y.shape[1]
+        self.n_min = n_min if n_min is not None else (7 ** self.n_dims)
 
-        if add_train_data and X is not None:
-            assert y.shape[0] == X.shape[0]
-            # Convert to lists
-            self.X = [x_i for x_i in X]
-            self.y = [y_i for y_i in y]
-            self.virtual_flag = [False for x in X]
-
-            if self.trained_flag:
-                self.regressors = []
-                for ind in range(n_stacks):
-                    self.regressors.append(
-                        gp.condition(np.asarray(self.X),
-                                     np.asarray(self.y)[:, ind] - self.mean,
-                                     self.kernel, self.hyper_params[ind]))
-
-        # Train the hyperparameters if there are
-        # sufficient training points provided
+        # If training data is provided...
         if X is not None:
-            assert y.shape[0] == X.shape[0]
-            if X.shape[0] >= self.n_train_threshold:
-                self.train_data(X, y, hypers)
 
-    def train_data(self, X, y, hypers=None):
+            assert y.shape[0] == X.shape[0]
+            assert X.shape[1] == self.n_dims
+
+            # Train the hyperparameters if there are sufficient training points
+            if X.shape[0] >= self.n_min:
+                self.train_data(X, y, kerneldef = kerneldef)
+
+            # Add the training data to the sampler if specified
+            if add_train_data:
+                self.X = [x_i for x_i in X]
+                self.y = [y_i for y_i in y]
+                self.virtual_flag = [False for x in X]
+
+                # If we have trained before, cache each regressor
+                if self.trained_flag:
+                    self.regressors = []
+                    for i_stack in range(n_stacks):
+                        self.regressors.append(
+                            gp.condition(np.asarray(self.X),
+                                         np.asarray(self.y)[:, i_stack]
+                                         - self.y_mean, self.kernel,
+                                         self.hyperparams[i_stack]))
+
+    def train_data(self, X, y, kerneldef = None):
         """
         Trains the Gaussian process used for the sampler
 
@@ -639,16 +646,18 @@ class StackedGaussianProcess(Sampler):
             Training features for the Gaussian process model
         y : numpy.ndarray
             Training targets for the Gaussian process model
-        hypers : tuple
+        hyperparams : tuple
             Hyperparameters of the Gaussian process
         """
-        # Set up the GP training and kernel
-        self.mean = np.mean(y)
-        min_l = 1e-2 * np.ones(2)
-        max_l = 1e3 * np.ones(2)
-        init_l = np.array([0.5, 0.5])
-        kerneldef = lambda h, k: \
-            h(1e-3, 1e2, 2.321) * k('matern3on2', h(min_l, max_l, init_l))
+        # If a kernel definition is not provided, use the default one below
+        if kerneldef is None:
+            kerneldef = lambda h, k: \
+                h(1e-3, 1e+2, 1) * k('matern3on2',
+                                     h(1e-2 * np.ones(self.n_dims),
+                                       1e+3 * np.ones(self.n_dims),
+                                       1e+0 * np.ones(self.n_dims)))
+
+        # Compose the kernel and setup the optimiser
         self.kernel = gp.compose(kerneldef)
         opt_config = gp.OptConfig()
         opt_config.sigma = gp.auto_range(kerneldef)
@@ -656,21 +665,27 @@ class StackedGaussianProcess(Sampler):
         opt_config.walltime = 50.0
         opt_config.global_opt = False
 
+        # Update the mean of the target outputs
+        self.y_mean = np.mean(y)
+
+        hyperparams = None
+
         # We need to train a regressor for each of the stacks
         # Let's use a common length scale by using folds
-        if hypers is None:
+        if self.hyperparams is None:
 
             folds = gp.Folds(self.n_stacks, [], [], [])
 
-            for stack in range(self.n_stacks):
+            for i_stack in range(self.n_stacks):
                 folds.X.append(X)
-                folds.flat_y.append(y[:, stack] - self.mean)
+                folds.flat_y.append(y[:, i_stack] - self.y_mean)
 
-            hypers = gp.train.learn_folds(folds, self.kernel, opt_config)
+            hyperparams = gp.train.learn_folds(folds, self.kernel, opt_config)
 
-        for stack in range(self.n_stacks):
-            self.hyper_params.append(hypers)
+        # Use the same hyperparameters for each of the stacks
+        self.hyperparams = [hyperparams for i_stack in range(self.n_stacks)]
 
+        # We have finished training
         self.trained_flag = True
 
     def update(self, uid, y_true):
@@ -690,15 +705,16 @@ class StackedGaussianProcess(Sampler):
             Index location in the data lists 'Delaunay.X' and
             'Delaunay.y' corresponding to the job being updated
         """
+        # Update the job
         ind = self._update(uid, y_true)
+
+        # Update the regressors about the new observations
         if self.trained_flag:
-            full_y = np.asarray(self.y)
-            print(self.y)
-            print(full_y)
-            print(self.mean)
+            y = np.asarray(self.y)
             for i, regressor in enumerate(self.regressors):
-                regressor.y = full_y[:, i] - self.mean
+                regressor.y = y[:, i] - self.y_mean
                 regressor.alpha = gp.predict.alpha(regressor.y, regressor.L)
+
         return ind
 
     def pick(self, n_test=500):
@@ -721,75 +737,65 @@ class StackedGaussianProcess(Sampler):
             A random hexadecimal ID to identify the corresponding job
         """
         n = len(self.X)
-        n_corners = 2 ** self.dims
+        n_corners = 2 ** self.n_dims
 
         if not self.trained_flag:
             xq = random_sample(self.lower, self.upper, 1)[0, :]
-            yq_exp = 0. * np.ones(self.n_stacks) + self.mean
+            yq_exp = self.y_mean * np.ones(self.n_stacks)
 
         elif n < n_corners + 1:
             # Bootstrap with a regular sampling strategy to get it started
             xq = grid_sample(self.lower, self.upper, n)
-            yq_exp = 0. * np.ones(self.n_stacks) + self.mean
+            yq_exp = self.y_mean * np.ones(self.n_stacks)
 
         else:
             # Randomly sample the volume.
             X_test = random_sample(self.lower, self.upper, n_test)
-            query_list = [gp.query(X_test, reg) for reg in self.regressors]
-            post_mu = np.asarray([gp.mean(reg, qry) for reg, qry in
-                                 zip(self.regressors, query_list)]) + self.mean
-            post_var = np.asarray([gp.variance(reg, qry) for reg, qry in
-                                  zip(self.regressors, query_list)])
+            predictor = [gp.query(X_test, r) for r in self.regressors]
+            post_mu = np.asarray([gp.mean(r, q)
+                                 for r, q in zip(self.regressors, predictor)]) \
+                + self.y_mean
+
+            post_var = np.asarray([gp.variance(r, q) for r, q in
+                                  zip(self.regressors, predictor)])
 
             # Aquisition Functions
-            explore_priority = 0.3
-            acq_func_dict = {
-                'maxvar': lambda u, v: np.argmax(np.sum(v, axis=0)),
-                'predmax': lambda u, v: np.argmax(np.max(u + 3 * np.sqrt(v),
-                                                         axis=0)),
-                'prodmax': lambda u, v: np.argmax(np.max((u + (self.mean +
-                                                  explore_priority / 3.0)) *
-                                                  np.sqrt(v), axis=0)),
-                'probGreaterThan':
-                    lambda u, v: np.argmax(np.max((1 - stats.norm.cdf(
-                                           explore_priority *
-                                           np.ones(u.shape), u,
-                                           np.sqrt(v))), axis=0))
-            }
+            acq_defs = acquisition_functions(y_mean = self.y_mean,
+                                             explore_priority =
+                                             self.explore_priority)
 
-            iq = acq_func_dict[self.acq_func](post_mu, post_var)
+            iq = acq_defs[self.acq_func](post_mu, post_var)
             xq = X_test[iq, :]
-            yq_exp = post_mu[:, iq]
+            yq_exp = post_mu[:, iq]  # Note that 'post_mu' is flipped
 
         # Place a virtual observation...
         uid = Sampler._assign(self, xq, yq_exp)
 
         if not self.trained_flag and np.sum([not i for i in self.virtual_flag]) \
-                >= self.n_train_threshold:
-            real_flag = [not i for i in self.virtual_flag]
-            X_real = [x for x, real in zip(self.X, real_flag) if real is True]
-            y_real = [y for y, real in zip(self.y, real_flag) if real is True]
-            self.train_data(np.asarray(X_real), np.asarray(y_real))
+                >= self.n_min:
+            real_flag = ~np.asarray(self.virtual_flag)
+            X_real = np.asarray(self.X)[real_flag]
+            y_real = np.asarray(self.y)[real_flag]
+            self.train_data(X_real, y_real)
 
-        # if we are still grid sampling and havent initialised the
-        # regressors... then create them
+        # If we are still grid sampling and havent initialised the regressors,
+        # then create them
         if self.trained_flag:
             if self.regressors is None:
-                self.regressors = []  # init a list of regressors
-                arr_X = np.asarray(self.X)
-                arr_Y = np.asarray(self.y)
-                for ind in range(self.n_stacks):
+                self.regressors = []  # initialise a list of regressors
+                X = np.asarray(self.X)
+                y = np.asarray(self.y)
+                for i_stack in range(self.n_stacks):
                     self.regressors.append(
-                        gp.condition(arr_X, arr_Y[:, ind] - self.mean,
-                                     self.kernel, self.hyper_params[ind]))
+                        gp.condition(X, y[:, i_stack] - self.y_mean,
+                                     self.kernel, self.hyperparams[i_stack]))
             else:
-                for ind in range(self.n_stacks):
+                for i_stack in range(self.n_stacks):
                     gp.add_data(np.asarray(xq[np.newaxis, :]),
-                                np.asarray(yq_exp[ind])[np.newaxis] -
-                                self.mean, self.regressors[ind])
+                                np.asarray(yq_exp[i_stack])[np.newaxis] -
+                                self.y_mean, self.regressors[i_stack])
 
         return xq, uid
-
 
     def predict(self, Xq):
         """
@@ -813,29 +819,27 @@ class StackedGaussianProcess(Sampler):
         assert self.trained_flag, "Sampler is not trained yet. " \
                                   "Possibly not enough observations provided."
 
-        real_flag = [not i for i in self.virtual_flag]
-        X_real = [x for x, real in zip(self.X, real_flag) if real is True]
-        y_real = [y for y, real in zip(self.y, real_flag) if real is True]
-        X_real = np.asarray(X_real)
-        y_real = np.asarray(y_real) - self.mean
+        real_flag = ~np.asarray(self.virtual_flag)
+        X_real = np.asarray(self.X)[real_flag]
+        y_real = np.asarray(self.y)[real_flag]
 
         post_mu = []
         post_var = []
 
-        for ind in range(self.n_stacks):
-            regressor = gp.condition(X_real, y_real[:, ind], self.kernel,
-                                     self.hyper_params[ind])
-            query_object = gp.query(Xq, regressor)
-            post_mu.append(gp.mean(regressor, query_object))
-            post_var.append(gp.variance(regressor, query_object))
+        for i_stack in range(self.n_stacks):
+            regressor = gp.condition(X_real, y_real[:, i_stack] - self.y_mean,
+                                     self.kernel, self.hyperparams[i_stack])
+            predictor = gp.query(Xq, regressor)
+            post_mu.append(gp.mean(regressor, predictor))
+            post_var.append(gp.variance(regressor, predictor))
 
-        return np.asarray(post_mu).T + self.mean, np.asarray(post_var).T
+        return np.asarray(post_mu).T + self.y_mean, np.asarray(post_var).T
 
 
 def grid_sample(lower, upper, n):
     """
     Used to seed an algorithm with a regular pattern of the corners and
-    the centre. Provide search parameters and the index.
+    the centre. Provide search parameters and the i_stackex.
 
     Parameters
     ----------
@@ -890,3 +894,21 @@ def random_sample(lower, upper, n):
     X_scaled = X * volume_range
     X_shifted = X_scaled + lower
     return X_shifted
+
+
+def acquisition_functions(y_mean = 0, explore_priority = 0.01):
+
+    # Aquisition Functions
+    return {
+        'var_max': lambda u, v: np.argmax(np.sum(v, axis = 0)),
+        'pred_max': lambda u, v: np.argmax(np.max(u + 3 * np.sqrt(v),
+                                           axis = 0)),
+        'prod_max': lambda u, v: np.argmax(np.max((u + (y_mean +
+                                           explore_priority / 3.0)) *
+                                           np.sqrt(v), axis = 0)),
+        'prob_tail':
+            lambda u, v: np.argmax(np.max((1 - stats.norm.cdf(
+                                   explore_priority *
+                                   np.ones(u.shape), u,
+                                   np.sqrt(v))), axis = 0)),
+    }
