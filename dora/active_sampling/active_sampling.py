@@ -197,7 +197,7 @@ class Delaunay(Sampler):
     --------
     Sampler : Base Class
     """
-    def __init__(self, lower, upper, explore_priority=0.0001):
+    def __init__(self, lower, upper, explore_priority = 0.0001):
         """
         Initialises the Delaunay class
 
@@ -261,7 +261,7 @@ class Delaunay(Sampler):
 
             # Otherwise, recursive subdivide the edges with the Delaunay model
             if not self.triangulation:
-                self.triangulation = ScipyDelaunay(self.X, incremental=True)
+                self.triangulation = ScipyDelaunay(self.X, incremental = True)
 
             points = self.triangulation.points
             yvals = np.asarray(self.y)
@@ -329,7 +329,8 @@ class GaussianProcess(Sampler):
     Sampler : Base Class
     """
     def __init__(self, lower, upper, X, y,
-                 kerneldef=None, add_train_data=True, explore_priority=0.01):
+                 kerneldef = None, add_train_data = True,
+                 explore_priority = 0.01):
         """
         Initialises the GaussianProcess class
 
@@ -360,10 +361,10 @@ class GaussianProcess(Sampler):
         self.print_kernel = None
         self.explore_priority = explore_priority
         self._train(X, y,
-                    kerneldef=kerneldef, add_train_data=add_train_data)
+                    kerneldef = kerneldef, add_train_data = add_train_data)
 
     def _train(self, X, y,
-               kerneldef=None, add_train_data=True):
+               kerneldef = None, add_train_data = True):
         """
         Trains the Gaussian process used for the sampler
 
@@ -558,8 +559,8 @@ class StackedGaussianProcess(Sampler):
     --------
     Sampler : Base Class
     """
-    def __init__(self, lower, upper, X = None, y = None, n_stacks = None,
-                 y_mean = 0, add_train_data = True, kerneldef = None,
+    def __init__(self, lower, upper, X = [], y = [], n_stacks = None,
+                 add_train_data = True, kerneldef = None,
                  hyperparams = None, n_min = None, acq_func = 'var_max',
                  explore_priority = 0.01):
         """
@@ -596,13 +597,20 @@ class StackedGaussianProcess(Sampler):
         """
         Sampler.__init__(self, lower, upper)
 
+        if kerneldef is None:
+            self.kerneldef = lambda h, k: \
+                h(1e-3, 1e+2, 1) * k('matern3on2',
+                                     h(1e-2 * np.ones(self.n_dims),
+                                       1e+3 * np.ones(self.n_dims),
+                                       1e+0 * np.ones(self.n_dims)))
+        else:
+            self.kerneldef = kerneldef
+
         self.hyperparams = hyperparams
         self.regressors = None
-        self.kernel = None
 
         # If the training data is not supplied, the mean of the target output
         # is specified by the keyword argument
-        self.y_mean = y_mean
         self.trained_flag = False
         self.acq_func = acq_func
         self.explore_priority = explore_priority
@@ -636,6 +644,26 @@ class StackedGaussianProcess(Sampler):
                                          - self.y_mean, self.kernel,
                                          self.hyperparams[i_stack]))
 
+    def set_kerneldef(self, kerneldef):
+        assert callable(kerneldef)
+        self.kerneldef = kerneldef
+
+    def get_kerneldef(self):
+        return self.kerneldef
+
+    def print_kernel(self, kerneldef):
+        # TO DO: Use the printer method to print the current kernel!
+        pass
+
+    def set_hyperparams(self, hyperparams):
+        if isinstance(hyperparams, list):
+            self.hyperparams = hyperparams
+        else:
+            self.hyperparams = [hyperparams for i in range(self.n_stacks)]
+
+    def get_hyperparams(self):
+        return self.hyperparams
+
     def train_data(self, X, y, kerneldef = None):
         """
         Trains the Gaussian process used for the sampler
@@ -650,12 +678,7 @@ class StackedGaussianProcess(Sampler):
             Hyperparameters of the Gaussian process
         """
         # If a kernel definition is not provided, use the default one below
-        if kerneldef is None:
-            kerneldef = lambda h, k: \
-                h(1e-3, 1e+2, 1) * k('matern3on2',
-                                     h(1e-2 * np.ones(self.n_dims),
-                                       1e+3 * np.ones(self.n_dims),
-                                       1e+0 * np.ones(self.n_dims)))
+
 
         # Compose the kernel and setup the optimiser
         self.kernel = gp.compose(kerneldef)
@@ -764,6 +787,7 @@ class StackedGaussianProcess(Sampler):
                                              explore_priority =
                                              self.explore_priority)
 
+            # post_mu is size n_stacks x n_query
             iq = acq_defs[self.acq_func](post_mu, post_var)
             xq = X_test[iq, :]
             yq_exp = post_mu[:, iq]  # Note that 'post_mu' is flipped
@@ -899,8 +923,11 @@ def random_sample(lower, upper, n):
 def acquisition_functions(y_mean = 0, explore_priority = 0.01):
 
     # Aquisition Functions
+    # u: Mean matrix (n x n_stacks)
+    # v: Variance matrix (n x n_stacks)
+
     return {
-        'var_max': lambda u, v: np.argmax(np.sum(v, axis = 0)),
+        'var_max': lambda u, v: np.argmax(np.sum(v, axis = 0),
         'pred_max': lambda u, v: np.argmax(np.max(u + 3 * np.sqrt(v),
                                            axis = 0)),
         'prod_max': lambda u, v: np.argmax(np.max((u + (y_mean +
@@ -912,3 +939,17 @@ def acquisition_functions(y_mean = 0, explore_priority = 0.01):
                                    np.ones(u.shape), u,
                                    np.sqrt(v))), axis = 0)),
     }
+
+
+# acq_func_dict = {
+#     'var_max': lambda u, v: np.argmax(v, axis=0),
+#     'pred_max': lambda u, v: np.argmax(u + np.sqrt(v), axis=0),
+#     'entropy_var': lambda u, v:
+#         np.argmax((self.explore_priority + np.sqrt(v)) *
+#                   u * (1 - u), axis=0),
+#     'sigmoid': lambda u, v:
+#         np.argmax(np.abs(stats.logistic.cdf(u + np.sqrt(v),
+#                   loc=0.5, scale=self.explore_priority) -
+#                   stats.logistic.cdf(u - np.sqrt(v),
+#                   loc=0.5, scale=self.explore_priority)), axis=0)
+# }
