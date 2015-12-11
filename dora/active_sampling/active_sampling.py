@@ -441,7 +441,7 @@ class GaussianProcess(Sampler):
             The number of random query points across the search space to pick
             from
         acq_fn : str, optional
-            The type of acquisition function used
+            The type of acq_name function used
 
         Returns
         -------
@@ -467,7 +467,7 @@ class GaussianProcess(Sampler):
             post_mu = gp.mean(self.regressor, query)
             post_var = gp.variance(self.regressor, query)
 
-            acq_func_dict = {
+            acq_name_dict = {
                 'var_max': lambda u, v: np.argmax(v, axis=0),
                 'pred_max': lambda u, v: np.argmax(u + np.sqrt(v), axis=0),
                 'entropy_var': lambda u, v:
@@ -480,7 +480,7 @@ class GaussianProcess(Sampler):
                               loc=0.5, scale=self.explore_priority)), axis=0)
             }
 
-            iq = acq_func_dict[acq_fn](post_mu, post_var)
+            iq = acq_name_dict[acq_fn](post_mu, post_var)
             xq = X_test[iq, :]
             yq_exp = post_mu[iq]
 
@@ -548,7 +548,7 @@ class StackedGaussianProcess(Sampler):
         Mean of the training target outputs
     trained_flag : bool
         Whether the GP model have been trained or not
-    acq_func : str
+    acq_name : str
         A string specifying the type of acquisition function used
     explore_priority : float
         The priority of exploration against exploitation
@@ -559,9 +559,9 @@ class StackedGaussianProcess(Sampler):
     --------
     Sampler : Base Class
     """
-    def __init__(self, lower, upper, X = [], y = [], n_stacks = None,
+    def __init__(self, lower, upper, X = [], y = [],
                  add_train_data = True, kerneldef = None,
-                 hyperparams = None, n_min = None, acq_func = 'var_max',
+                 hyperparams = None, n_min = None, acq_name = 'var_max',
                  explore_priority = 0.01):
         """
         Initialises the GaussianProcess class
@@ -590,7 +590,7 @@ class StackedGaussianProcess(Sampler):
             Number of training samples required before sampler can be trained
         y_mean : float
             Mean of the training target outputs
-        acq_func : str
+        acq_name : str
             A string specifying the type of acquisition function used
         explore_priority : float, optional
             The priority of exploration against exploitation
@@ -612,37 +612,37 @@ class StackedGaussianProcess(Sampler):
         # If the training data is not supplied, the mean of the target output
         # is specified by the keyword argument
         self.trained_flag = False
-        self.acq_func = acq_func
+        self.acq_name = acq_name
         self.explore_priority = explore_priority
 
-        self.n_stacks = n_stacks if y is None else y.shape[1]
+        self.n_stacks = len(y[0]) if y else None
         self.n_min = n_min if n_min is not None else (7 ** self.n_dims)
 
-        # If training data is provided...
-        if X is not None:
+        # # If training data is provided...
+        # if X is not None:
 
-            assert y.shape[0] == X.shape[0]
-            assert X.shape[1] == self.n_dims
+        #     assert y.shape[0] == X.shape[0]
+        #     assert X.shape[1] == self.n_dims
 
-            # Train the hyperparameters if there are sufficient training points
-            if X.shape[0] >= self.n_min:
-                self.train_data(X, y, kerneldef = kerneldef)
+        #     # Train the hyperparameters if there are sufficient training points
+        #     if X.shape[0] >= self.n_min:
+        #         self.train_data(X, y, kerneldef = kerneldef)
 
-            # Add the training data to the sampler if specified
-            if add_train_data:
-                self.X = [x_i for x_i in X]
-                self.y = [y_i for y_i in y]
-                self.virtual_flag = [False for x in X]
+        #     # Add the training data to the sampler if specified
+        #     if add_train_data:
+        #         self.X = [x_i for x_i in X]
+        #         self.y = [y_i for y_i in y]
+        #         self.virtual_flag = [False for x in X]
 
-                # If we have trained before, cache each regressor
-                if self.trained_flag:
-                    self.regressors = []
-                    for i_stack in range(n_stacks):
-                        self.regressors.append(
-                            gp.condition(np.asarray(self.X),
-                                         np.asarray(self.y)[:, i_stack]
-                                         - self.y_mean, self.kernel,
-                                         self.hyperparams[i_stack]))
+        #         # If we have trained before, cache each regressor
+        #         if self.trained_flag:
+        #             self.regressors = []
+        #             for i_stack in range(n_stacks):
+        #                 self.regressors.append(
+        #                     gp.condition(np.asarray(self.X),
+        #                                  np.asarray(self.y)[:, i_stack]
+        #                                  - self.y_mean, self.kernel,
+        #                                  self.hyperparams[i_stack]))
 
     def set_kerneldef(self, kerneldef):
         assert callable(kerneldef)
@@ -663,6 +663,28 @@ class StackedGaussianProcess(Sampler):
 
     def get_hyperparams(self):
         return self.hyperparams
+
+    def set_acq_name(self, acq_name):
+        assert type(acq_name) is str
+        self.acq_name = acq_name
+
+    def get_acq_func(self):
+        return acq_defs(y_mean =
+                        self.y_mean,
+                        explore_priority =
+                        self.explore_priority)[self.acq_name]
+
+    def set_explore_priority(self, explore_priority):
+        self.explore_priority = explore_priority
+
+    def get_explore_priority(self):
+        return self.explore_priority
+
+    def set_min_training_size(self, n_min):
+        self.n_min = n_min
+
+    def get_min_training_size(self):
+        return self.n_min
 
     def train_data(self, X, y, kerneldef = None):
         """
@@ -783,12 +805,12 @@ class StackedGaussianProcess(Sampler):
                                   zip(self.regressors, predictor)])
 
             # Aquisition Functions
-            acq_defs = acquisition_functions(y_mean = self.y_mean,
+            acq_defs = acq_defs(y_mean = self.y_mean,
                                              explore_priority =
                                              self.explore_priority)
 
             # post_mu is size n_stacks x n_query
-            iq = acq_defs[self.acq_func](post_mu, post_var)
+            iq = acq_defs[self.acq_name](post_mu, post_var)
             xq = X_test[iq, :]
             yq_exp = post_mu[:, iq]  # Note that 'post_mu' is flipped
 
@@ -860,6 +882,28 @@ class StackedGaussianProcess(Sampler):
         return np.asarray(post_mu).T + self.y_mean, np.asarray(post_var).T
 
 
+def atleast_2d(y):
+    """
+    ..note : Assumes homogenous list or arrays
+    """
+    if isinstance(y, list):
+        if type(y[0]) is not np.ndarray:
+            return [np.array([y_i]) for y_i in y]
+        elif len(y[0].shape) == 1:
+            return y
+        else:
+            raise ValueError("List element already has more than 1 dimension")
+    elif isinstance(y, np.ndarray):
+        if len(y.shape) == 1:
+            return y[:, np.newaxis]
+        elif len(y.shape) == 2:
+            return y
+        else:
+            raise ValueError("Object already has more than 2 dimensions")
+    else:
+        raise ValueError('Object is not a list or an array')
+
+
 def grid_sample(lower, upper, n):
     """
     Used to seed an algorithm with a regular pattern of the corners and
@@ -920,14 +964,14 @@ def random_sample(lower, upper, n):
     return X_shifted
 
 
-def acquisition_functions(y_mean = 0, explore_priority = 0.01):
+def acq_defs(y_mean = 0, explore_priority = 0.01):
 
     # Aquisition Functions
     # u: Mean matrix (n x n_stacks)
     # v: Variance matrix (n x n_stacks)
 
     return {
-        'var_max': lambda u, v: np.argmax(np.sum(v, axis = 0),
+        'var_max': lambda u, v: np.argmax(np.sum(v, axis = 0)),
         'pred_max': lambda u, v: np.argmax(np.max(u + 3 * np.sqrt(v),
                                            axis = 0)),
         'prod_max': lambda u, v: np.argmax(np.max((u + (y_mean +
@@ -941,7 +985,7 @@ def acquisition_functions(y_mean = 0, explore_priority = 0.01):
     }
 
 
-# acq_func_dict = {
+# acq_name_dict = {
 #     'var_max': lambda u, v: np.argmax(v, axis=0),
 #     'pred_max': lambda u, v: np.argmax(u + np.sqrt(v), axis=0),
 #     'entropy_var': lambda u, v:
