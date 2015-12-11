@@ -35,21 +35,18 @@ def main():
     upper = [1, 1]
 
     logging.info('Randomly sampling for training data.')
-    n_initial_sample = 50
-    X_train = sampling.random_sample(lower, upper, n_initial_sample)
-    y_train = np.asarray([simulate_measurement(i) for i in X_train])[:, np.newaxis]
+    # n_initial_sample = 50
+    # X_train = sampling.random_sample(lower, upper, n_initial_sample)
+    # y_train = np.asarray([simulate_measurement(i) for i in X_train])[:, np.newaxis]
 
     logging.info('Initialising and training sampler.')
-    sampler = sampling.StackedGaussianProcess(lower, upper,
-                                              X = X_train, y = y_train,
-                                              add_train_data=False,
-                                              acq_func = 'prod_max')
+    sampler = sampling.StackedGaussianProcess(lower, upper, acq_name = 'sigmoid')
 
     # Set up plotting:
     plots = {'fig': pl.figure(),
              'count': 0,
              'shape': (2, 3)}
-    plot_triggers = [8, 9, 10, 50, 100, target_samples-1]
+    plot_triggers = [60, 100, 200, 300, 400, target_samples - 1]
 
     # Run the active sampling:
     logging.info('Actively sampling new points..')
@@ -61,6 +58,7 @@ def main():
 
         sampler.update(newId, observation)
 
+        print(i)
         if i in plot_triggers:
             plot_progress(plots, sampler)
 
@@ -69,59 +67,33 @@ def main():
 
 def plot_progress(plots, sampler):
     fig = plots['fig']
-    cols = pl.cm.jet(np.linspace(0, 1, 64))
-    custom = mpl.colors.ListedColormap(cols*0.5+0.5)
-    fig.add_subplot(*(plots['shape'] + (1+plots['count'],)))
+    # cols = pl.cm.jet(np.linspace(0, 1, 64))
+    # custom = mpl.colors.ListedColormap(cols * 0.5 + 0.5)
+    fig.add_subplot(*(plots['shape'] + (1 + plots['count'],)))
     plots['count'] += 1
-    y = np.asarray(sampler.y)
-    w = 4./np.log(1 + len(y))
+    y = np.asarray(sampler.y).flatten()
 
-    if isinstance(sampler, sampling.Delaunay):
-        # todo (AL): only show the measured samples!
-        X = np.asarray(sampler.X)
+    # w = 4. / np.log(1 + len(y))
 
-        pl.tripcolor(X[:, 0], X[:, 1], y, shading='gouraud', edgecolors='k',
-                     linewidth=w, cmap=custom)
-        pl.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
+    X = sampler.regressors[0].X
 
-    elif isinstance(sampler, sampling.GaussianProcess):
-        X = sampler.regressor.X
-        minv = np.min(X, axis=0)
-        maxv = np.max(X, axis=0)
-        res = 400
-        xi = np.linspace(minv[0], maxv[0], res)
-        yi = np.linspace(minv[1], maxv[1], res)
-        xg, yg = np.meshgrid(xi, yi)
-        x_test = np.array([xg.flatten(), yg.flatten()]).T
-        query = gp.query(x_test, sampler.regressor)
+    print(y.shape, X.shape)
+    minv = np.min(X, axis=0)
+    maxv = np.max(X, axis=0)
+    res = 400
+    xi = np.linspace(minv[0], maxv[0], res)
+    yi = np.linspace(minv[1], maxv[1], res)
+    xg, yg = np.meshgrid(xi, yi)
+    x_test = np.array([xg.flatten(), yg.flatten()]).T
+    query = gp.query(x_test, sampler.regressors[0])
 
-        zi = np.reshape(gp.mean(sampler.regressor, query), xg.shape)
+    zi = np.reshape(gp.mean(sampler.regressors[0], query), xg.shape)
 
-        extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
-                  np.max(X, axis=0)[0], y.min()]
-        pl.imshow(zi, vmin=0, vmax=1, extent=extent)
+    extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
+              np.max(X, axis=0)[0], y.min()]
+    pl.imshow(zi, vmin=0, vmax=1, extent=extent)
 
-    elif isinstance(sampler, sampling.StackedGaussianProcess):
-        X = sampler.regressors[0].X
-        minv = np.min(X, axis=0)
-        maxv = np.max(X, axis=0)
-        res = 400
-        xi = np.linspace(minv[0], maxv[0], res)
-        yi = np.linspace(minv[1], maxv[1], res)
-        xg, yg = np.meshgrid(xi, yi)
-        x_test = np.array([xg.flatten(), yg.flatten()]).T
-        query = gp.query(x_test, sampler.regressors[0])
-
-        zi = np.reshape(gp.mean(sampler.regressors[0], query), xg.shape)
-
-        extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
-                  np.max(X, axis=0)[0], y.min()]
-        pl.imshow(zi, vmin=0, vmax=1, extent=extent)
-
-    else:
-        raise(ValueError("Unsupported Sampler!"))
-
-    pl.scatter(X[:, 0], X[:, 1], c=y)
+    pl.scatter(X[:, 0], X[:, 1], c = y)
     pl.axis('image')
     pl.title('%d Samples' % len(y))
 
