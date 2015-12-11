@@ -31,7 +31,7 @@ class Sampler:
     y : list
         List of target outputs or expected (virtual) target outputs
         corresponding to the feature vectors 'X'
-    virtual_flag : list
+    virtual_flags : list
         A list of boolean flags i_stackicating the virtual elements of 'y'
             True: Corresponding target output is virtual
             False: Corresponding target output is observed
@@ -60,7 +60,7 @@ class Sampler:
         assert self.lower.shape[0] == self.n_dims
         self.X = []
         self.y = []
-        self.virtual_flag = []
+        self.virtual_flags = []
         self.pending_indices = {}
 
     def pick(self):
@@ -135,7 +135,7 @@ class Sampler:
         n = len(self.X)
         self.X.append(xq)
         self.y.append(yq_exp)
-        self.virtual_flag.append(True)
+        self.virtual_flags.append(True)
 
         # Create an uid for this observation
         m = hashlib.md5()
@@ -171,7 +171,7 @@ class Sampler:
         # Kill the job and update collected data with true observation
         i_stack = self.pending_indices.pop(uid)
         self.y[i_stack] = np.asarray(y_true)
-        self.virtual_flag[i_stack] = False
+        self.virtual_flags[i_stack] = False
 
         return i_stack
 
@@ -264,7 +264,7 @@ class Delaunay(Sampler):
 
             points = self.triangulation.points
             yvals = np.asarray(self.y)
-            virtual = np.asarray(self.virtual_flag)
+            virtual = np.asarray(self.virtual_flags)
 
             # Weight by hyper-volume
             simplices = [tuple(s) for s in self.triangulation.vertices]
@@ -400,7 +400,7 @@ class GaussianProcess(Sampler):
         if add_train:
             self.X = X.copy()
             self.y = y.copy()
-            self.virtual_flag = [False for y_i in y]
+            self.virtual_flags = [False for y_i in y]
             self.regressor = gp.condition(np.asarray(self.X),
                                           np.asarray(self.y),
                                           self.kernel, self.hyperparams)
@@ -512,7 +512,7 @@ class GaussianProcess(Sampler):
         numpy.ndarray
             Variance of the prediction at the given locations
         """
-        real_flag = ~np.asarray(self.virtual_flag)
+        real_flag = ~np.asarray(self.virtual_flags)
         X_real = np.asarray(self.X)[real_flag]
         y_real = np.asarray(self.y)[real_flag]
         y_mean = y_real.mean()
@@ -615,7 +615,7 @@ class StackedGaussianProcess(Sampler):
         self.explore_priority = explore_priority
 
         self.n_stacks = len(y[0]) if y else None
-        self.n_min = n_min if n_min is not None else (7 ** self.n_dims)
+        self.n_min = n_min if n_min is not None else (4 ** self.n_dims)
 
     def set_kerneldef(self, kerneldef):
         assert callable(kerneldef)
@@ -681,7 +681,7 @@ class StackedGaussianProcess(Sampler):
         assert self.X != []
         assert self.y != []
 
-        real_flag = ~np.asarray(self.virtual_flag)
+        real_flag = ~np.asarray(self.virtual_flags)
         X_real = np.asarray(self.X)[real_flag]
         y_real = np.asarray(self.y)[real_flag]
 
@@ -788,6 +788,11 @@ class StackedGaussianProcess(Sampler):
             Index location in the data lists 'Delaunay.X' and
             'Delaunay.y' corresponding to the job being updated
         """
+        if type(y_true) is not np.ndarray:
+            if type(y_true) is list:
+                y_true = np.array(y_true)
+            else:
+                y_true = np.array([y_true])
         ind = self._update(uid, y_true)
         self.refresh()
         self.update_regressors()
@@ -832,7 +837,7 @@ class StackedGaussianProcess(Sampler):
         else:
 
             if train or self.regressors is None:
-                self.train(*self.get_real_data())
+                self.train(self.X, self.y)
 
             # Randomly sample the volume for test points
             Xq = random_sample(self.lower, self.upper, n_test)
@@ -889,7 +894,7 @@ class StackedGaussianProcess(Sampler):
         assert self.trained_flag, "Sampler is not trained yet. " \
                                   "Possibly not enough observations provided."
 
-        real_flag = ~np.asarray(self.virtual_flag)
+        real_flag = ~np.asarray(self.virtual_flags)
         X_real = np.asarray(self.X)[real_flag]
         y_real = np.asarray(self.y)[real_flag]
 

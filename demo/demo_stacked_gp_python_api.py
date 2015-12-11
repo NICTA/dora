@@ -12,13 +12,10 @@ The sampler uses a Gaussian process to probabilistically approximate the true
 model
 
 """
-
-import numpy as np
 import logging
 import matplotlib.pyplot as pl
-import matplotlib as mpl
+from dora.active_sampling import pltutils
 import dora.active_sampling as sampling
-import dora.regressors.gp as gp
 from example_processes import simulate_measurement
 
 # The plotting subpackage is throwing FutureWarnings
@@ -26,76 +23,43 @@ import warnings
 warnings.simplefilter("ignore", FutureWarning)
 
 
-
 def main():
 
     # Set up a sampling problem:
-    target_samples = 501
+    n_target_samples = 301
     lower = [0, 0]
     upper = [1, 1]
 
-    logging.info('Randomly sampling for training data.')
-    # n_initial_sample = 50
-    # X_train = sampling.random_sample(lower, upper, n_initial_sample)
-    # y_train = np.asarray([simulate_measurement(i) for i in X_train])[:, np.newaxis]
-
-    logging.info('Initialising and training sampler.')
-    sampler = sampling.StackedGaussianProcess(lower, upper, acq_name = 'sigmoid')
+    sampler = sampling.StackedGaussianProcess(lower, upper,
+                                              acq_name = 'sigmoid')
 
     # Set up plotting:
-    plots = {'fig': pl.figure(),
-             'count': 0,
-             'shape': (2, 3)}
-    plot_triggers = [60, 100, 200, 300, 400, target_samples - 1]
+    plot_triggers = [20, 50, 100, 150, 200, 300]
+    n_triggers = len(plot_triggers)
+    plt_size = pltutils.split_subplots(n_triggers)
+
+    fig = pl.figure()
+    axs = iter([fig.add_subplot(*(plt_size + (i + 1,)))
+                for i in range(n_triggers)])
+
+    train_triggers = [False if i % 25 > 0 else True
+                      for i in range(n_target_samples)]
 
     # Run the active sampling:
     logging.info('Actively sampling new points..')
-    for i in range(target_samples):
+    for i in range(n_target_samples):
 
-        newX, newId = sampler.pick()
+        xq, uid = sampler.pick(train = train_triggers[i])
 
-        observation = np.asarray([simulate_measurement(newX)])
+        yq_true = simulate_measurement(xq)
 
-        sampler.update(newId, observation)
+        sampler.update(uid, yq_true)
 
-        print(i)
         if i in plot_triggers:
-            plot_progress(plots, sampler)
+            pltutils.plot_sampler_progress(sampler, ax = next(axs))
 
+        logging.info(i)
     pl.show()
-
-
-def plot_progress(plots, sampler):
-    fig = plots['fig']
-    # cols = pl.cm.jet(np.linspace(0, 1, 64))
-    # custom = mpl.colors.ListedColormap(cols * 0.5 + 0.5)
-    fig.add_subplot(*(plots['shape'] + (1 + plots['count'],)))
-    plots['count'] += 1
-    y = np.asarray(sampler.y).flatten()
-
-    # w = 4. / np.log(1 + len(y))
-
-    X = sampler.regressors[0].X
-
-    print(y.shape, X.shape)
-    minv = np.min(X, axis=0)
-    maxv = np.max(X, axis=0)
-    res = 400
-    xi = np.linspace(minv[0], maxv[0], res)
-    yi = np.linspace(minv[1], maxv[1], res)
-    xg, yg = np.meshgrid(xi, yi)
-    x_test = np.array([xg.flatten(), yg.flatten()]).T
-    query = gp.query(x_test, sampler.regressors[0])
-
-    zi = np.reshape(gp.mean(sampler.regressors[0], query), xg.shape)
-
-    extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
-              np.max(X, axis=0)[0], y.min()]
-    pl.imshow(zi, vmin=0, vmax=1, extent=extent)
-
-    pl.scatter(X[:, 0], X[:, 1], c = y)
-    pl.axis('image')
-    pl.title('%d Samples' % len(y))
 
 
 if __name__ == '__main__':
