@@ -12,102 +12,55 @@ The sampler uses a Gaussian process to probabilistically approximate the true
 model
 
 """
-
-import numpy as np
 import logging
 import matplotlib.pyplot as pl
-import matplotlib as mpl
+from dora.active_sampling import pltutils
 import dora.active_sampling as sampling
-import dora.regressors.gp as gp
 from example_processes import simulate_measurement
-
-# The plotting subpackage is throwing FutureWarnings
-import warnings
-warnings.simplefilter("ignore", FutureWarning)
-
 
 
 def main():
 
-    # Set up a sampling problem:
-    target_samples = 501
+    # Set up a sampling problem
+    n_target_samples = 301
     lower = [0, 0]
     upper = [1, 1]
 
-    logging.info('Randomly sampling for training data.')
-    n_initial_sample = 50
-    X_train = sampling.random_sample(lower, upper, n_initial_sample)
-    y_train = np.asarray([simulate_measurement(i) for i in X_train])
+    # Initialise the sampler
+    sampler = sampling.GaussianProcess(lower, upper, acq_name = 'sigmoid')
 
-    logging.info('Initialising and training sampler.')
-    sampler = sampling.GaussianProcess(lower, upper, X_train, y_train,
-                                        add_train_data=False)
+    # Set up plotting
+    plot_triggers = [20, 50, 100, 150, 200, 300]
+    n_triggers = len(plot_triggers)
+    plt_size = pltutils.split_subplots(n_triggers)
+    fig = pl.figure()
+    axs = iter([fig.add_subplot(*(plt_size + (i + 1,)))
+                for i in range(n_triggers)])
 
-    print('Final kernel:', sampler.print_kernel(sampler.hyperparams), '+ noise',
-          sampler.hyperparams[1])
+    # We do not have to train every iteration
+    train_triggers = [False if i % 25 > 0 else True
+                      for i in range(n_target_samples)]
 
-    # Set up plotting:
-    plots = {'fig': pl.figure(),
-             'count': 0,
-             'shape': (2, 3)}
-    plot_triggers = [8, 9, 10, 50, 100, target_samples-1]
+    # Start active sampling!
+    for i in range(n_target_samples):
 
-    # Run the active sampling:
-    logging.info('Actively sampling new points..')
-    for i in range(target_samples):
+        # Pick a location to sample
+        xq, uid = sampler.pick(train = train_triggers[i])
 
-        newX, newId = sampler.pick()
+        # Sample that location
+        yq_true = simulate_measurement(xq)
 
-        observation = simulate_measurement(newX)
+        # Update the sampler about the new observation
+        sampler.update(uid, yq_true)
 
-        sampler.update(newId, observation)
-
+        # Plot the sampler progress
         if i in plot_triggers:
-            plot_progress(plots, sampler)
+            sampler.train(sampler.X, sampler.y)
+            pltutils.plot_sampler_progress(sampler, ax = next(axs))
+
+        logging.info('Iteration: %d' % i)
 
     pl.show()
-
-
-def plot_progress(plots, sampler):
-    fig = plots['fig']
-    cols = pl.cm.jet(np.linspace(0, 1, 64))
-    custom = mpl.colors.ListedColormap(cols*0.5+0.5)
-    fig.add_subplot(*(plots['shape'] + (1+plots['count'],)))
-    plots['count'] += 1
-    y = np.asarray(sampler.y)
-    w = 4./np.log(1 + len(y))
-
-    if isinstance(sampler, sampling.Delaunay):
-        # todo (AL): only show the measured samples!
-        X = np.asarray(sampler.X)
-
-        pl.tripcolor(X[:, 0], X[:, 1], y, shading='gouraud', edgecolors='k',
-                     linewidth=w, cmap=custom)
-        pl.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
-
-    elif isinstance(sampler, sampling.GaussianProcess):
-        X = sampler.regressor.X
-        minv = np.min(X, axis=0)
-        maxv = np.max(X, axis=0)
-        res = 400
-        xi = np.linspace(minv[0], maxv[0], res)
-        yi = np.linspace(minv[1], maxv[1], res)
-        xg, yg = np.meshgrid(xi, yi)
-        x_test = np.array([xg.flatten(), yg.flatten()]).T
-        query = gp.query(x_test, sampler.regressor)
-
-        zi = np.reshape(gp.mean(sampler.regressor, query), xg.shape)
-
-        extent = [np.min(X, axis=0)[0], np.max(X, axis=0)[0],
-                  np.max(X, axis=0)[0], y.min()]
-        pl.imshow(zi, vmin=0, vmax=1, extent=extent)
-
-    else:
-        raise(ValueError("Unsupported Sampler!"))
-
-    pl.scatter(X[:, 0], X[:, 1], c=y)
-    pl.axis('image')
-    pl.title('%d Samples' % len(y))
 
 
 if __name__ == '__main__':
