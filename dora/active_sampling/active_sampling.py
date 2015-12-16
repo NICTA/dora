@@ -9,6 +9,7 @@ from scipy.spatial import Delaunay as ScipyDelaunay
 import dora.regressors.gp as gp
 import scipy.stats as stats
 import hashlib
+from util import ArrayBuffer
 
 
 class Sampler:
@@ -25,19 +26,19 @@ class Sampler:
         Upper bounds for each parameter in the parameter space
     dims : int
         Dimension of the parameter space (number of parameters)
-    X : list
-        List of feature vectors representing observed locations in the
-        parameter space
-    y : list
-        List of target outputs or expected (virtual) target outputs
-        corresponding to the feature vectors 'X'
-    virtual_flags : list
-        A list of boolean flags i_stackicating the virtual elements of 'y'
+    X : ArrayBuffer
+        Contiguous Buffer of feature vectors representing observed locations
+        in the parameter space
+    y : ArrayBuffer
+        Contiguous Buffer of target outputs or expected (virtual) target
+        outputs corresponding to the feature vectors 'X'
+    virtual_flag : ArrayBuffer
+        A contiguous array of boolean flags indicating virtual elements of 'y'
             True: Corresponding target output is virtual
             False: Corresponding target output is observed
-    pending_indices : dict
-        A dictionary that maps the job ID to the corresponding indices in both
-        'X' and 'y'
+    pending_results : dict
+        A dictionary that maps the job ID to the corresponding index in both
+        the 'X' and 'y' buffers.
     """
 
     def __init__(self, lower, upper):
@@ -54,14 +55,15 @@ class Sampler:
         upper : array_like
             Upper or maximum bounds for the parameter space
         """
-        self.lower = np.asarray(lower)
-        self.upper = np.asarray(upper)
-        self.n_dims = self.upper.shape[0]
-        assert self.lower.shape[0] == self.n_dims
-        self.X = []
-        self.y = []
-        self.virtual_flags = []
-        self.pending_indices = {}
+        self.lower = np.array(lower)
+        self.upper = np.array(upper)
+        self.dims = self.upper.shape[0]
+        assert (self.lower.ndim == 1) and (self.upper.ndim == 1)
+        assert self.lower.shape[0] == self.dims
+        self.X_buffer = ArrayBuffer()
+        self.y_buffer = ArrayBuffer()
+        self.virt_buffer = ArrayBuffer()
+        self.pending_results = {}
 
     def pick(self):
         """
@@ -115,8 +117,7 @@ class Sampler:
 
     def _assign(self, xq, yq_exp):
         """
-        Assigns a pair of picked location in parameter space and virtual
-        targets a job ID
+        Assigns a pair (location in parameter space, virtual target) a job ID
 
         Parameters
         ----------
@@ -133,9 +134,9 @@ class Sampler:
         """
         # Place a virtual observation onto the collected data
         n = len(self.X)
-        self.X.append(xq)
-        self.y.append(yq_exp)
-        self.virtual_flags.append(True)
+        self.X_buffer.append(xq)
+        self.y_buffer.append(yq_exp)
+        self.virtual_flag.append(True)
 
         # Create an uid for this observation
         m = hashlib.md5()
@@ -143,7 +144,7 @@ class Sampler:
         uid = m.hexdigest()
 
         # Note the index of corresponding to this picked location
-        self.pending_indices[uid] = n
+        self.pending_results[uid] = n
 
         return uid
 
@@ -165,15 +166,16 @@ class Sampler:
             'Sampler.y' corresponding to the job being updated
         """
         # Make sure the job uid given is valid
-        if uid not in self.pending_indices:
+        if uid not in self.pending_results:
             raise ValueError('Result was not pending!')
+        assert uid in self.pending_indices
 
         # Kill the job and update collected data with true observation
-        i_stack = self.pending_indices.pop(uid)
-        self.y[i_stack] = np.asarray(y_true)
-        self.virtual_flags[i_stack] = False
+        ind = self.pending_results.pop(uid)
+        self.y_buffer()[ind] = y_true
+        self.virtual_flag()[ind] = False
 
-        return i_stack
+        return ind
 
 
 class Delaunay(Sampler):
@@ -196,7 +198,7 @@ class Delaunay(Sampler):
     --------
     Sampler : Base Class
     """
-    def __init__(self, lower, upper, explore_priority = 0.0001):
+    def __init__(self, lower, upper, explore_priority=0.0001):
         """
         Initialises the Delaunay class
 
@@ -249,8 +251,16 @@ class Delaunay(Sampler):
         str
             A random hexadecimal ID to identify the corresponding job
         """
-        n = len(self.X)
-        n_corners = 2 ** self.n_dims
+
+        X = self.X_buffer()
+        yvals = self.y_buffer()
+        virtual = self.virtual_flag()
+        n = len(X)
+
+        # -- note that we are assuming the points in X are not reordered by
+        # the scipy Delaunay implementation
+
+        n_corners = 2 ** self.dims
         if n < n_corners + 1:
 
             # Bootstrap with a regular sampling strategy to get it started
@@ -260,11 +270,7 @@ class Delaunay(Sampler):
 
             # Otherwise, recursive subdivide the edges with the Delaunay model
             if not self.triangulation:
-                self.triangulation = ScipyDelaunay(self.X, incremental = True)
-
-            points = self.triangulation.points
-            yvals = np.asarray(self.y)
-            virtual = np.asarray(self.virtual_flags)
+                self.triangulation = ScipyDelaunay(X, incremental=True)
 
             # Weight by hyper-volume
             simplices = [tuple(s) for s in self.triangulation.vertices]
@@ -274,10 +280,10 @@ class Delaunay(Sampler):
 
                 # Computes the sample value as:
                 #   hyper-volume of simplex * variance of values in simplex
-                i_stack = list(s)
-                value = (np.var(yvals[i_stack]) + self.explore_priority) * \
-                    np.linalg.det((points[i_stack] - points[i_stack[0]])[1:])
-                if not np.max(virtual[i_stack]):
+                ind = list(s)
+                value = (np.var(yvals[ind]) + self.explore_priority) * \
+                    np.linalg.det((points[ind] - points[ind[0]])[1:])
+                if not np.max(virtual[ind]):
                     cache[s] = value
                 return value
 
@@ -285,13 +291,17 @@ class Delaunay(Sampler):
             sample_value = [cache[s] if s in cache else get_value(s)
                             for s in simplices]
 
-            # Fi_stack the points in the highest value simplex
-            simplex_i_stackices = list(simplices[np.argmax(sample_value)])
-            simplex = points[simplex_i_stackices]
-            simplex_v = yvals[simplex_i_stackices]
+            # alternatively, a nicely vectorised computation might work here
 
-            # Weight based on deviation from the mean
-            weight = 1e-3 + np.abs(simplex_v - np.mean(simplex_v))
+
+            # Extract the points in the highest value simplex
+            simplex_indices = list(simplices[np.argmax(sample_value)])
+            simplex = X[simplex_indices]
+            simplex_v = yvals[simplex_indices]
+
+            # Weight the position in this simplex based on value deviation
+            eps = 1e-3
+            weight = eps + np.abs(simplex_v - np.mean(simplex_v))
             weight /= np.sum(weight)
             xq = weight.dot(simplex)
             yq_exp = weight.dot(simplex_v)
@@ -369,6 +379,8 @@ class GaussianProcess(Sampler):
             The priority of exploration against exploitation
         """
         Sampler.__init__(self, lower, upper)
+
+
 
         if kerneldef is None:
             self.kerneldef = lambda h, k: \

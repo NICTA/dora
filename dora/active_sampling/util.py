@@ -4,40 +4,30 @@ import numpy as np
 import time
 
 
-class ArrayBuffer():
+class ArrayBuffer:
     """
     ArrayBuffer Class
 
     Provides an efficient structure for numpy arrays growing on the first axis.
     Implemented with an automatically resising buffer, providing matrices as
-    views to this data.
+    views to this data by slicing along the first axis.
 
     Attributes:
 
     """
-    def __init__(self, dims, dtype=float):
+    initial_size = 10
+
+    def __init__(self):
         """
         Initialise Buffer
-
-        .. note:: Dimensionality of the second axis must be provided a priori.
-
-        Parameters
-        ----------
-        dims : int
-            Second dimension of growing array - shape will by (., d)
-
-        dtype : type (optional)
-            Data format of numpy array buffer
-
         """
-        assert(isinstance(dims, int))
-        self.__buffer = np.zeros((0, dims), dtype)
+        self.__buffer = None
         self.__count = 0
 
     def append(self, value):
         """
-        Adds a length d vector to the buffer, extending its first axis by
-        adding a 1xdims row.
+        Adds an array_like to the buffer, extending its first axis by
+        adding a (1 x value.shape) row onto the end.
 
         Parameters
         ----------
@@ -45,30 +35,50 @@ class ArrayBuffer():
             A one dimensional array of length dims consistent with the buffer.
         """
         value = np.asarray(value)
-        assert(value.ndim == 1)
+
+        if self.__buffer is None:
+            newsize = (ArrayBuffer.initial_size,) + value.shape  # tuples
+            self.__buffer = np.zeros(newsize, value.dtype)
+
+        assert(value.ndim == self.__buffer.ndim - 1)
+        assert(value.shape == self.__buffer.shape[1:])
+
         self.__count += 1
+
         if self.__count >= self.__buffer.shape[0]:
             growth_factor = 2.0
-            newsize = np.floor(growth_factor*self.__buffer.shape[0] + 2.0)
-            # make a new buffer - cant change old one in case it is referenced
-            self.__buffer = np.resize(self.__buffer,
-                                      (newsize, self.__buffer.shape[1]))
+            newsize = list(self.__buffer.shape)
+            newsize[0] = np.floor(growth_factor*newsize[0] + 2.0)
+            self.__buffer = np.resize(self.__buffer, newsize)
 
         self.__buffer[self.__count-1] = value
+
+        return
+
+    def __call__(self):
         return self.__buffer[:self.__count]
 
 
 def demo():
     d = 20
     n_stack = 10000
-    buf = ArrayBuffer(d)
+
+    buf = ArrayBuffer()
 
     st = time.time()
     for i in range(n_stack):
-        a = buf.append(np.random.random(d))  # NOQA we dont do anything with a
+        # buf.append(np.random.random())
+        buf.append(np.random.random(d))  # NOQA we dont do anything with a
 
     ft = time.time()
     print('Efficient buffer took {0:.5f} seconds'.format(ft-st))
+
+    a = buf()
+
+    import IPython; IPython.embed(); import sys; sys.exit()
+    print(a)
+    exit()
+
 
     st = time.time()
     b = np.zeros((0, d))
