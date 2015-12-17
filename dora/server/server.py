@@ -5,6 +5,7 @@ import numpy as np
 
 app = fl.Flask(__name__)
 
+
 @app.route('/samplers', methods=['POST'])
 @returns_json
 def initialise_sampler():
@@ -37,20 +38,20 @@ def initialise_sampler():
         initDict['y_train'] = np.asarray(initDict['y_train'])
 
     mapping = {'X_train': 'X_train', 'y_train': 'y_train',
-                'add_train_data': 'add_train_data',
+               'add_train_data': 'add_train_data',
                'n_outputs': 'n_stacks',
                'mean': 'mean', 'n_train_threshold': 'n_train_threshold',
                'acquisition_func': 'acq_func',
                'explore_factor': 'explore_factor'}
 
-    mapDict = {mapping[k]:v for k,v in initDict.items() if k in mapping}
+    mapDict = {mapping[k]: v for k, v in initDict.items() if k in mapping}
 
     if not hasattr(fl.current_app, 'samplers'):
         fl.current_app.samplers = {}
 
     samplerid = len(fl.current_app.samplers)
-    fl.current_app.samplers[samplerid] = StackedGP(initDict['lower'],
-                                               initDict['upper'], **mapDict)
+    fl.current_app.samplers[samplerid] \
+        = StackedGP(initDict['lower'], initDict['upper'], **mapDict)
 
     obs_uri = fl.url_for('.get_query', samplerid=samplerid, _external=True)
     pred_uri = fl.url_for('.predict', samplerid=samplerid, _external=True)
@@ -59,9 +60,10 @@ def initialise_sampler():
     settings_uri = fl.url_for('.retrieve_settings', samplerid=samplerid,
                               _external=True)
 
-    response_data = {"status": "OK", "samplerid":samplerid, 'obs_uri': obs_uri,
-                     'pred_uri': pred_uri, 'training_data_uri': training_uri,
-                     'settings': settings_uri}
+    response_data = {"status": "OK", "samplerid": samplerid, 'obs_uri':
+                     obs_uri, 'pred_uri': pred_uri, 'training_data_uri':
+                     training_uri, 'settings': settings_uri}
+
     return response_data, 200
 
 
@@ -74,13 +76,14 @@ def get_query(samplerid):
     """
 
     newX, uid = fl.current_app.samplers[int(samplerid)].pick()
-    obs_uri = fl.url_for('.update_sampler', samplerid=samplerid, uid=uid, _external=True)
+    obs_uri = fl.url_for('.update_sampler', samplerid=samplerid, uid=uid,
+                         _external=True)
     response_data = {"query": newX.tolist(), "uid": uid, 'uri': obs_uri}
     return response_data, 200
 
 
-
-@app.route('/samplers/<string:samplerid>/observations/<string:uid>', methods=['PUT'])
+@app.route('/samplers/<string:samplerid>/observations/<string:uid>',
+           methods=['PUT'])
 @returns_json
 def update_sampler(samplerid, uid):
     """ updates the sampler with the forward model's observation
@@ -90,26 +93,29 @@ def update_sampler(samplerid, uid):
     equals the number of stacks in the sampler)
     """
     measurement = fl.request.json
-    fl.current_app.samplers[int(samplerid)].update(uid, np.asarray(measurement))
+    fl.current_app.samplers[int(samplerid)].update(uid,
+                                                   np.asarray(measurement))
     response_data = "Model updated with measurement"
     return response_data, 200
+
 
 @app.route('/samplers/<string:samplerid>/prediction', methods=['GET'])
 @returns_json
 def predict(samplerid):
     """
-    provides a prediction of the forward model at a set of given query parameters
-    it expects a list of lists with n elements in the main list corrsponding to
-    the number of queries and each element has d elements corresponding
-    to the number of parameters in the forward model.
-    It returns a dict with a predictive mean and and predictive variance entry
+    provides a prediction of the forward model at a set of given query
+    parameters it expects a list of lists with n elements in the main list
+    corrsponding to the number of queries and each element has d elements
+    corresponding to the number of parameters in the forward model.  It
+    returns a dict with a predictive mean and and predictive variance entry
     Each are n x n_stacks
     """
 
     query_loc = fl.request.json
-    pred_mean, pred_var = fl.current_app.samplers[int(samplerid)].predict(np.asarray(query_loc))
+    pred_mean, pred_var = \
+        fl.current_app.samplers[int(samplerid)].predict(np.asarray(query_loc))
     response_data = {"predictive_mean": pred_mean.tolist(),
-                    "predictive_variance": pred_var.tolist()}
+                     "predictive_variance": pred_var.tolist()}
     return response_data, 200
 
 
@@ -125,14 +131,15 @@ def retrieve_trainingdata(samplerid):
     virtualIndices = fl.current_app.samplers[int(samplerid)].virtual_flag
     real_id = [not i for i in virtualIndices]
 
-    real_X = [x for x, real in zip(X, real_id) if real is True]
-    real_y = [y for y, real in zip(y, real_id) if real is True]
+    real_X = [x_ for x_, real in zip(X, real_id) if real is True]
+    real_y = [y_ for y_, real in zip(y, real_id) if real is True]
 
-    virt_X = [x for x, real in zip(X, real_id) if real is False]
-    virt_y = [y for y, real in zip(y, real_id) if real is False]
-    response_data = {"X": real_X,"y": real_y,
+    virt_X = [x_ for x_, real in zip(X, real_id) if real is False]
+    virt_y = [y_ for y_, real in zip(y, real_id) if real is False]
+    response_data = {"X": real_X, "y": real_y,
                      "virtual_X": virt_X, "virtual_y": virt_y}
     return response_data, 200
+
 
 @app.route('/samplers/<string:samplerid>/settings', methods=['GET'])
 @returns_json
@@ -149,9 +156,11 @@ def retrieve_settings(samplerid):
     trained_flag = fl.current_app.samplers[int(samplerid)].trained_flag
     # TODO <SIMON> add ability to retrieve full state
     # hyper_params = fl.current_app.samplers[int(samplerid)].hyper_params
-    # regressors = [reg.tolist() for reg in fl.current_app.samplers[int(samplerid)].regressors]
-    # acq_func = [y.tolist() for y in fl.current_app.samplers[int(samplerid)].acq_func]
-    # explore_factor = [y.tolist() for y in fl.current_app.samplers[int(samplerid)].explore_factor]
+    # regressors = [reg.tolist() for reg in
+    # fl.current_app.samplers[int(samplerid)].regressors] acq_func =
+    # [y.tolist() for y in fl.current_app.samplers[int(samplerid)].acq_func]
+    # explore_factor = [y.tolist() for y in
+    # fl.current_app.samplers[int(samplerid)].explore_factor]
     #
     # virtualIndices = fl.current_app.samplers[int(samplerid)].virtual_flag
     # real_id = [not i for i in virtualIndices]
@@ -162,11 +171,9 @@ def retrieve_settings(samplerid):
     # virt_X = [x for x, real in zip(X, real_id) if real is False]
     # virt_y = [y for y, real in zip(y, real_id) if real is False]
 
-    response_data = {"lower": lower, "upper": upper, 'n_stacks':n_stacks,
-                     "mean":mean,
-                     "trained_flag":trained_flag}
+    response_data = {"lower": lower, "upper": upper, 'n_stacks': n_stacks,
+                     "mean": mean, "trained_flag": trained_flag}
     return response_data, 200
 
 if __name__ == '__main__':
     app.run(debug=True)
-

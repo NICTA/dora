@@ -12,10 +12,7 @@ This demo interacts uses Dora's REST api to actively sample a model that
 
 import numpy as np
 import logging
-import matplotlib.pyplot as pl
-import matplotlib as mpl
-import dora.active_sampling as sampling
-import dora.regressors.gp as gp
+import sys
 import subprocess
 import requests
 import time
@@ -27,11 +24,9 @@ import warnings
 warnings.simplefilter("ignore", FutureWarning)
 
 
-
-
 def main():
 
-    server = subprocess.Popen(['python', '../dora/server/server.py'])
+    server = subprocess.Popen([sys.executable, '../dora/server/server.py'])
     time.sleep(5)
 
     # Set up a sampling problem:
@@ -42,14 +37,13 @@ def main():
     explore_factor = 0.3
     n_outputs = 20
 
-    initialiseArgs = {'lower':lower, 'upper':upper,'n_outputs':n_outputs,
-                  'n_train_threshold': n_train,
-                  'acquisition_func': 'prodmax',
-                  'explore_factor': explore_factor}
+    initialiseArgs = {'lower': lower, 'upper': upper, 'n_outputs': n_outputs,
+                      'n_train_threshold': n_train, 'acquisition_func':
+                      'prodmax', 'explore_factor': explore_factor}
 
     # initialise sampler
     sampler_info = requests.post('http://localhost:5000/samplers',
-                               json=initialiseArgs).json()
+                                 json=initialiseArgs).json()
     logging.info("Model Info: " + str(sampler_info))
 
     # Set up plotting:
@@ -61,7 +55,8 @@ def main():
     # Run the active sampling:
     for i in range(target_samples):
         logging.info('Samples: %d' % i)
-        #post a request to the sampler for a query location
+
+        # post a request to the sampler for a query location
         r = requests.post(sampler_info['obs_uri'])
         r.raise_for_status()
 
@@ -88,8 +83,6 @@ def main():
     vv.use().Run()
 
 
-
-
 def plot_progress(plots, sampler_info):
 
     settings = requests.get(sampler_info['settings']).json()
@@ -97,8 +90,8 @@ def plot_progress(plots, sampler_info):
     upper = settings['upper']
     n_outputs = settings['n_stacks']
 
-    fig = plots['fig']
-    subplt =vv.subplot(*(plots['shape'] + (1+plots['count'],)))
+    # fig = plots['fig']
+    subplt = vv.subplot(*(plots['shape'] + (1+plots['count'],)))
     plots['count'] += 1
 
     # Plot predictions and training data
@@ -106,33 +99,32 @@ def plot_progress(plots, sampler_info):
 
     xres = 30
     yres = 30
-    xeva, yeva = np.meshgrid(np.linspace(lower[0], upper[0], xres), np.linspace(
-        lower[1], upper[1], yres))
-    Xquery = np.array([xeva.flatten(),yeva.flatten()]).T
-    r=requests.get(sampler_info['pred_uri'], json=Xquery.tolist())
+    xeva, yeva = np.meshgrid(np.linspace(lower[0], upper[0], xres),
+                             np.linspace(lower[1], upper[1], yres))
+    Xquery = np.array([xeva.flatten(), yeva.flatten()]).T
+    r = requests.get(sampler_info['pred_uri'], json=Xquery.tolist())
     r.raise_for_status()
     pred = r.json()
     pred_mean = pred['predictive_mean']
-    id_matrix = np.reshape(np.arange(Xquery.shape[0])[:,np.newaxis],xeva.shape)
+    id_matrix = np.reshape(np.arange(Xquery.shape[0])[:, np.newaxis],
+                           xeva.shape)
     vol = np.zeros((n_outputs, xeva.shape[0], xeva.shape[1]))
     for x in range(xres):
         for y in range(yres):
-            vol[:,x,y] = pred_mean[id_matrix[x,y]]
-    plt = vv.volshow(vol, renderStyle='mip',clim=(-0.5, 1))
-    plt.colormap = vv.CM_JET  #  HOT
+            vol[:, x, y] = pred_mean[id_matrix[x, y]]
+    plt = vv.volshow(vol, renderStyle='mip', clim=(-0.5, 1))
+    plt.colormap = vv.CM_JET
     subplt.axis.xLabel = 'input 1'
     subplt.axis.yLabel = 'input 2'
     subplt.axis.zLabel = 'model output'
     a = ((np.asarray(training_data['X']) - np.array([np.min(xeva),
-            np.min(yeva)])[np.newaxis,:])/ np.array([np.max(xeva) -
-            np.min(xeva),np.max(yeva)-np.min(yeva)])[np.newaxis,:])  \
-            * np.array(xeva.shape)
+          np.min(yeva)])[np.newaxis, :]) / np.array([np.max(xeva) -
+          np.min(xeva), np.max(yeva)-np.min(yeva)])[np.newaxis, :])  \
+          * np.array(xeva.shape)  # NOQA
     n = a.shape[0]
     a = np.hstack((a, (n_outputs+0.01)*np.ones((n, 1))))
     pp = vv.Pointset(a)
     vv.plot(pp, ms='.', mc='w', mw='9', ls='')
-
-
 
 
 if __name__ == '__main__':
