@@ -22,7 +22,30 @@ class ArrayBuffer:
         Initialise Buffer
         """
         self.__buffer = None
+        self.__value = None
         self.__count = 0
+
+    @property
+    def shape(self):
+        return self.__value.shape
+
+    def __len__(self):
+        return self.__count
+
+    def __getitem__(self, index):
+        return self.__value.__getitem__(index)
+
+    def __setitem__(self, index, val):
+        return self.__value.__setitem__(index, val)
+
+    def __delitem__(self, index):
+        return self.__value.__delitem__(index)
+
+    def __repr__(self):
+        return 'Buffer Contains:\n' + self.__value.__repr__()
+
+    def __call__(self):
+        return self.__value
 
     def append(self, value):
         """
@@ -52,11 +75,8 @@ class ArrayBuffer:
             self.__buffer = np.resize(self.__buffer, newsize)
 
         self.__buffer[self.__count-1] = value
-
+        self.__value = self.__buffer[:self.__count]
         return
-
-    def __call__(self):
-        return self.__buffer[:self.__count]
 
 
 def demo():
