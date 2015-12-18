@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.boxcox_normplot &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-boxcox-normplot">
+<h1>scipy.stats.boxcox_normplot<a class="headerlink" href="#scipy-stats-boxcox-normplot" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.boxcox_normplot">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">boxcox_normplot</tt><big>(</big><em>x</em>, <em>la</em>, <em>lb</em>, <em>plot=None</em>, <em>N=80</em><big>)</big><a class="headerlink" href="#scipy.stats.boxcox_normplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute parameters for a Box-Cox normality plot, optionally show it.</p>
+<p>A Box-Cox normality plot shows graphically what the best transformation
+parameter is to use in <cite>boxcox</cite> to obtain a distribution that is close
+to normal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>array_like</em>) -- Input array.</li>
+<li><strong>lb</strong> (<em>la,</em>) -- The lower and upper bounds for the <tt class="docutils literal"><span class="pre">lmbda</span></tt> values to pass to <cite>boxcox</cite>
+for Box-Cox transformations.  These are also the limits of the
+horizontal axis of the plot if that is generated.</li>
+<li><strong>plot</strong> (<em>object, optional</em>) -- If given, plots the quantiles and least squares fit.
+<cite>plot</cite> is an object that has to have methods &quot;plot&quot; and &quot;text&quot;.
+The <cite>matplotlib.pyplot</cite> module or a Matplotlib Axes object can be used,
+or a custom object with the same methods.
+Default is None, which means that no plot is created.</li>
+<li><strong>N</strong> (<em>int, optional</em>) -- Number of points on the horizontal axis (equally distributed from
+<cite>la</cite> to <cite>lb</cite>).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>lmbdas</strong> (<em>ndarray</em>) -- The <tt class="docutils literal"><span class="pre">lmbda</span></tt> values for which a Box-Cox transform was done.</li>
+<li><strong>ppcc</strong> (<em>ndarray</em>) -- Probability Plot Correlelation Coefficient, as obtained from <cite>probplot</cite>
+when fitting the Box-Cox transformed input <cite>x</cite> against a normal
+distribution.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="scipy.stats.probplot.html#scipy.stats.probplot" title="scipy.stats.probplot"><tt class="xref py py-func docutils literal"><span class="pre">probplot()</span></tt></a>, <a class="reference internal" href="scipy.stats.boxcox.html#scipy.stats.boxcox" title="scipy.stats.boxcox"><tt class="xref py py-func docutils literal"><span class="pre">boxcox()</span></tt></a>, <a class="reference internal" href="scipy.stats.boxcox_normmax.html#scipy.stats.boxcox_normmax" title="scipy.stats.boxcox_normmax"><tt class="xref py py-func docutils literal"><span class="pre">boxcox_normmax()</span></tt></a>, <a class="reference internal" href="scipy.stats.boxcox_llf.html#scipy.stats.boxcox_llf" title="scipy.stats.boxcox_llf"><tt class="xref py py-func docutils literal"><span class="pre">boxcox_llf()</span></tt></a>, <a class="reference internal" href="scipy.stats.ppcc_max.html#scipy.stats.ppcc_max" title="scipy.stats.ppcc_max"><tt class="xref py py-func docutils literal"><span class="pre">ppcc_max()</span></tt></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>Even if <cite>plot</cite> is given, the figure is not shown or saved by
+<cite>boxcox_normplot</cite>; <tt class="docutils literal"><span class="pre">plt.show()</span></tt> or <tt class="docutils literal"><span class="pre">plt.savefig('figname.png')</span></tt>
+should be used after calling <cite>probplot</cite>.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>Generate some non-normally distributed data, and create a Box-Cox plot:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">loggamma</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="o">.</span><span class="n">boxcox_normplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Determine and plot the optimal <tt class="docutils literal"><span class="pre">lmbda</span></tt> to transform <tt class="docutils literal"><span class="pre">x</span></tt> and plot it in
+the same plot:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">_</span><span class="p">,</span> <span class="n">maxlog</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">boxcox</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">maxlog</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

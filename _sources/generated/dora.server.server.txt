@@ -1,0 +1,34 @@
+dora.server.server
+==================
+
+.. automodule:: dora.server.server
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_query
+      initialise_sampler
+      predict
+      retrieve_settings
+      retrieve_trainingdata
+      returns_json
+      update_sampler
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      StackedGP
+   
+   
+
+   
+   
+   

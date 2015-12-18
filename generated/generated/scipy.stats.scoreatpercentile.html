@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.scoreatpercentile &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-scoreatpercentile">
+<h1>scipy.stats.scoreatpercentile<a class="headerlink" href="#scipy-stats-scoreatpercentile" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.scoreatpercentile">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">scoreatpercentile</tt><big>(</big><em>a</em>, <em>per</em>, <em>limit=()</em>, <em>interpolation_method='fraction'</em>, <em>axis=None</em><big>)</big><a class="headerlink" href="#scipy.stats.scoreatpercentile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the score at a given percentile of the input sequence.</p>
+<p>For example, the score at <cite>per=50</cite> is the median. If the desired quantile
+lies between two data points, we interpolate between them, according to
+the value of <cite>interpolation</cite>. If the parameter <cite>limit</cite> is provided, it
+should be a tuple (lower, upper) of two values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>array_like</em>) -- A 1-D array of values from which to extract score.</li>
+<li><strong>per</strong> (<em>array_like</em>) -- Percentile(s) at which to extract score.  Values should be in range
+[0,100].</li>
+<li><strong>limit</strong> (<em>tuple, optional</em>) -- Tuple of two scalars, the lower and upper limits within which to
+compute the percentile. Values of <cite>a</cite> outside
+this (closed) interval will be ignored.</li>
+<li><strong>interpolation</strong> (<em>{'fraction', 'lower', 'higher'}, optional</em>) -- <p>This optional parameter specifies the interpolation method to use,
+when the desired quantile lies between two data points <cite>i</cite> and <cite>j</cite></p>
+<blockquote>
+<div><ul>
+<li>fraction: <tt class="docutils literal"><span class="pre">i</span> <span class="pre">+</span> <span class="pre">(j</span> <span class="pre">-</span> <span class="pre">i)</span> <span class="pre">*</span> <span class="pre">fraction</span></tt> where <tt class="docutils literal"><span class="pre">fraction</span></tt> is the
+fractional part of the index surrounded by <tt class="docutils literal"><span class="pre">i</span></tt> and <tt class="docutils literal"><span class="pre">j</span></tt>.</li>
+<li>lower: <tt class="docutils literal"><span class="pre">i</span></tt>.</li>
+<li>higher: <tt class="docutils literal"><span class="pre">j</span></tt>.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><strong>axis</strong> (<em>int, optional</em>) -- Axis along which the percentiles are computed. The default (None)
+is to compute the median along a flattened version of the array.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>score</strong> -- Score at percentile(s).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="scipy.stats.percentileofscore.html#scipy.stats.percentileofscore" title="scipy.stats.percentileofscore"><tt class="xref py py-func docutils literal"><span class="pre">percentileofscore()</span></tt></a>, <tt class="xref py py-func docutils literal"><span class="pre">numpy.percentile()</span></tt></p>
+</div>
+<p class="rubric">Notes</p>
+<p>This function will become obsolete in the future.
+For Numpy 1.9 and higher, <cite>numpy.percentile</cite> provides all the functionality
+that <cite>scoreatpercentile</cite> provides.  And it's significantly faster.
+Therefore it's recommended to use <cite>numpy.percentile</cite> for users that have
+numpy &gt;= 1.9.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="o">.</span><span class="n">scoreatpercentile</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="go">49.5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

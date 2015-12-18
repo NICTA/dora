@@ -1,0 +1,6 @@
+dora.server.retrieve_trainingdata
+=================================
+
+.. currentmodule:: dora.server
+
+.. autofunction:: retrieve_trainingdata

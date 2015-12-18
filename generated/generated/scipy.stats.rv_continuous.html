@@ -1,0 +1,473 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.rv_continuous &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-rv-continuous">
+<h1>scipy.stats.rv_continuous<a class="headerlink" href="#scipy-stats-rv-continuous" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="scipy.stats.rv_continuous">
+<em class="property">class </em><tt class="descclassname">scipy.stats.</tt><tt class="descname">rv_continuous</tt><big>(</big><em>momtype=1</em>, <em>a=None</em>, <em>b=None</em>, <em>xtol=1e-14</em>, <em>badvalue=None</em>, <em>name=None</em>, <em>longname=None</em>, <em>shapes=None</em>, <em>extradoc=None</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generic continuous random variable class meant for subclassing.</p>
+<p><cite>rv_continuous</cite> is a base class to construct specific distribution classes
+and instances from for continuous random variables. It cannot be used
+directly as a distribution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>momtype</strong> (<em>int, optional</em>) -- The type of generic moment calculation to use: 0 for pdf, 1 (default)
+for ppf.</li>
+<li><strong>a</strong> (<em>float, optional</em>) -- Lower bound of the support of the distribution, default is minus
+infinity.</li>
+<li><strong>b</strong> (<em>float, optional</em>) -- Upper bound of the support of the distribution, default is plus
+infinity.</li>
+<li><strong>xtol</strong> (<em>float, optional</em>) -- The tolerance for fixed point calculation for generic ppf.</li>
+<li><strong>badvalue</strong> (<em>object, optional</em>) -- The value in a result arrays that indicates a value that for which
+some argument restriction is violated, default is np.nan.</li>
+<li><strong>name</strong> (<em>str, optional</em>) -- The name of the instance. This string is used to construct the default
+example for distributions.</li>
+<li><strong>longname</strong> (<em>str, optional</em>) -- This string is used as part of the first line of the docstring returned
+when a subclass has no docstring of its own. Note: <cite>longname</cite> exists
+for backwards compatibility, do not use for new subclasses.</li>
+<li><strong>shapes</strong> (<em>str, optional</em>) -- The shape of the distribution. For example <tt class="docutils literal"><span class="pre">&quot;m,</span> <span class="pre">n&quot;</span></tt> for a
+distribution that takes two integers as the two shape arguments for all
+its methods.</li>
+<li><strong>extradoc</strong> (<em>str, optional, deprecated</em>) -- This string is used as the last part of the docstring returned when a
+subclass has no docstring of its own. Note: <cite>extradoc</cite> exists for
+backwards compatibility, do not use for new subclasses.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.rvs">
+<tt class="descname">rvs</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em>, <em>size=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.rvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>random variates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.pdf">
+<tt class="descname">pdf</tt><big>(</big><em>x</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>probability density function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.logpdf">
+<tt class="descname">logpdf</tt><big>(</big><em>x</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>log of the probability density function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.cdf">
+<tt class="descname">cdf</tt><big>(</big><em>x</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.cdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>cumulative density function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.logcdf">
+<tt class="descname">logcdf</tt><big>(</big><em>x</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.logcdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>log of the cumulative density function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.sf">
+<tt class="descname">sf</tt><big>(</big><em>x</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.sf" title="Permalink to this definition">¶</a></dt>
+<dd><p>survival function (1-cdf --- sometimes more accurate)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.logsf">
+<tt class="descname">logsf</tt><big>(</big><em>x</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.logsf" title="Permalink to this definition">¶</a></dt>
+<dd><p>log of the survival function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.ppf">
+<tt class="descname">ppf</tt><big>(</big><em>q</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.ppf" title="Permalink to this definition">¶</a></dt>
+<dd><p>percent point function (inverse of cdf --- quantiles)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.isf">
+<tt class="descname">isf</tt><big>(</big><em>q</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.isf" title="Permalink to this definition">¶</a></dt>
+<dd><p>inverse survival function (inverse of sf)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.moment">
+<tt class="descname">moment</tt><big>(</big><em>n</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.moment" title="Permalink to this definition">¶</a></dt>
+<dd><p>non-central n-th moment of the distribution.  May not work for array
+arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.stats">
+<tt class="descname">stats</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em>, <em>moments='mv'</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>mean('m'), variance('v'), skew('s'), and/or kurtosis('k')</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.entropy">
+<tt class="descname">entropy</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>(differential) entropy of the RV.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.fit">
+<tt class="descname">fit</tt><big>(</big><em>data</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameter estimates for generic data</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">expect(func=None, args=(), loc=0, scale=1, lb=None, ub=None,</tt></dt>
+<dd><blockquote>
+<div>conditional=False, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwds)</div></blockquote>
+<p>Expected value of a function with respect to the distribution.
+Additional kwd arguments passed to integrate.quad</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.median">
+<tt class="descname">median</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Median of the distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.mean">
+<tt class="descname">mean</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean of the distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.std">
+<tt class="descname">std</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard deviation of the distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.var">
+<tt class="descname">var</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variance of the distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.interval">
+<tt class="descname">interval</tt><big>(</big><em>alpha</em>, <em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interval that with <cite>alpha</cite> percent probability contains a random
+realization of this distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>&lt;shape(s)&gt;</em>, <em>loc=0</em>, <em>scale=1</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calling a distribution instance creates a frozen RV object with the
+same methods but holding the given shape, location, and scale fixed.
+See Notes section.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">**Parameters for Methods**</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">x : array_like</tt></dt>
+<dd><p>quantiles</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">q : array_like</tt></dt>
+<dd><p>lower or upper tail probability</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">&lt;shape(s)&gt; : array_like</tt></dt>
+<dd><p>shape parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">loc : array_like, optional</tt></dt>
+<dd><p>location parameter (default=0)</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">scale : array_like, optional</tt></dt>
+<dd><p>scale parameter (default=1)</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">size : int or tuple of ints, optional</tt></dt>
+<dd><p>shape of random variates (default computed from input arguments )</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">moments : string, optional</tt></dt>
+<dd><p>composed of letters ['mvsk'] specifying which moments to compute where
+'m' = mean, 'v' = variance, 's' = (Fisher's) skew and
+'k' = (Fisher's) kurtosis. (default='mv')</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">n : int</tt></dt>
+<dd><p>order of moment to calculate in method moments</p>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p><strong>Methods that can be overwritten by subclasses</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">_rvs</span>
+<span class="n">_pdf</span>
+<span class="n">_cdf</span>
+<span class="n">_sf</span>
+<span class="n">_ppf</span>
+<span class="n">_isf</span>
+<span class="n">_stats</span>
+<span class="n">_munp</span>
+<span class="n">_entropy</span>
+<span class="n">_argcheck</span>
+</pre></div>
+</div>
+<p>There are additional (internal and private) generic methods that can
+be useful for cross-checking and for debugging, but might work in all
+cases when directly called.</p>
+<p><strong>Frozen Distribution</strong></p>
+<p>Alternatively, the object may be called (as a function) to fix the shape,
+location, and scale parameters returning a &quot;frozen&quot; continuous RV object:</p>
+<dl class="docutils">
+<dt>rv = generic(&lt;shape(s)&gt;, loc=0, scale=1)</dt>
+<dd>frozen RV object with the same methods but holding the given shape,
+location, and scale fixed</dd>
+</dl>
+<p><strong>Subclassing</strong></p>
+<p>New random variables can be defined by subclassing rv_continuous class
+and re-defining at least the <tt class="docutils literal"><span class="pre">_pdf</span></tt> or the <tt class="docutils literal"><span class="pre">_cdf</span></tt> method (normalized
+to location 0 and scale 1) which will be given clean arguments (in between
+a and b) and passing the argument check method.</p>
+<p>If positive argument checking is not correct for your RV
+then you will also need to re-define the <tt class="docutils literal"><span class="pre">_argcheck</span></tt> method.</p>
+<p>Correct, but potentially slow defaults exist for the remaining
+methods but for speed and/or accuracy you can over-ride:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">_logpdf</span><span class="p">,</span> <span class="n">_cdf</span><span class="p">,</span> <span class="n">_logcdf</span><span class="p">,</span> <span class="n">_ppf</span><span class="p">,</span> <span class="n">_rvs</span><span class="p">,</span> <span class="n">_isf</span><span class="p">,</span> <span class="n">_sf</span><span class="p">,</span> <span class="n">_logsf</span>
+</pre></div>
+</div>
+<p>Rarely would you override <tt class="docutils literal"><span class="pre">_isf</span></tt>, <tt class="docutils literal"><span class="pre">_sf</span></tt> or <tt class="docutils literal"><span class="pre">_logsf</span></tt>, but you could.</p>
+<p>Statistics are computed using numerical integration by default.
+For speed you can redefine this using <tt class="docutils literal"><span class="pre">_stats</span></tt>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>take shape parameters and return mu, mu2, g1, g2</li>
+<li>If you can't compute one of these, return it as None</li>
+<li>Can also be defined with a keyword argument <tt class="docutils literal"><span class="pre">moments=&lt;str&gt;</span></tt>,
+where &lt;str&gt; is a string composed of 'm', 'v', 's',
+and/or 'k'.  Only the components appearing in string
+should be computed and returned in the order 'm', 'v',
+'s', or 'k'  with missing values returned as None.</li>
+</ul>
+</div></blockquote>
+<p>Alternatively, you can override <tt class="docutils literal"><span class="pre">_munp</span></tt>, which takes n and shape
+parameters and returns the nth non-central moment of the distribution.</p>
+<p>A note on <tt class="docutils literal"><span class="pre">shapes</span></tt>: subclasses need not specify them explicitly. In this
+case, the <cite>shapes</cite> will be automatically deduced from the signatures of the
+overridden methods.
+If, for some reason, you prefer to avoid relying on introspection, you can
+specify <tt class="docutils literal"><span class="pre">shapes</span></tt> explicitly as an argument to the instance constructor.</p>
+<p class="rubric">Examples</p>
+<p>To create a new Gaussian distribution, we would do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">gaussian_gen</span><span class="p">(</span><span class="n">rv_continuous</span><span class="p">):</span>
+    <span class="s">&quot;Gaussian distribution&quot;</span>
+    <span class="k">def</span> <span class="nf">_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="o">...</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>momtype=1</em>, <em>a=None</em>, <em>b=None</em>, <em>xtol=1e-14</em>, <em>badvalue=None</em>, <em>name=None</em>, <em>longname=None</em>, <em>shapes=None</em>, <em>extradoc=None</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#scipy.stats.rv_continuous.__init__" title="scipy.stats.rv_continuous.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([momtype,&nbsp;a,&nbsp;b,&nbsp;xtol,&nbsp;badvalue,&nbsp;...])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="scipy.stats.rv_continuous.cdf.html#scipy.stats.rv_continuous.cdf" title="scipy.stats.rv_continuous.cdf"><tt class="xref py py-obj docutils literal"><span class="pre">cdf</span></tt></a>(x,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Cumulative distribution function of the given RV.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="scipy.stats.rv_continuous.entropy.html#scipy.stats.rv_continuous.entropy" title="scipy.stats.rv_continuous.entropy"><tt class="xref py py-obj docutils literal"><span class="pre">entropy</span></tt></a>(*args,&nbsp;**kwds)</td>
+<td>Differential entropy of the RV.</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">est_loc_scale</span></tt>(*args,&nbsp;**kwds)</td>
+<td><cite>est_loc_scale</cite> is deprecated!</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="scipy.stats.rv_continuous.expect.html#scipy.stats.rv_continuous.expect" title="scipy.stats.rv_continuous.expect"><tt class="xref py py-obj docutils literal"><span class="pre">expect</span></tt></a>([func,&nbsp;args,&nbsp;loc,&nbsp;scale,&nbsp;lb,&nbsp;ub,&nbsp;...])</td>
+<td>Calculate expected value of a function with respect to the distribution.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="scipy.stats.rv_continuous.fit.html#scipy.stats.rv_continuous.fit" title="scipy.stats.rv_continuous.fit"><tt class="xref py py-obj docutils literal"><span class="pre">fit</span></tt></a>(data,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Return MLEs for shape, location, and scale parameters from data.</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">fit_loc_scale</span></tt>(data,&nbsp;*args)</td>
+<td>Estimate loc and scale parameters from data using 1st and 2nd moments.</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">freeze</span></tt>(*args,&nbsp;**kwds)</td>
+<td>Freeze the distribution for the given arguments.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#scipy.stats.rv_continuous.interval" title="scipy.stats.rv_continuous.interval"><tt class="xref py py-obj docutils literal"><span class="pre">interval</span></tt></a>(alpha,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Confidence interval with equal areas around the median.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="scipy.stats.rv_continuous.isf.html#scipy.stats.rv_continuous.isf" title="scipy.stats.rv_continuous.isf"><tt class="xref py py-obj docutils literal"><span class="pre">isf</span></tt></a>(q,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Inverse survival function at q of the given RV.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="scipy.stats.rv_continuous.logcdf.html#scipy.stats.rv_continuous.logcdf" title="scipy.stats.rv_continuous.logcdf"><tt class="xref py py-obj docutils literal"><span class="pre">logcdf</span></tt></a>(x,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Log of the cumulative distribution function at x of the given RV.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="scipy.stats.rv_continuous.logpdf.html#scipy.stats.rv_continuous.logpdf" title="scipy.stats.rv_continuous.logpdf"><tt class="xref py py-obj docutils literal"><span class="pre">logpdf</span></tt></a>(x,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Log of the probability density function at x of the given RV.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="scipy.stats.rv_continuous.logsf.html#scipy.stats.rv_continuous.logsf" title="scipy.stats.rv_continuous.logsf"><tt class="xref py py-obj docutils literal"><span class="pre">logsf</span></tt></a>(x,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Log of the survival function of the given RV.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#scipy.stats.rv_continuous.mean" title="scipy.stats.rv_continuous.mean"><tt class="xref py py-obj docutils literal"><span class="pre">mean</span></tt></a>(*args,&nbsp;**kwds)</td>
+<td>Mean of the distribution</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#scipy.stats.rv_continuous.median" title="scipy.stats.rv_continuous.median"><tt class="xref py py-obj docutils literal"><span class="pre">median</span></tt></a>(*args,&nbsp;**kwds)</td>
+<td>Median of the distribution.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="scipy.stats.rv_continuous.moment.html#scipy.stats.rv_continuous.moment" title="scipy.stats.rv_continuous.moment"><tt class="xref py py-obj docutils literal"><span class="pre">moment</span></tt></a>(n,&nbsp;*args,&nbsp;**kwds)</td>
+<td>n'th order non-central moment of distribution.</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">nnlf</span></tt>(theta,&nbsp;x)</td>
+<td>Return negative loglikelihood function</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="scipy.stats.rv_continuous.pdf.html#scipy.stats.rv_continuous.pdf" title="scipy.stats.rv_continuous.pdf"><tt class="xref py py-obj docutils literal"><span class="pre">pdf</span></tt></a>(x,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Probability density function at x of the given RV.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="scipy.stats.rv_continuous.ppf.html#scipy.stats.rv_continuous.ppf" title="scipy.stats.rv_continuous.ppf"><tt class="xref py py-obj docutils literal"><span class="pre">ppf</span></tt></a>(q,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Percent point function (inverse of cdf) at q of the given RV.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#scipy.stats.rv_continuous.rvs" title="scipy.stats.rv_continuous.rvs"><tt class="xref py py-obj docutils literal"><span class="pre">rvs</span></tt></a>(*args,&nbsp;**kwds)</td>
+<td>Random variates of given type.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="scipy.stats.rv_continuous.sf.html#scipy.stats.rv_continuous.sf" title="scipy.stats.rv_continuous.sf"><tt class="xref py py-obj docutils literal"><span class="pre">sf</span></tt></a>(x,&nbsp;*args,&nbsp;**kwds)</td>
+<td>Survival function (1-cdf) at x of the given RV.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="scipy.stats.rv_continuous.stats.html#scipy.stats.rv_continuous.stats" title="scipy.stats.rv_continuous.stats"><tt class="xref py py-obj docutils literal"><span class="pre">stats</span></tt></a>(*args,&nbsp;**kwds)</td>
+<td>Some statistics of the given RV</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#scipy.stats.rv_continuous.std" title="scipy.stats.rv_continuous.std"><tt class="xref py py-obj docutils literal"><span class="pre">std</span></tt></a>(*args,&nbsp;**kwds)</td>
+<td>Standard deviation of the distribution.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#scipy.stats.rv_continuous.var" title="scipy.stats.rv_continuous.var"><tt class="xref py py-obj docutils literal"><span class="pre">var</span></tt></a>(*args,&nbsp;**kwds)</td>
+<td>Variance of the distribution</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

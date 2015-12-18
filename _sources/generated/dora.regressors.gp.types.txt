@@ -1,0 +1,26 @@
+dora.regressors.gp.types
+========================
+
+.. automodule:: dora.regressors.gp.types
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Folds
+      OptConfig
+      QueryParams
+      Range
+      RegressionParams
+   
+   
+
+   
+   
+   

@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.mood &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-mood">
+<h1>scipy.stats.mood<a class="headerlink" href="#scipy-stats-mood" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.mood">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">mood</tt><big>(</big><em>x</em>, <em>y</em>, <em>axis=0</em><big>)</big><a class="headerlink" href="#scipy.stats.mood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform Mood's test for equal scale parameters.</p>
+<p>Mood's two-sample test for scale parameters is a non-parametric
+test for the null hypothesis that two samples are drawn from the
+same distribution with the same scale parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>y</strong> (<em>x,</em>) -- Arrays of sample data.</li>
+<li><strong>axis</strong> (<em>int, optional</em>) -- The axis along which the samples are tested.  <cite>x</cite> and <cite>y</cite> can be of
+different length along <cite>axis</cite>.
+If <cite>axis</cite> is None, <cite>x</cite> and <cite>y</cite> are flattened and the test is done on
+all values in the flattened arrays.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>z</strong> (<em>scalar or ndarray</em>) -- The z-score for the hypothesis test.  For 1-D inputs a scalar is
+returned;</li>
+<li><strong>p-value</strong> (<em>scalar ndarray</em>) -- The p-value for the hypothesis test.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="scipy.stats.fligner.html#scipy.stats.fligner" title="scipy.stats.fligner"><tt class="xref py py-func docutils literal"><span class="pre">fligner()</span></tt></a></dt>
+<dd>A non-parametric test for the equality of k variances</dd>
+<dt><a class="reference internal" href="scipy.stats.ansari.html#scipy.stats.ansari" title="scipy.stats.ansari"><tt class="xref py py-func docutils literal"><span class="pre">ansari()</span></tt></a></dt>
+<dd>A non-parametric test for the equality of 2 variances</dd>
+<dt><a class="reference internal" href="scipy.stats.bartlett.html#scipy.stats.bartlett" title="scipy.stats.bartlett"><tt class="xref py py-func docutils literal"><span class="pre">bartlett()</span></tt></a></dt>
+<dd>A parametric test for equality of k variances in normal samples</dd>
+<dt><a class="reference internal" href="scipy.stats.levene.html#scipy.stats.levene" title="scipy.stats.levene"><tt class="xref py py-func docutils literal"><span class="pre">levene()</span></tt></a></dt>
+<dd>A parametric test for equality of k variances</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The data are assumed to be drawn from probability distributions <tt class="docutils literal"><span class="pre">f(x)</span></tt>
+and <tt class="docutils literal"><span class="pre">f(x/s)</span> <span class="pre">/</span> <span class="pre">s</span></tt> respectively, for some probability density function f.
+The null hypothesis is that <tt class="docutils literal"><span class="pre">s</span> <span class="pre">==</span> <span class="pre">1</span></tt>.</p>
+<p>For multi-dimensional arrays, if the inputs are of shapes
+<tt class="docutils literal"><span class="pre">(n0,</span> <span class="pre">n1,</span> <span class="pre">n2,</span> <span class="pre">n3)</span></tt>  and <tt class="docutils literal"><span class="pre">(n0,</span> <span class="pre">m1,</span> <span class="pre">n2,</span> <span class="pre">n3)</span></tt>, then if <tt class="docutils literal"><span class="pre">axis=1</span></tt>, the
+resulting z and p values will have shape <tt class="docutils literal"><span class="pre">(n0,</span> <span class="pre">n2,</span> <span class="pre">n3)</span></tt>.  Note that
+<tt class="docutils literal"><span class="pre">n1</span></tt> and <tt class="docutils literal"><span class="pre">m1</span></tt> don't have to be equal, but the other dimensions do.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">mood</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(2, 6, 7)</span>
+</pre></div>
+</div>
+<p>Find the number of points where the difference in scale is not significant:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">p</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">74</span>
+</pre></div>
+</div>
+<p>Perform the test with different scales:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">35</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="o">.</span><span class="n">mood</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">(array([-5.84332354, -5.6840814 ]), array([5.11694980e-09, 1.31517628e-08]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

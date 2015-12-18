@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dora.server.initialise_sampler &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Active Sampling - REST HTTP Server" href="../server.html" />
+    <link rel="next" title="dora.server.server" href="dora.server.server.html" />
+    <link rel="prev" title="dora.server.response" href="dora.server.response.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dora.server.server.html" title="dora.server.server"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dora.server.response.html" title="dora.server.response"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../server.html" accesskey="U">Active Sampling - REST HTTP Server</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dora-server-initialise-sampler">
+<h1>dora.server.initialise_sampler<a class="headerlink" href="#dora-server-initialise-sampler" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="dora.server.initialise_sampler">
+<tt class="descclassname">dora.server.</tt><tt class="descname">initialise_sampler</tt><big>(</big><big>)</big><a class="headerlink" href="#dora.server.initialise_sampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise the Sampler Model
+This expects a dict containing:
+lower : a list of the lower bounds of the region of interest
+upper : a list of the upper bounds of the region of interest
+X_train : training data to train the sampler. a list of n elements where is</p>
+<blockquote>
+<div>element is itself a list with d elements where n
+is the number of
+training points and d is the number of dimension (parameters of
+the forward model)</div></blockquote>
+<dl class="docutils">
+<dt>y_train <span class="classifier-delimiter">:</span> <span class="classifier">the observed values outputted by the forward model for each set</span></dt>
+<dd>of parameters in X_train. another list of lists. n x s where s
+is the number of outputs of the forward model. s also corresponds
+to the number of stacks in the sampler</dd>
+</dl>
+<p>Optional keys in the dict:
+add_train_data : a boolean operator that tells the sampler to include the</p>
+<blockquote>
+<div>training data to the sampler rather than just using it to
+train its parameters. Default = True</div></blockquote>
+<dl class="docutils">
+<dt>n_stacks <span class="classifier-delimiter">:</span> <span class="classifier">the number of stacks in the sampler. this must be equal to the</span></dt>
+<dd>number of outputs of the forward model</dd>
+<dt>mean <span class="classifier-delimiter">:</span> <span class="classifier">the mean of the training data. this is redundant and will be</span></dt>
+<dd>removed shortly. Default = 0. TODO(SIMON)</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dora.server.response.html"
+                        title="previous chapter">dora.server.response</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dora.server.server.html"
+                        title="next chapter">dora.server.server</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dora.server.server.html" title="dora.server.server"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dora.server.response.html" title="dora.server.response"
+             >previous</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../server.html" >Active Sampling - REST HTTP Server</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

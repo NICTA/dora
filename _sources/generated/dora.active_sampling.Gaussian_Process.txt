@@ -1,0 +1,26 @@
+dora.active_sampling.Gaussian_Process
+=====================================
+
+.. currentmodule:: dora.active_sampling
+
+.. autoclass:: Gaussian_Process
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Gaussian_Process.__init__
+      ~Gaussian_Process.pick
+      ~Gaussian_Process.predict
+      ~Gaussian_Process.train_hypers
+      ~Gaussian_Process.update
+   
+   
+
+   
+   
+   

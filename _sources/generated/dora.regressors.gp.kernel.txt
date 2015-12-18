@@ -1,0 +1,43 @@
+dora.regressors.gp.kernel
+=========================
+
+.. automodule:: dora.regressors.gp.kernel
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      auto_range
+      cdist
+      chisquare
+      compose
+      describer
+      gaussian
+      laplace
+      matern3on2
+      mt_weights
+      named_target
+      non_stationary
+      nonstat_rr
+      sin
+      tree
+      tree1D
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Printer
+      Range
+   
+   
+
+   
+   
+   

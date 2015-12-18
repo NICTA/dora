@@ -1,0 +1,6 @@
+dora.active_sampling.random_sample
+==================================
+
+.. currentmodule:: dora.active_sampling
+
+.. autofunction:: random_sample

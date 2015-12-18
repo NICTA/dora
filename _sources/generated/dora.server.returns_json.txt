@@ -1,0 +1,6 @@
+dora.server.returns_json
+========================
+
+.. currentmodule:: dora.server
+
+.. autofunction:: returns_json

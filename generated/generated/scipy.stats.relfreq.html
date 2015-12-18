@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.relfreq &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-relfreq">
+<h1>scipy.stats.relfreq<a class="headerlink" href="#scipy-stats-relfreq" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.relfreq">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">relfreq</tt><big>(</big><em>a</em>, <em>numbins=10</em>, <em>defaultreallimits=None</em>, <em>weights=None</em><big>)</big><a class="headerlink" href="#scipy.stats.relfreq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a relative frequency histogram, using the histogram function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>array_like</em>) -- Input array.</li>
+<li><strong>numbins</strong> (<em>int, optional</em>) -- The number of bins to use for the histogram. Default is 10.</li>
+<li><strong>defaultreallimits</strong> (<em>tuple (lower, upper), optional</em>) -- <p>The lower and upper values for the range of the histogram.
+If no value is given, a range slightly larger then the range of the
+values in a is used. Specifically <tt class="docutils literal"><span class="pre">(a.min()</span> <span class="pre">-</span> <span class="pre">s,</span> <span class="pre">a.max()</span> <span class="pre">+</span> <span class="pre">s)</span></tt>,</p>
+<blockquote>
+<div>where <tt class="docutils literal"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">(1/2)(a.max()</span> <span class="pre">-</span> <span class="pre">a.min())</span> <span class="pre">/</span> <span class="pre">(numbins</span> <span class="pre">-</span> <span class="pre">1)</span></tt>.</div></blockquote>
+</li>
+<li><strong>weights</strong> (<em>array_like, optional</em>) -- The weights for each value in <cite>a</cite>. Default is None, which gives each
+value a weight of 1.0</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>relfreq</strong> (<em>ndarray</em>) -- Binned values of relative frequency.</li>
+<li><strong>lowerreallimit</strong> (<em>float</em>) -- Lower real limit</li>
+<li><strong>binsize</strong> (<em>float</em>) -- Width of each bin.</li>
+<li><strong>extrapoints</strong> (<em>int</em>) -- Extra points.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">relfreqs</span><span class="p">,</span> <span class="n">lowlim</span><span class="p">,</span> <span class="n">binsize</span><span class="p">,</span> <span class="n">extrapoints</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">relfreq</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">numbins</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">relfreqs</span>
+<span class="go">array([ 0.5       ,  0.16666667,  0.16666667,  0.16666667])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">relfreqs</span><span class="p">)</span>  <span class="c"># relative frequencies should add up to 1</span>
+<span class="go">0.99999999999999989</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

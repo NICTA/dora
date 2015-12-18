@@ -1,0 +1,36 @@
+dora.active_sampling.ScipyDelaunay
+==================================
+
+.. currentmodule:: dora.active_sampling
+
+.. autoclass:: ScipyDelaunay
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ScipyDelaunay.__init__
+      ~ScipyDelaunay.add_points
+      ~ScipyDelaunay.close
+      ~ScipyDelaunay.find_simplex
+      ~ScipyDelaunay.lift_points
+      ~ScipyDelaunay.plane_distance
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ScipyDelaunay.convex_hull
+      ~ScipyDelaunay.transform
+      ~ScipyDelaunay.vertex_neighbor_vertices
+      ~ScipyDelaunay.vertex_to_simplex
+   
+   

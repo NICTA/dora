@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Active Sampling - REST HTTP Server &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="index.html" />
+    <link rel="next" title="dora.server.retrieve_settings" href="generated/dora.server.retrieve_settings.html" />
+    <link rel="prev" title="dora.active_sampling.random_sample" href="generated/dora.active_sampling.random_sample.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.server.retrieve_settings.html" title="dora.server.retrieve_settings"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.active_sampling.random_sample.html" title="dora.active_sampling.random_sample"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="active-sampling-rest-http-server">
+<h1>Active Sampling - REST HTTP Server<a class="headerlink" href="#active-sampling-rest-http-server" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.server.retrieve_settings.html#dora.server.retrieve_settings" title="dora.server.retrieve_settings"><tt class="xref py py-obj docutils literal"><span class="pre">retrieve_settings</span></tt></a>(samplerid)</td>
+<td>provides lists of the settings used by the sampler.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.server.update_sampler.html#dora.server.update_sampler" title="dora.server.update_sampler"><tt class="xref py py-obj docutils literal"><span class="pre">update_sampler</span></tt></a>(samplerid,&nbsp;uid)</td>
+<td>updates the sampler with the forward model's observation</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.server.app.html#dora.server.app" title="dora.server.app"><tt class="xref py py-obj docutils literal"><span class="pre">app</span></tt></a></td>
+<td>The flask object implements a WSGI application and acts as the central object.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.server.response.html#module-dora.server.response" title="dora.server.response"><tt class="xref py py-obj docutils literal"><span class="pre">response</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.server.initialise_sampler.html#dora.server.initialise_sampler" title="dora.server.initialise_sampler"><tt class="xref py py-obj docutils literal"><span class="pre">initialise_sampler</span></tt></a>()</td>
+<td>Initialise the Sampler Model This expects a dict containing: lower : a list of the lower bounds of the region of interest upper : a list of the upper bounds of the region of interest X_train : training data to train the sampler.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.server.server.html#module-dora.server.server" title="dora.server.server"><tt class="xref py py-obj docutils literal"><span class="pre">server</span></tt></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.server.get_query.html#dora.server.get_query" title="dora.server.get_query"><tt class="xref py py-obj docutils literal"><span class="pre">get_query</span></tt></a>(samplerid)</td>
+<td>Returns a set of parameters to query the forward model with</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.server.returns_json.html#dora.server.returns_json" title="dora.server.returns_json"><tt class="xref py py-obj docutils literal"><span class="pre">returns_json</span></tt></a>(f)</td>
+<td>A decorator for Flask route handlers that return JSON.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.server.predict.html#dora.server.predict" title="dora.server.predict"><tt class="xref py py-obj docutils literal"><span class="pre">predict</span></tt></a>(samplerid)</td>
+<td>provides a prediction of the forward model at a set of given query</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.server.retrieve_trainingdata.html#dora.server.retrieve_trainingdata" title="dora.server.retrieve_trainingdata"><tt class="xref py py-obj docutils literal"><span class="pre">retrieve_trainingdata</span></tt></a>(samplerid)</td>
+<td>provides lists of the real and virtual training data used by the sampler.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/dora.active_sampling.random_sample.html"
+                        title="previous chapter">dora.active_sampling.random_sample</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/dora.server.retrieve_settings.html"
+                        title="next chapter">dora.server.retrieve_settings</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.server.retrieve_settings.html" title="dora.server.retrieve_settings"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.active_sampling.random_sample.html" title="dora.active_sampling.random_sample"
+             >previous</a> |</li>
+        <li><a href="index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

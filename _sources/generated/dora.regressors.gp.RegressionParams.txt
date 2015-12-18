@@ -1,0 +1,22 @@
+dora.regressors.gp.RegressionParams
+===================================
+
+.. currentmodule:: dora.regressors.gp
+
+.. autoclass:: RegressionParams
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RegressionParams.__init__
+   
+   
+
+   
+   
+   

@@ -1,0 +1,34 @@
+dora.active_sampling.active_sampling
+====================================
+
+.. automodule:: dora.active_sampling.active_sampling
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      grid_sample
+      random_sample
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Base_Sampler
+      Delaunay
+      Gaussian_Process
+      ScipyDelaunay
+      Stacked_Gaussian_Process
+      candidates
+   
+   
+
+   
+   
+   

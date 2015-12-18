@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dora.active_sampling.Delaunay &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Active Sampling - Python API" href="../sampling.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../sampling.html" accesskey="U">Active Sampling - Python API</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dora-active-sampling-delaunay">
+<h1>dora.active_sampling.Delaunay<a class="headerlink" href="#dora-active-sampling-delaunay" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="dora.active_sampling.Delaunay">
+<em class="property">class </em><tt class="descclassname">dora.active_sampling.</tt><tt class="descname">Delaunay</tt><big>(</big><em>lower</em>, <em>upper</em>, <em>explore_priority=0.0001</em><big>)</big><a class="headerlink" href="#dora.active_sampling.Delaunay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delaunay Class</p>
+<p>Inherits from the Sampler class and augments pick and update with the
+mechanics of the Delanauy triangulation method</p>
+<dl class="attribute">
+<dt id="dora.active_sampling.Delaunay.triangulation">
+<tt class="descname">triangulation</tt><a class="headerlink" href="#dora.active_sampling.Delaunay.triangulation" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>scipy.spatial.qhull.Delaunay</em> -- The Delaunay triangulation model object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.Delaunay.simplex_cache">
+<tt class="descname">simplex_cache</tt><a class="headerlink" href="#dora.active_sampling.Delaunay.simplex_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> -- Cached values of simplices for Delaunay triangulation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.Delaunay.explore_priority">
+<tt class="descname">explore_priority</tt><a class="headerlink" href="#dora.active_sampling.Delaunay.explore_priority" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> -- The priority of exploration against exploitation</p>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-class docutils literal"><span class="pre">Sampler</span></tt></dt>
+<dd>Base Class</dd>
+</dl>
+</div>
+<dl class="method">
+<dt id="dora.active_sampling.Delaunay.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>lower</em>, <em>upper</em>, <em>explore_priority=0.0001</em><big>)</big><a class="headerlink" href="#dora.active_sampling.Delaunay.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialises the Delaunay class</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently only supports rectangular type restrictions on the</p>
+</div>
+<p>parameter space</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>lower</strong> (<em>array_like</em>) -- Lower or minimum bounds for the parameter space</li>
+<li><strong>upper</strong> (<em>array_like</em>) -- Upper or maximum bounds for the parameter space</li>
+<li><strong>explore_priority</strong> (<em>float, optional</em>) -- The priority of exploration against exploitation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#dora.active_sampling.Delaunay.__init__" title="dora.active_sampling.Delaunay.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(lower,&nbsp;upper[,&nbsp;explore_priority])</td>
+<td>Initialises the Delaunay class</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">pick</span></tt>()</td>
+<td>Picks the next location in parameter space for the next observation</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">update</span></tt>(uid,&nbsp;y_true)</td>
+<td>Updates a job with its observed value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../sampling.html" >Active Sampling - Python API</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

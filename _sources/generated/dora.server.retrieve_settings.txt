@@ -1,0 +1,6 @@
+dora.server.retrieve_settings
+=============================
+
+.. currentmodule:: dora.server
+
+.. autofunction:: retrieve_settings

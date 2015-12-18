@@ -1,0 +1,6 @@
+dora.server.predict
+===================
+
+.. currentmodule:: dora.server
+
+.. autofunction:: predict

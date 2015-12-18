@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.binned_statistic_dd &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-binned-statistic-dd">
+<h1>scipy.stats.binned_statistic_dd<a class="headerlink" href="#scipy-stats-binned-statistic-dd" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.binned_statistic_dd">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">binned_statistic_dd</tt><big>(</big><em>sample</em>, <em>values</em>, <em>statistic='mean'</em>, <em>bins=10</em>, <em>range=None</em><big>)</big><a class="headerlink" href="#scipy.stats.binned_statistic_dd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a multidimensional binned statistic for a set of data.</p>
+<p>This is a generalization of a histogramdd function.  A histogram divides
+the space into bins, and returns the count of the number of points in
+each bin.  This function allows the computation of the sum, mean, median,
+or other statistic of the values within each bin.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.11.0.</span></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sample</strong> (<em>array_like</em>) -- Data to histogram passed as a sequence of D arrays of length N, or
+as an (N,D) array.</li>
+<li><strong>values</strong> (<em>array_like</em>) -- The values on which the statistic will be computed.  This must be
+the same shape as x.</li>
+<li><strong>statistic</strong> (<em>string or callable, optional</em>) -- <p>The statistic to compute (default is 'mean').
+The following statistics are available:</p>
+<blockquote>
+<div><ul>
+<li>'mean' : compute the mean of values for points within each bin.
+Empty bins will be represented by NaN.</li>
+<li>'median' : compute the median of values for points within each
+bin. Empty bins will be represented by NaN.</li>
+<li>'count' : compute the count of points within each bin.  This is
+identical to an unweighted histogram.  <cite>values</cite> array is not
+referenced.</li>
+<li>'sum' : compute the sum of values for points within each bin.
+This is identical to a weighted histogram.</li>
+<li>function : a user-defined function which takes a 1D array of
+values, and outputs a single numerical statistic. This function
+will be called on the values in each bin.  Empty bins will be
+represented by function([]), or NaN if this returns an error.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><strong>bins</strong> (<em>sequence or int, optional</em>) -- <p>The bin specification:</p>
+<ul>
+<li>A sequence of arrays describing the bin edges along each dimension.</li>
+<li>The number of bins for each dimension (nx, ny, ... =bins)</li>
+<li>The number of bins for all dimensions (nx=ny=...=bins).</li>
+</ul>
+</li>
+<li><strong>range</strong> (<em>sequence, optional</em>) -- A sequence of lower and upper bin edges to be used if the edges are
+not given explicitely in <cite>bins</cite>. Defaults to the minimum and maximum
+values along each dimension.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>statistic</strong> (<em>ndarray, shape(nx1, nx2, nx3,...)</em>) -- The values of the selected statistic in each two-dimensional bin</li>
+<li><strong>edges</strong> (<em>list of ndarrays</em>) -- A list of D arrays describing the (nxi + 1) bin edges for each
+dimension</li>
+<li><strong>binnumber</strong> (<em>1-D ndarray of ints</em>) -- This assigns to each observation an integer that represents the bin
+in which this observation falls. Array has the same length as values.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><tt class="xref py py-func docutils literal"><span class="pre">np.histogramdd()</span></tt>, <a class="reference internal" href="scipy.stats.binned_statistic.html#scipy.stats.binned_statistic" title="scipy.stats.binned_statistic"><tt class="xref py py-func docutils literal"><span class="pre">binned_statistic()</span></tt></a>, <a class="reference internal" href="scipy.stats.binned_statistic_2d.html#scipy.stats.binned_statistic_2d" title="scipy.stats.binned_statistic_2d"><tt class="xref py py-func docutils literal"><span class="pre">binned_statistic_2d()</span></tt></a></p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

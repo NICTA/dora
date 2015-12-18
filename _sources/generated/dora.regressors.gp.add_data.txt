@@ -1,0 +1,6 @@
+dora.regressors.gp.add_data
+===========================
+
+.. currentmodule:: dora.regressors.gp
+
+.. autofunction:: add_data

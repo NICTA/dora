@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dora.server.app &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Active Sampling - REST HTTP Server" href="../server.html" />
+    <link rel="next" title="dora.server.response" href="dora.server.response.html" />
+    <link rel="prev" title="dora.server.update_sampler" href="dora.server.update_sampler.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dora.server.response.html" title="dora.server.response"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dora.server.update_sampler.html" title="dora.server.update_sampler"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../server.html" accesskey="U">Active Sampling - REST HTTP Server</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dora-server-app">
+<h1>dora.server.app<a class="headerlink" href="#dora-server-app" title="Permalink to this headline">¶</a></h1>
+<dl class="data">
+<dt id="dora.server.app">
+<tt class="descclassname">dora.server.</tt><tt class="descname">app</tt><em class="property"> = &lt;Flask 'dora.server.server'&gt;</em><a class="headerlink" href="#dora.server.app" title="Permalink to this definition">¶</a></dt>
+<dd><p>The flask object implements a WSGI application and acts as the central
+object.  It is passed the name of the module or package of the
+application.  Once it is created it will act as a central registry for
+the view functions, the URL rules, template configuration and much more.</p>
+<p>The name of the package is used to resolve resources from inside the
+package or the folder the module is contained in depending on if the
+package parameter resolves to an actual python package (a folder with
+an <cite>__init__.py</cite> file inside) or a standard module (just a <cite>.py</cite> file).</p>
+<p>For more information about resource loading, see <tt class="xref py py-func docutils literal"><span class="pre">open_resource()</span></tt>.</p>
+<p>Usually you create a <tt class="xref py py-class docutils literal"><span class="pre">Flask</span></tt> instance in your main module or
+in the <cite>__init__.py</cite> file of your package like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-about-the-first-parameter admonition">
+<p class="first admonition-title">About the First Parameter</p>
+<p>The idea of the first parameter is to give Flask an idea what
+belongs to your application.  This name is used to find resources
+on the file system, can be used by extensions to improve debugging
+information and a lot more.</p>
+<p>So it's important what you provide there.  If you are using a single
+module, <cite>__name__</cite> is always the correct value.  If you however are
+using a package, it's usually recommended to hardcode the name of
+your package there.</p>
+<p>For example if your application is defined in <cite>yourapplication/app.py</cite>
+you should create it with one of the two versions below:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="s">&#39;yourapplication&#39;</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p class="last">Why is that?  The application will work even with <cite>__name__</cite>, thanks
+to how resources are looked up.  However it will make debugging more
+painful.  Certain extensions can make assumptions based on the
+import name of your application.  For example the Flask-SQLAlchemy
+extension will look for the code in your application that triggered
+an SQL query in debug mode.  If the import name is not properly set
+up, that debugging information is lost.  (For example it would only
+pick up SQL queries in <cite>yourapplication.app</cite> and not
+<cite>yourapplication.views.frontend</cite>)</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.7: </span>The <cite>static_url_path</cite>, <cite>static_folder</cite>, and <cite>template_folder</cite>
+parameters were added.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.8: </span>The <cite>instance_path</cite> and <cite>instance_relative_config</cite> parameters were
+added.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>import_name</strong> -- the name of the application package</li>
+<li><strong>static_url_path</strong> -- can be used to specify a different path for the
+static files on the web.  Defaults to the name
+of the <cite>static_folder</cite> folder.</li>
+<li><strong>static_folder</strong> -- the folder with static files that should be served
+at <cite>static_url_path</cite>.  Defaults to the <tt class="docutils literal"><span class="pre">'static'</span></tt>
+folder in the root path of the application.</li>
+<li><strong>template_folder</strong> -- the folder that contains the templates that should
+be used by the application.  Defaults to
+<tt class="docutils literal"><span class="pre">'templates'</span></tt> folder in the root path of the
+application.</li>
+<li><strong>instance_path</strong> -- An alternative instance path for the application.
+By default the folder <tt class="docutils literal"><span class="pre">'instance'</span></tt> next to the
+package or module is assumed to be the instance
+path.</li>
+<li><strong>instance_relative_config</strong> -- if set to <cite>True</cite> relative filenames
+for loading the config are assumed to
+be relative to the instance path instead
+of the application root.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dora.server.update_sampler.html"
+                        title="previous chapter">dora.server.update_sampler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dora.server.response.html"
+                        title="next chapter">dora.server.response</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dora.server.response.html" title="dora.server.response"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dora.server.update_sampler.html" title="dora.server.update_sampler"
+             >previous</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../server.html" >Active Sampling - REST HTTP Server</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

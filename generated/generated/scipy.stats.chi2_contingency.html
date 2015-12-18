@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.chi2_contingency &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-chi2-contingency">
+<h1>scipy.stats.chi2_contingency<a class="headerlink" href="#scipy-stats-chi2-contingency" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.chi2_contingency">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">chi2_contingency</tt><big>(</big><em>observed</em>, <em>correction=True</em>, <em>lambda_=None</em><big>)</big><a class="headerlink" href="#scipy.stats.chi2_contingency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chi-square test of independence of variables in a contingency table.</p>
+<p>This function computes the chi-square statistic and p-value for the
+hypothesis test of independence of the observed frequencies in the
+contingency table <a class="footnote-reference" href="#id4" id="id1">[1]</a> <cite>observed</cite>.  The expected frequencies are computed
+based on the marginal sums under the assumption of independence; see
+<cite>scipy.stats.contingency.expected_freq</cite>.  The number of degrees of
+freedom is (expressed using numpy functions and attributes):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dof</span> <span class="o">=</span> <span class="n">observed</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">observed</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="n">observed</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>observed</strong> (<em>array_like</em>) -- The contingency table. The table contains the observed frequencies
+(i.e. number of occurrences) in each category.  In the two-dimensional
+case, the table is often described as an &quot;R x C table&quot;.</li>
+<li><strong>correction</strong> (<em>bool, optional</em>) -- If True, <em>and</em> the degrees of freedom is 1, apply Yates' correction
+for continuity.  The effect of the correction is to adjust each
+observed value by 0.5 towards the corresponding expected value.</li>
+<li><strong>lambda</strong> (<em>float or str, optional.</em>) -- By default, the statistic computed in this test is Pearson's
+chi-squared statistic <a class="footnote-reference" href="#id5" id="id2">[2]</a>.  <cite>lambda_</cite> allows a statistic from the
+Cressie-Read power divergence family <a class="footnote-reference" href="#id6" id="id3">[3]</a> to be used instead.  See
+<cite>power_divergence</cite> for details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>chi2</strong> (<em>float</em>) -- The test statistic.</li>
+<li><strong>p</strong> (<em>float</em>) -- The p-value of the test</li>
+<li><strong>dof</strong> (<em>int</em>) -- Degrees of freedom</li>
+<li><strong>expected</strong> (ndarray, same shape as <cite>observed</cite>) -- The expected frequencies, based on the marginal sums of the table.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="scipy.stats.contingency.expected_freq.html#scipy.stats.contingency.expected_freq" title="scipy.stats.contingency.expected_freq"><tt class="xref py py-func docutils literal"><span class="pre">contingency.expected_freq()</span></tt></a>, <a class="reference internal" href="scipy.stats.fisher_exact.html#scipy.stats.fisher_exact" title="scipy.stats.fisher_exact"><tt class="xref py py-func docutils literal"><span class="pre">fisher_exact()</span></tt></a>, <a class="reference internal" href="scipy.stats.chisquare.html#scipy.stats.chisquare" title="scipy.stats.chisquare"><tt class="xref py py-func docutils literal"><span class="pre">chisquare()</span></tt></a>, <a class="reference internal" href="scipy.stats.power_divergence.html#scipy.stats.power_divergence" title="scipy.stats.power_divergence"><tt class="xref py py-func docutils literal"><span class="pre">power_divergence()</span></tt></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>An often quoted guideline for the validity of this calculation is that
+the test should be used only if the observed and expected frequency in
+each cell is at least 5.</p>
+<p>This is a test for the independence of different categories of a
+population. The test is only meaningful when the dimension of
+<cite>observed</cite> is two or more.  Applying the test to a one-dimensional
+table will always result in <cite>expected</cite> equal to <cite>observed</cite> and a
+chi-square statistic equal to 0.</p>
+<p>This function does not handle masked arrays, because the calculation
+does not make sense with missing values.</p>
+<p>Like stats.chisquare, this function computes a chi-square statistic;
+the convenience this function provides is to figure out the expected
+frequencies and degrees of freedom from the given contingency table.
+If these were already known, and if the Yates' correction was not
+required, one could use stats.chisquare.  That is, if one calls:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">chi2</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">dof</span><span class="p">,</span> <span class="n">ex</span> <span class="o">=</span> <span class="n">chi2_contingency</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>then the following is true:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="n">chi2</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="n">stats</span><span class="o">.</span><span class="n">chisquare</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">f_exp</span><span class="o">=</span><span class="n">ex</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                             <span class="n">ddof</span><span class="o">=</span><span class="n">obs</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">dof</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <cite>lambda_</cite> argument was added in version 0.13.0 of scipy.</p>
+<p class="rubric">References</p>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>&quot;Contingency table&quot;, <a class="reference external" href="http://en.wikipedia.org/wiki/Contingency_table">http://en.wikipedia.org/wiki/Contingency_table</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>&quot;Pearson's chi-squared test&quot;,
+<a class="reference external" href="http://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test">http://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Cressie, N. and Read, T. R. C., &quot;Multinomial Goodness-of-Fit
+Tests&quot;, J. Royal Stat. Soc. Series B, Vol. 46, No. 3 (1984),
+pp. 440-464.</td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>A two-way example (2 x 3):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chi2_contingency</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
+<span class="go">(2.7777777777777777,</span>
+<span class="go"> 0.24935220877729619,</span>
+<span class="go"> 2,</span>
+<span class="go"> array([[ 12.,  12.,  16.],</span>
+<span class="go">        [ 18.,  18.,  24.]]))</span>
+</pre></div>
+</div>
+<p>Perform the test using the log-likelihood ratio (i.e. the &quot;G-test&quot;)
+instead of Pearson's chi-squared statistic.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">dof</span><span class="p">,</span> <span class="n">expctd</span> <span class="o">=</span> <span class="n">chi2_contingency</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="s">&quot;log-likelihood&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">,</span> <span class="n">p</span>
+<span class="go">(2.7688587616781319, 0.25046668010954165)</span>
+</pre></div>
+</div>
+<p>A four-way example (2 x 2 x 2 x 2):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[[[[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">],</span>
+<span class="gp">... </span>       <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">16</span><span class="p">]],</span>
+<span class="gp">... </span>      <span class="p">[[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span>
+<span class="gp">... </span>       <span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">]]],</span>
+<span class="gp">... </span>     <span class="p">[[[</span><span class="mi">23</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+<span class="gp">... </span>       <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">22</span><span class="p">]],</span>
+<span class="gp">... </span>      <span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">17</span><span class="p">],</span>
+<span class="gp">... </span>       <span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">]]]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chi2_contingency</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
+<span class="go">(8.7584514426741897,</span>
+<span class="go"> 0.64417725029295503,</span>
+<span class="go"> 11,</span>
+<span class="go"> array([[[[ 14.15462386,  14.15462386],</span>
+<span class="go">          [ 16.49423111,  16.49423111]],</span>
+<span class="go">         [[ 11.2461395 ,  11.2461395 ],</span>
+<span class="go">          [ 13.10500554,  13.10500554]]],</span>
+<span class="go">        [[[ 19.5591166 ,  19.5591166 ],</span>
+<span class="go">          [ 22.79202844,  22.79202844]],</span>
+<span class="go">         [[ 15.54012004,  15.54012004],</span>
+<span class="go">          [ 18.10873492,  18.10873492]]]]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

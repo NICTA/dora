@@ -1,0 +1,22 @@
+dora.regressors.gp.Folds
+========================
+
+.. currentmodule:: dora.regressors.gp
+
+.. autoclass:: Folds
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Folds.__init__
+   
+   
+
+   
+   
+   

@@ -1,0 +1,26 @@
+dora.active_sampling.Stacked_Gaussian_Process
+=============================================
+
+.. currentmodule:: dora.active_sampling
+
+.. autoclass:: Stacked_Gaussian_Process
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Stacked_Gaussian_Process.__init__
+      ~Stacked_Gaussian_Process.pick
+      ~Stacked_Gaussian_Process.predict
+      ~Stacked_Gaussian_Process.train_data
+      ~Stacked_Gaussian_Process.update
+   
+   
+
+   
+   
+   

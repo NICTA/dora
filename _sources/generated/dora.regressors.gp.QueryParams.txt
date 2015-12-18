@@ -1,0 +1,22 @@
+dora.regressors.gp.QueryParams
+==============================
+
+.. currentmodule:: dora.regressors.gp
+
+.. autoclass:: QueryParams
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~QueryParams.__init__
+   
+   
+
+   
+   
+   

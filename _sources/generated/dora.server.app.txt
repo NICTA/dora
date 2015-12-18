@@ -1,0 +1,6 @@
+dora.server.app
+===============
+
+.. currentmodule:: dora.server
+
+.. autodata:: app

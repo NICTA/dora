@@ -1,0 +1,26 @@
+dora.regressors.gp.linalg
+=========================
+
+.. automodule:: dora.regressors.gp.linalg
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      cholesky
+      choleskyjitter
+      jitchol
+      ndX
+      ndY
+   
+   
+
+   
+   
+   
+
+   
+   
+   

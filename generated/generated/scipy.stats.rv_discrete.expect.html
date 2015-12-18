@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.rv_discrete.expect &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-rv-discrete-expect">
+<h1>scipy.stats.rv_discrete.expect<a class="headerlink" href="#scipy-stats-rv-discrete-expect" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="scipy.stats.rv_discrete.expect">
+<tt class="descclassname">rv_discrete.</tt><tt class="descname">expect</tt><big>(</big><em>func=None</em>, <em>args=()</em>, <em>loc=0</em>, <em>lb=None</em>, <em>ub=None</em>, <em>conditional=False</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_discrete.expect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate expected value of a function with respect to the distribution
+for discrete distribution</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fn</strong> (<em>function (default: identity mapping)</em>) -- Function for which sum is calculated. Takes only one argument.</li>
+<li><strong>args</strong> (<em>tuple</em>) -- argument (parameters) of the distribution</li>
+<li><strong>ub</strong> (<em>lb,</em>) -- lower and upper bound for integration, default is set to the
+support of the distribution, lb and ub are inclusive (ul&lt;=k&lt;=ub)</li>
+<li><strong>conditional</strong> (<em>bool, optional</em>) -- Default is False.
+If true then the expectation is corrected by the conditional
+probability of the integration interval. The return value is the
+expectation of the function, conditional on being in the given
+interval (k such that ul&lt;=k&lt;=ub).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>expect</strong> -- Expected value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li>function is not vectorized</li>
+<li>accuracy: uses self.moment_tol as stopping criterium
+for heavy tailed distribution e.g. zipf(4), accuracy for
+mean, variance in example is only 1e-5,
+increasing precision (moment_tol) makes zipf very slow</li>
+<li>suppnmin=100 internal parameter for minimum number of points to
+evaluate could be added as keyword parameter, to evaluate functions
+with non-monotonic shapes, points include integers in (-suppnmin,
+suppnmin)</li>
+<li>uses maxcount=1000 limits the number of points that are evaluated
+to break loop for infinite sums
+(a maximum of suppnmin+1000 positive plus suppnmin+1000 negative
+integers are evaluated)</li>
+</ul>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+dora.active_sampling.grid_sample
+================================
+
+.. currentmodule:: dora.active_sampling
+
+.. autofunction:: grid_sample

@@ -1,0 +1,6 @@
+dora.server.update_sampler
+==========================
+
+.. currentmodule:: dora.server
+
+.. autofunction:: update_sampler

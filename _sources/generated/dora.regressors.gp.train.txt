@@ -1,0 +1,44 @@
+dora.regressors.gp.train
+========================
+
+.. automodule:: dora.regressors.gp.train
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_data
+      batch_start
+      chol_down
+      chol_up
+      chol_up_insert
+      condition
+      learn
+      learn_folds
+      make_folds
+      negative_log_marginal_likelihood
+      negative_log_prob_cross_val
+      optimise_hypers
+      pack
+      remove_data
+      solve_triangular
+      unpack
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Delaunay
+      Folds
+   
+   
+
+   
+   
+   

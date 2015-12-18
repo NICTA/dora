@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.fisher_exact &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-fisher-exact">
+<h1>scipy.stats.fisher_exact<a class="headerlink" href="#scipy-stats-fisher-exact" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.fisher_exact">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">fisher_exact</tt><big>(</big><em>table</em>, <em>alternative='two-sided'</em><big>)</big><a class="headerlink" href="#scipy.stats.fisher_exact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a Fisher exact test on a 2x2 contingency table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table</strong> (<em>array_like of ints</em>) -- A 2x2 contingency table.  Elements should be non-negative integers.</li>
+<li><strong>alternative</strong> (<em>{'two-sided', 'less', 'greater'}, optional</em>) -- Which alternative hypothesis to the null hypothesis the test uses.
+Default is 'two-sided'.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>oddsratio</strong> (<em>float</em>) -- This is prior odds ratio and not a posterior estimate.</li>
+<li><strong>p_value</strong> (<em>float</em>) -- P-value, the probability of obtaining a distribution at least as
+extreme as the one that was actually observed, assuming that the
+null hypothesis is true.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="scipy.stats.chi2_contingency.html#scipy.stats.chi2_contingency" title="scipy.stats.chi2_contingency"><tt class="xref py py-func docutils literal"><span class="pre">chi2_contingency()</span></tt></a></dt>
+<dd>Chi-square test of independence of variables in a contingency table.</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The calculated odds ratio is different from the one R uses. In R language,
+this implementation returns the (more common) &quot;unconditional Maximum
+Likelihood Estimate&quot;, while R uses the &quot;conditional Maximum Likelihood
+Estimate&quot;.</p>
+<p>For tables with large numbers the (inexact) chi-square test implemented
+in the function <cite>chi2_contingency</cite> can also be used.</p>
+<p class="rubric">Examples</p>
+<p>Say we spend a few days counting whales and sharks in the Atlantic and
+Indian oceans. In the Atlantic ocean we find 8 whales and 1 shark, in the
+Indian ocean 2 whales and 5 sharks. Then our contingency table is:</p>
+<div class="highlight-python"><div class="highlight"><pre>        Atlantic  Indian
+whales     8        2
+sharks     1        5
+</pre></div>
+</div>
+<p>We use this table to find the p-value:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">oddsratio</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">fisher_exact</span><span class="p">([[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pvalue</span>
+<span class="go">0.0349...</span>
+</pre></div>
+</div>
+<p>The probability that we would observe this or an even more imbalanced ratio
+by chance is about 3.5%.  A commonly used significance level is 5%, if we
+adopt that we can therefore conclude that our observed imbalance is
+statistically significant; whales prefer the Atlantic while sharks prefer
+the Indian ocean.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

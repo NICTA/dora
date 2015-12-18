@@ -1,0 +1,31 @@
+dora.regressors.gp.predict
+==========================
+
+.. automodule:: dora.regressors.gp.predict
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      alpha
+      covariance
+      demux
+      draws
+      mean
+      mux
+      noise_vector
+      query
+      time
+      variance
+   
+   
+
+   
+   
+   
+
+   
+   
+   

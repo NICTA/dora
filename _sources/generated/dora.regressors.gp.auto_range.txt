@@ -1,0 +1,6 @@
+dora.regressors.gp.auto_range
+=============================
+
+.. currentmodule:: dora.regressors.gp
+
+.. autofunction:: auto_range

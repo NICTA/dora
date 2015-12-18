@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.boxcox &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-boxcox">
+<h1>scipy.stats.boxcox<a class="headerlink" href="#scipy-stats-boxcox" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.boxcox">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">boxcox</tt><big>(</big><em>x</em>, <em>lmbda=None</em>, <em>alpha=None</em><big>)</big><a class="headerlink" href="#scipy.stats.boxcox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a positive dataset transformed by a Box-Cox power transformation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>ndarray</em>) -- Input array.  Should be 1-dimensional.</li>
+<li><strong>lmbda</strong> (<em>{None, scalar}, optional</em>) -- <p>If <cite>lmbda</cite> is not None, do the transformation for that value.</p>
+<p>If <cite>lmbda</cite> is None, find the lambda that maximizes the log-likelihood
+function and return it as the second output argument.</p>
+</li>
+<li><strong>alpha</strong> (<em>{None, float}, optional</em>) -- If <cite>alpha</cite> is not None, return the <tt class="docutils literal"><span class="pre">100</span> <span class="pre">*</span> <span class="pre">(1-alpha)%</span></tt> confidence
+interval for <cite>lmbda</cite> as the third output argument.
+Must be between 0.0 and 1.0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>boxcox</strong> (<em>ndarray</em>) -- Box-Cox power transformed array.</li>
+<li><strong>maxlog</strong> (<em>float, optional</em>) -- If the <cite>lmbda</cite> parameter is None, the second returned argument is
+the lambda that maximizes the log-likelihood function.</li>
+<li><strong>(min_ci, max_ci)</strong> (<em>tuple of float, optional</em>) -- If <cite>lmbda</cite> parameter is None and <cite>alpha</cite> is not None, this returned
+tuple of floats represents the minimum and maximum confidence limits
+given <cite>alpha</cite>.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="scipy.stats.probplot.html#scipy.stats.probplot" title="scipy.stats.probplot"><tt class="xref py py-func docutils literal"><span class="pre">probplot()</span></tt></a>, <a class="reference internal" href="scipy.stats.boxcox_normplot.html#scipy.stats.boxcox_normplot" title="scipy.stats.boxcox_normplot"><tt class="xref py py-func docutils literal"><span class="pre">boxcox_normplot()</span></tt></a>, <a class="reference internal" href="scipy.stats.boxcox_normmax.html#scipy.stats.boxcox_normmax" title="scipy.stats.boxcox_normmax"><tt class="xref py py-func docutils literal"><span class="pre">boxcox_normmax()</span></tt></a>, <a class="reference internal" href="scipy.stats.boxcox_llf.html#scipy.stats.boxcox_llf" title="scipy.stats.boxcox_llf"><tt class="xref py py-func docutils literal"><span class="pre">boxcox_llf()</span></tt></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>The Box-Cox transform is given by:</p>
+<div class="highlight-python"><div class="highlight"><pre>y = (x**lmbda - 1) / lmbda,  for lmbda &gt; 0
+    log(x),                  for lmbda = 0
+</pre></div>
+</div>
+<p><cite>boxcox</cite> requires the input data to be positive.  Sometimes a Box-Cox
+transformation provides a shift parameter to achieve this; <cite>boxcox</cite> does
+not.  Such a shift parameter is equivalent to adding a positive constant to
+<cite>x</cite> before calling <cite>boxcox</cite>.</p>
+<p>The confidence limits returned when <cite>alpha</cite> is provided give the interval
+where:</p>
+<div class="math">
+\[\begin{split}llf(\hat{\lambda}) - llf(\lambda) &lt; \frac{1}{2}\chi^2(1 - \alpha, 1),\end{split}\]</div>
+<p>with <tt class="docutils literal"><span class="pre">llf</span></tt> the log-likelihood function and <span class="math">\(\chi^2\)</span> the chi-squared
+function.</p>
+<p class="rubric">References</p>
+<p>G.E.P. Box and D.R. Cox, &quot;An Analysis of Transformations&quot;, Journal of the
+Royal Statistical Society B, 26, 211-252 (1964).</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>We generate some random variates from a non-normal distribution and make a
+probability plot for it, to show it is non-normal in the tails:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">loggamma</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="o">.</span><span class="n">probplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;Probplot against normal distribution&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We now use <cite>boxcox</cite> to transform the data so it's closest to normal:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">boxcox</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="o">.</span><span class="n">probplot</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;Probplot after Box-Cox transformation&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction to Dora &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="index.html" />
+    <link rel="next" title="Active Sampling - Python API" href="sampling.html" />
+    <link rel="prev" title="Welcome to Dora&#39;s documentation!" href="index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sampling.html" title="Active Sampling - Python API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Dora&#39;s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction-to-dora">
+<h1>Introduction to Dora<a class="headerlink" href="#introduction-to-dora" title="Permalink to this headline">¶</a></h1>
+<p>Dora is a library for Bayesian active sampling with non-parametric models.</p>
+<p>Dora simultaneously builds a non-parametric model of an observable
+process, and directs new measurements to learn about the process.
+Inherently, it takes actions to improve the model (exploration), and to
+achieve desired goals given its knowledge (exploration).</p>
+<p>The models utilised are non-parametric models such as bilinear
+interpolation of a Delaunay triangulation or Gaussian Process
+regression. We are building this tool to be able to plug in other
+models, so it will shortly be possible to link in our <em>revrand</em> package
+for fast Bayesian linear regression that behaves similar to GP
+regression so that kernel-regression like modeling can be applied to
+large sampled datasets.</p>
+<p>The key features of Dora are:</p>
+<ul class="simple">
+<li>a Python library to design experimental sampling to simultaneously
+explore and exploit an underlying process</li>
+<li>a RESTful web service that can be called from any other launguages
+providing the core functionality of the Python library</li>
+<li>The ability to use a variety of process models including Gaussian
+Process regression <a class="footnote-reference" href="#id3" id="id1">[1]</a>, Delaunay triangulation, and models from the
+<em>Revrand</em> library <a class="footnote-reference" href="#id4" id="id2">[2]</a>.</li>
+<li>a suite of strategies to conduct information, risk or value based
+sampling to learn these models efficiently or target phenomenon of
+interest.</li>
+</ul>
+<div class="section" id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
+<p>To install, simply run <tt class="docutils literal"><span class="pre">setup.py</span></tt>:</p>
+<div class="code console highlight-python"><div class="highlight"><pre>$ python setup.py install
+</pre></div>
+</div>
+<p>or install with <tt class="docutils literal"><span class="pre">pip</span></tt>:</p>
+<div class="code console highlight-python"><div class="highlight"><pre>$ pip install git+https://github.com/nicta/dora.git@release
+</pre></div>
+</div>
+<p>Refer to <a class="reference external" href="docs/installation.rst">docs/installation.rst</a> for
+advanced installation instructions.</p>
+<p>Have a look at some of the <a class="reference external" href="demo/">demos</a>, e.g.:</p>
+<div class="code console highlight-python"><div class="highlight"><pre>$ python demo/demo_gp_python_api.py
+</pre></div>
+</div>
+<p>The demos include examples of different underlying models (GP and
+Delaunay), and examples of both Python 3 code calling the api directly,
+and the general case of calling a server through a HTTP REST interface.</p>
+<p>Here is a very brief example of how to use active sampling with a
+Gaussian Process model in Python. We are assuming we can collect some
+limited training data with noisy targets <tt class="docutils literal"><span class="pre">y_train</span></tt>, inputs <tt class="docutils literal"><span class="pre">X_train</span></tt>
+for the purpose of selecting initial model hyperparameters, and we now
+want to use targeted sampling to efficiently continue the exploration.</p>
+<div class="code highlight-python"><div class="highlight"><pre>$ import dora.active_sampling as dora import
+dora.regressors.gp as gp from example_processes import simulate_measurement
+import numpy as np
+# Set up a sampling problem:
+n_initial_sample = 50
+lower = [0, 0]
+upper = [1, 1]
+X_train = dora.random_sample(lower, upper, n_initial_sample)
+y_train = np.asarray([simulate_measurement(i) for i in X_train])
+
+# Set up a sampler using Dora
+sampler = dora.Gaussian_Process(lower, upper, X_train, y_train,
+                                add_train_data=False)
+
+# Run the active sampling:
+logging.info(&#39;Actively sampling new points..&#39;)
+target_samples = 501
+for i in range(target_samples):
+    # Note - Dora provides a sample X, and a sample Id
+    # While we are doing this in a loop, in reality the observations can
+    # be asynchronously observed and returned out of order.
+    newX, newId = sampler.pick()
+    observation = simulate_measurement(newX)
+    sampler.update(newId, observation)
+</pre></div>
+</div>
+</div>
+<div class="section" id="useful-links">
+<h2>Useful Links<a class="headerlink" href="#useful-links" title="Permalink to this headline">¶</a></h2>
+<p>Home Page <a class="reference external" href="http://github.com/nicta/dora">http://github.com/nicta/dora</a></p>
+<p>Documentation <a class="reference external" href="http://nicta.github.io/dora">http://nicta.github.io/dora</a></p>
+<p>Issue tracking <a class="reference external" href="https://github.com/nicta/dora/issues">https://github.com/nicta/dora/issues</a></p>
+</div>
+<div class="section" id="bugs-feedback">
+<h2>Bugs &amp; Feedback<a class="headerlink" href="#bugs-feedback" title="Permalink to this headline">¶</a></h2>
+<p>For bugs, questions and discussions, please use
+<a class="reference external" href="https://github.com/NICTA/dora/issues">Github Issues</a>.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Gaussian Processes for Machine Learning, Carl Edward Rasmussen
+and Chris Williams, the MIT Press, 2006</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>NICTA <a class="reference external" href="https://github.com/NICTA/revrand">Revrand</a> library.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td>Osborne, M. (2010). Bayesian Gaussian Processes for Sequential
+Prediction, Optimisation and Quadrature (PhD thesis). PhD thesis,
+University of Oxford.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[4]</td><td>Garnett, R., Osborne, M. A., &amp; Roberts, S. J. (2010). Bayesian
+optimization for sensor set selection. International Conference on
+Information Processing in Sensor Networks (pp. 209–219).</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="copyright-license">
+<h2>Copyright &amp; License<a class="headerlink" href="#copyright-license" title="Permalink to this headline">¶</a></h2>
+<p>Copyright 2015 National ICT Australia.</p>
+<p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may
+not use this file except in compliance with the License. You may obtain
+a copy of the License at:</p>
+<p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction to Dora</a><ul>
+<li><a class="reference internal" href="#quickstart">Quickstart</a></li>
+<li><a class="reference internal" href="#useful-links">Useful Links</a></li>
+<li><a class="reference internal" href="#bugs-feedback">Bugs &amp; Feedback</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#copyright-license">Copyright &amp; License</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Dora's documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sampling.html"
+                        title="next chapter">Active Sampling - Python API</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sampling.html" title="Active Sampling - Python API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Dora&#39;s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

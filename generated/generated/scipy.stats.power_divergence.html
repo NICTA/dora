@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.power_divergence &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-power-divergence">
+<h1>scipy.stats.power_divergence<a class="headerlink" href="#scipy-stats-power-divergence" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.power_divergence">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">power_divergence</tt><big>(</big><em>f_obs</em>, <em>f_exp=None</em>, <em>ddof=0</em>, <em>axis=0</em>, <em>lambda_=None</em><big>)</big><a class="headerlink" href="#scipy.stats.power_divergence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cressie-Read power divergence statistic and goodness of fit test.</p>
+<p>This function tests the null hypothesis that the categorical data
+has the given frequencies, using the Cressie-Read power divergence
+statistic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>f_obs</strong> (<em>array_like</em>) -- Observed frequencies in each category.</li>
+<li><strong>f_exp</strong> (<em>array_like, optional</em>) -- Expected frequencies in each category.  By default the categories are
+assumed to be equally likely.</li>
+<li><strong>ddof</strong> (<em>int, optional</em>) -- &quot;Delta degrees of freedom&quot;: adjustment to the degrees of freedom
+for the p-value.  The p-value is computed using a chi-squared
+distribution with <tt class="docutils literal"><span class="pre">k</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">-</span> <span class="pre">ddof</span></tt> degrees of freedom, where <cite>k</cite>
+is the number of observed frequencies.  The default value of <cite>ddof</cite>
+is 0.</li>
+<li><strong>axis</strong> (<em>int or None, optional</em>) -- The axis of the broadcast result of <cite>f_obs</cite> and <cite>f_exp</cite> along which to
+apply the test.  If axis is None, all values in <cite>f_obs</cite> are treated
+as a single data set.  Default is 0.</li>
+<li><strong>lambda</strong> (<em>float or str, optional</em>) -- <p><cite>lambda_</cite> gives the power in the Cressie-Read power divergence
+statistic.  The default is 1.  For convenience, <cite>lambda_</cite> may be
+assigned one of the following strings, in which case the
+corresponding numerical value is used:</p>
+<div class="highlight-python"><div class="highlight"><pre>String              Value   Description
+&quot;pearson&quot;             1     Pearson&#39;s chi-squared statistic.
+                            In this case, the function is
+                            equivalent to `stats.chisquare`.
+&quot;log-likelihood&quot;      0     Log-likelihood ratio. Also known as
+                            the G-test [3]_.
+&quot;freeman-tukey&quot;      -1/2   Freeman-Tukey statistic.
+&quot;mod-log-likelihood&quot; -1     Modified log-likelihood ratio.
+&quot;neyman&quot;             -2     Neyman&#39;s statistic.
+&quot;cressie-read&quot;        2/3   The power recommended in [5]_.
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>stat</strong> (<em>float or ndarray</em>) -- The Cressie-Read power divergence test statistic.  The value is
+a float if <cite>axis</cite> is None or if` <cite>f_obs</cite> and <cite>f_exp</cite> are 1-D.</li>
+<li><strong>p</strong> (<em>float or ndarray</em>) -- The p-value of the test.  The value is a float if <cite>ddof</cite> and the
+return value <cite>stat</cite> are scalars.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="scipy.stats.chisquare.html#scipy.stats.chisquare" title="scipy.stats.chisquare"><tt class="xref py py-func docutils literal"><span class="pre">chisquare()</span></tt></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>This test is invalid when the observed or expected frequencies in each
+category are too small.  A typical rule is that all of the observed
+and expected frequencies should be at least 5.</p>
+<p>When <cite>lambda_</cite> is less than zero, the formula for the statistic involves
+dividing by <cite>f_obs</cite>, so a warning or error may be generated if any value
+in <cite>f_obs</cite> is 0.</p>
+<p>Similarly, a warning or error may be generated if any value in <cite>f_exp</cite> is
+zero when <cite>lambda_</cite> &gt;= 0.</p>
+<p>The default degrees of freedom, k-1, are for the case when no parameters
+of the distribution are estimated. If p parameters are estimated by
+efficient maximum likelihood then the correct degrees of freedom are
+k-1-p. If the parameters are estimated in a different way, then the
+dof can be between k-1-p and k-1. However, it is also possible that
+the asymptotic distribution is not a chisquare, in which case this
+test is not appropriate.</p>
+<p>This function handles masked arrays.  If an element of <cite>f_obs</cite> or <cite>f_exp</cite>
+is masked, then data at that position is ignored, and does not count
+towards the size of the data set.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.13.0.</span></p>
+</div>
+<p class="rubric">References</p>
+<table class="docutils footnote" frame="void" id="id1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Lowry, Richard.  &quot;Concepts and Applications of Inferential
+Statistics&quot;. Chapter 8. <a class="reference external" href="http://faculty.vassar.edu/lowry/ch8pt1.html">http://faculty.vassar.edu/lowry/ch8pt1.html</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td>&quot;Chi-squared test&quot;, <a class="reference external" href="http://en.wikipedia.org/wiki/Chi-squared_test">http://en.wikipedia.org/wiki/Chi-squared_test</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td>&quot;G-test&quot;, <a class="reference external" href="http://en.wikipedia.org/wiki/G-test">http://en.wikipedia.org/wiki/G-test</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[4]</td><td>Sokal, R. R. and Rohlf, F. J. &quot;Biometry: the principles and
+practice of statistics in biological research&quot;, New York: Freeman
+(1981)</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[5]</td><td>Cressie, N. and Read, T. R. C., &quot;Multinomial Goodness-of-Fit
+Tests&quot;, J. Royal Stat. Soc. Series B, Vol. 46, No. 3 (1984),
+pp. 440-464.</td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>(See <cite>chisquare</cite> for more examples.)</p>
+<p>When just <cite>f_obs</cite> is given, it is assumed that the expected frequencies
+are uniform and given by the mean of the observed frequencies.  Here we
+perform a G-test (i.e. use the log-likelihood ratio statistic):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;log-likelihood&#39;</span><span class="p">)</span>
+<span class="go">(2.006573162632538, 0.84823476779463769)</span>
+</pre></div>
+</div>
+<p>The expected frequencies can be given with the <cite>f_exp</cite> argument:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">f_exp</span><span class="o">=</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">lambda_</span><span class="o">=</span><span class="s">&#39;log-likelihood&#39;</span><span class="p">)</span>
+<span class="go">(3.5, 0.62338762774958223)</span>
+</pre></div>
+</div>
+<p>When <cite>f_obs</cite> is 2-D, by default the test is applied to each column.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">24</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obs</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(6, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="s">&quot;log-likelihood&quot;</span><span class="p">)</span>
+<span class="go">(array([ 2.00657316,  6.77634498]), array([ 0.84823477,  0.23781225]))</span>
+</pre></div>
+</div>
+<p>By setting <tt class="docutils literal"><span class="pre">axis=None</span></tt>, the test is applied to all data in the array,
+which is equivalent to applying the test to the flattened array.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="go">(23.31034482758621, 0.015975692534127565)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+<span class="go">(23.31034482758621, 0.015975692534127565)</span>
+</pre></div>
+</div>
+<p><cite>ddof</cite> is the change to make to the default degrees of freedom.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">(2.0, 0.73575888234288467)</span>
+</pre></div>
+</div>
+<p>The calculation of the p-values is done by broadcasting the
+test statistic with <cite>ddof</cite>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="n">ddof</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="go">(2.0, array([ 0.84914504,  0.73575888,  0.5724067 ]))</span>
+</pre></div>
+</div>
+<p><cite>f_obs</cite> and <cite>f_exp</cite> are also broadcast.  In the following, <cite>f_obs</cite> has
+shape (6,) and <cite>f_exp</cite> has shape (2, 6), so the result of broadcasting
+<cite>f_obs</cite> and <cite>f_exp</cite> has shape (2, 6).  To compute the desired chi-squared
+statistics, we must use <tt class="docutils literal"><span class="pre">axis=1</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">power_divergence</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">f_exp</span><span class="o">=</span><span class="p">[[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span>                        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">]],</span>
+<span class="gp">... </span>                 <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">(array([ 3.5 ,  9.25]), array([ 0.62338763,  0.09949846]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

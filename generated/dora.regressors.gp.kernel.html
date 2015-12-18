@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dora.regressors.gp.kernel &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Built-in Regressors" href="../regressors.html" />
+    <link rel="next" title="dora.regressors.gp.learn" href="dora.regressors.gp.learn.html" />
+    <link rel="prev" title="dora.regressors.gp.types" href="dora.regressors.gp.types.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dora.regressors.gp.learn.html" title="dora.regressors.gp.learn"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dora.regressors.gp.types.html" title="dora.regressors.gp.types"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../regressors.html" accesskey="U">Built-in Regressors</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-dora.regressors.gp.kernel">
+<span id="dora-regressors-gp-kernel"></span><h1>dora.regressors.gp.kernel<a class="headerlink" href="#module-dora.regressors.gp.kernel" title="Permalink to this headline">¶</a></h1>
+<p>Kernel module
+Defines basic kernel functions of the form:</p>
+<blockquote>
+<div>funcname(x_p, x_q, par) that return a covariance matrix.
+x_p is n1*d, x_q is n2*d, the result should be n1*n2
+par can be a scalar, array, or list of these.</div></blockquote>
+<p>All kernels must allow x_q=None, and efficiently compute the diagonal
+of K(x_p, x_p) as a (n1,) shaped vector.</p>
+<p>Multi-task kernels must begin with <a href="#id1"><span class="problematic" id="id2">mt_</span></a>, and such kernels must use the
+last dimension of x_p and x_q as an indicator of the task.</p>
+<p>This file also contains code for composing these kernels into multi-use
+objects.</p>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">auto_range</span></tt>(user_kernel)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">cdist</span></tt>(XA,&nbsp;XB[,&nbsp;metric,&nbsp;p,&nbsp;V,&nbsp;VI,&nbsp;w])</td>
+<td>Computes distance between each pair of the two collections of inputs.</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">chisquare</span></tt>(x_p,&nbsp;x_q[,&nbsp;eps])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">compose</span></tt>(user_kernel)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">describer</span></tt>(user_kernel)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">gaussian</span></tt>(x_p,&nbsp;x_q,&nbsp;LS)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">laplace</span></tt>(x_p,&nbsp;x_q,&nbsp;LS)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">matern3on2</span></tt>(x_p,&nbsp;x_q,&nbsp;LS)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">mt_weights</span></tt>(x_p,&nbsp;x_q,&nbsp;params)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">named_target</span></tt>(covfn,&nbsp;fn_cache)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">non_stationary</span></tt>(x_p,&nbsp;x_q,&nbsp;params)</td>
+<td>Implementation of Paciorek's kernel where length scale is defined as</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">nonstat_rr</span></tt>(x_p,&nbsp;x_q,&nbsp;params)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">sin</span></tt>(x_p,&nbsp;x_q,&nbsp;params)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">tree</span></tt>(x_p,&nbsp;x_q,&nbsp;params)</td>
+<td>Implementation of Paciorek's kernel where length scale is defined as</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">tree1D</span></tt>(x_p,&nbsp;x_q,&nbsp;params)</td>
+<td>Implementation of Paciorek's kernel where length scale is defined as</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">Printer</span></tt>([val])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">Range</span></tt>(lowerBound,&nbsp;upperBound,&nbsp;initialVal)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dora.regressors.gp.types.html"
+                        title="previous chapter">dora.regressors.gp.types</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dora.regressors.gp.learn.html"
+                        title="next chapter">dora.regressors.gp.learn</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dora.regressors.gp.learn.html" title="dora.regressors.gp.learn"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dora.regressors.gp.types.html" title="dora.regressors.gp.types"
+             >previous</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li>
+          <li><a href="../regressors.html" >Built-in Regressors</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+dora.active_sampling.candidates
+===============================
+
+.. currentmodule:: dora.active_sampling
+
+.. autoclass:: candidates
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~candidates.__init__
+   
+   
+
+   
+   
+   

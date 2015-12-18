@@ -1,0 +1,6 @@
+dora.server.initialise_sampler
+==============================
+
+.. currentmodule:: dora.server
+
+.. autofunction:: initialise_sampler

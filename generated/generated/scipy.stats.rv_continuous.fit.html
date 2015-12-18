@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.rv_continuous.fit &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-rv-continuous-fit">
+<h1>scipy.stats.rv_continuous.fit<a class="headerlink" href="#scipy-stats-rv-continuous-fit" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="scipy.stats.rv_continuous.fit">
+<tt class="descclassname">rv_continuous.</tt><tt class="descname">fit</tt><big>(</big><em>data</em>, <em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#scipy.stats.rv_continuous.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return MLEs for shape, location, and scale parameters from data.</p>
+<p>MLE stands for Maximum Likelihood Estimate.  Starting estimates for
+the fit are given by input arguments; for any arguments not provided
+with starting estimates, <tt class="docutils literal"><span class="pre">self._fitstart(data)</span></tt> is called to generate
+such.</p>
+<p>One can hold some parameters fixed to specific values by passing in
+keyword arguments <tt class="docutils literal"><span class="pre">f0</span></tt>, <tt class="docutils literal"><span class="pre">f1</span></tt>, ..., <tt class="docutils literal"><span class="pre">fn</span></tt> (for shape parameters)
+and <tt class="docutils literal"><span class="pre">floc</span></tt> and <tt class="docutils literal"><span class="pre">fscale</span></tt> (for location and scale parameters,
+respectively).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>array_like</em>) -- Data to use in calculating the MLEs.</li>
+<li><strong>args</strong> (<em>floats, optional</em>) -- Starting value(s) for any shape-characterizing arguments (those not
+provided will be determined by a call to <tt class="docutils literal"><span class="pre">_fitstart(data)</span></tt>).
+No default value.</li>
+<li><strong>kwds</strong> (<em>floats, optional</em>) -- <p>Starting values for the location and scale parameters; no default.
+Special keyword arguments are recognized as holding certain
+parameters fixed:</p>
+<p>f0...fn : hold respective shape parameters fixed.</p>
+<p>floc : hold location parameter fixed to specified value.</p>
+<p>fscale : hold scale parameter fixed to specified value.</p>
+<dl class="docutils">
+<dt>optimizer <span class="classifier-delimiter">:</span> <span class="classifier">The optimizer to use.  The optimizer must take func,</span></dt>
+<dd>and starting position as the first two arguments,
+plus args (for extra arguments to pass to the
+function to be optimized) and disp=0 to suppress
+output as keyword arguments.</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>shape, loc, scale</strong> -- MLEs for any shape statistics, followed by those for location and
+scale.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple of floats</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This fit is computed by maximizing a log-likelihood function, with
+penalty applied for samples outside of range of the distribution. The
+returned answer is not guaranteed to be the globally optimal MLE, it
+may only be locally optimal, or the optimization may fail altogether.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

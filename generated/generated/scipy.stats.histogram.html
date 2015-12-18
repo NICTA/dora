@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.histogram &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-histogram">
+<h1>scipy.stats.histogram<a class="headerlink" href="#scipy-stats-histogram" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.histogram">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">histogram</tt><big>(</big><em>a</em>, <em>numbins=10</em>, <em>defaultlimits=None</em>, <em>weights=None</em>, <em>printextras=False</em><big>)</big><a class="headerlink" href="#scipy.stats.histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Separates the range into several bins and returns the number of instances
+in each bin.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>array_like</em>) -- Array of scores which will be put into bins.</li>
+<li><strong>numbins</strong> (<em>int, optional</em>) -- The number of bins to use for the histogram. Default is 10.</li>
+<li><strong>defaultlimits</strong> (<em>tuple (lower, upper), optional</em>) -- <p>The lower and upper values for the range of the histogram.
+If no value is given, a range slightly larger then the range of the
+values in a is used. Specifically <tt class="docutils literal"><span class="pre">(a.min()</span> <span class="pre">-</span> <span class="pre">s,</span> <span class="pre">a.max()</span> <span class="pre">+</span> <span class="pre">s)</span></tt>,</p>
+<blockquote>
+<div>where <tt class="docutils literal"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">(1/2)(a.max()</span> <span class="pre">-</span> <span class="pre">a.min())</span> <span class="pre">/</span> <span class="pre">(numbins</span> <span class="pre">-</span> <span class="pre">1)</span></tt>.</div></blockquote>
+</li>
+<li><strong>weights</strong> (<em>array_like, optional</em>) -- The weights for each value in <cite>a</cite>. Default is None, which gives each
+value a weight of 1.0</li>
+<li><strong>printextras</strong> (<em>bool, optional</em>) -- If True, if there are extra points (i.e. the points that fall outside
+the bin limits) a warning is raised saying how many of those points
+there are.  Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>histogram</strong> (<em>ndarray</em>) -- Number of points (or sum of weights) in each bin.</li>
+<li><strong>low_range</strong> (<em>float</em>) -- Lowest value of histogram, the lower limit of the first bin.</li>
+<li><strong>binsize</strong> (<em>float</em>) -- The size of the bins (all bins have the same size).</li>
+<li><strong>extrapoints</strong> (<em>int</em>) -- The number of points outside the range of the histogram.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><tt class="xref py py-func docutils literal"><span class="pre">numpy.histogram()</span></tt></p>
+</div>
+<p class="rubric">Notes</p>
+<p>This histogram is based on numpy's histogram but has a larger range by
+default if default limits is not set.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

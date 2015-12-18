@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>scipy.stats.rankdata &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipy-stats-rankdata">
+<h1>scipy.stats.rankdata<a class="headerlink" href="#scipy-stats-rankdata" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="scipy.stats.rankdata">
+<tt class="descclassname">scipy.stats.</tt><tt class="descname">rankdata</tt><big>(</big><em>a</em>, <em>method='average'</em><big>)</big><a class="headerlink" href="#scipy.stats.rankdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign ranks to data, dealing with ties appropriately.</p>
+<p>Ranks begin at 1.  The <cite>method</cite> argument controls how ranks are assigned
+to equal values.  See <a class="footnote-reference" href="#id2" id="id1">[1]</a> for further discussion of ranking methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>array_like</em>) -- The array of values to be ranked.  The array is first flattened.</li>
+<li><strong>method</strong> (<em>str, optional</em>) -- <p>The method used to assign ranks to tied elements.
+The options are 'average', 'min', 'max', 'dense' and 'ordinal'.</p>
+<dl class="docutils">
+<dt>'average':</dt>
+<dd>The average of the ranks that would have been assigned to
+all the tied values is assigned to each value.</dd>
+<dt>'min':</dt>
+<dd>The minimum of the ranks that would have been assigned to all
+the tied values is assigned to each value.  (This is also
+referred to as &quot;competition&quot; ranking.)</dd>
+<dt>'max':</dt>
+<dd>The maximum of the ranks that would have been assigned to all
+the tied values is assigned to each value.</dd>
+<dt>'dense':</dt>
+<dd>Like 'min', but the rank of the next highest element is assigned
+the rank immediately after those assigned to the tied elements.</dd>
+<dt>'ordinal':</dt>
+<dd>All values are given a distinct rank, corresponding to the order
+that the values occur in <cite>a</cite>.</dd>
+</dl>
+<p>The default is 'average'.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ranks</strong> -- An array of length equal to the size of <cite>a</cite>, containing rank
+scores.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>All floating point types are converted to numpy.float64 before ranking.
+This may result in spurious ties if an input array of floats has a wider
+data type than numpy.float64 (e.g. numpy.float128).</p>
+<p class="rubric">References</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>&quot;Ranking&quot;, <a class="reference external" href="http://en.wikipedia.org/wiki/Ranking">http://en.wikipedia.org/wiki/Ranking</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rankdata</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="go">array([ 1. ,  2.5,  4. ,  2.5])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rankdata</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;min&#39;</span><span class="p">)</span>
+<span class="go">array([ 1.,  2.,  4.,  2.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rankdata</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;max&#39;</span><span class="p">)</span>
+<span class="go">array([ 1.,  3.,  4.,  3.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rankdata</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;dense&#39;</span><span class="p">)</span>
+<span class="go">array([ 1.,  2.,  3.,  2.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rankdata</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;ordinal&#39;</span><span class="p">)</span>
+<span class="go">array([ 1.,  2.,  4.,  3.])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

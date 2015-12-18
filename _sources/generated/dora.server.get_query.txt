@@ -1,0 +1,6 @@
+dora.server.get_query
+=====================
+
+.. currentmodule:: dora.server
+
+.. autofunction:: get_query

@@ -1,0 +1,22 @@
+dora.regressors.gp.OptConfig
+============================
+
+.. currentmodule:: dora.regressors.gp
+
+.. autoclass:: OptConfig
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~OptConfig.__init__
+   
+   
+
+   
+   
+   

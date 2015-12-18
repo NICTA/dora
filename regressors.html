@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Available Regressors &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="index.html" />
+    <link rel="next" title="dora.regressors.gp.condition" href="generated/dora.regressors.gp.condition.html" />
+    <link rel="prev" title="dora.server.retrieve_trainingdata" href="generated/dora.server.retrieve_trainingdata.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.regressors.gp.condition.html" title="dora.regressors.gp.condition"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.server.retrieve_trainingdata.html" title="dora.server.retrieve_trainingdata"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="available-regressors">
+<h1>Available Regressors<a class="headerlink" href="#available-regressors" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="delaunay-triangulation">
+<h2>Delaunay Triangulation<a class="headerlink" href="#delaunay-triangulation" title="Permalink to this headline">¶</a></h2>
+<p>Using the Scipy implementation.</p>
+</div>
+<div class="section" id="nicta-revrand">
+<h2>NICTA/revrand<a class="headerlink" href="#nicta-revrand" title="Permalink to this headline">¶</a></h2>
+<p>The NICTA library for Generalised Bayesian linear regression, and kernel-like
+models that scale to large data. See more at:</p>
+<blockquote>
+<div><a class="reference external" href="http://github.com/nicta/revrand">http://github.com/nicta/revrand</a></div></blockquote>
+</div>
+<div class="section" id="gaussian-process-regression">
+<h2>Gaussian Process Regression<a class="headerlink" href="#gaussian-process-regression" title="Permalink to this headline">¶</a></h2>
+<p>This is a NICTA developed module implementing Gaussian Process regression.
+This component is not documented in detail here, but its key components include:</p>
+<p>Building and learning kernels:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+<p>Supervised prediction from a training dataset:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.regressors.gp.condition.html#dora.regressors.gp.condition" title="dora.regressors.gp.condition"><tt class="xref py py-obj docutils literal"><span class="pre">condition</span></tt></a>(X,&nbsp;y,&nbsp;kernelFn,&nbsp;hyper_opt_config_copys)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.regressors.gp.query.html#dora.regressors.gp.query" title="dora.regressors.gp.query"><tt class="xref py py-obj docutils literal"><span class="pre">query</span></tt></a>(Xs,&nbsp;p)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.regressors.gp.add_data.html#dora.regressors.gp.add_data" title="dora.regressors.gp.add_data"><tt class="xref py py-obj docutils literal"><span class="pre">add_data</span></tt></a>(newX,&nbsp;newY,&nbsp;regressor[,&nbsp;query,&nbsp;...])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.regressors.gp.mean.html#dora.regressors.gp.mean" title="dora.regressors.gp.mean"><tt class="xref py py-obj docutils literal"><span class="pre">mean</span></tt></a>(regressor,&nbsp;query)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/dora.regressors.gp.variance.html#dora.regressors.gp.variance" title="dora.regressors.gp.variance"><tt class="xref py py-obj docutils literal"><span class="pre">variance</span></tt></a>(regressor,&nbsp;query)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/dora.regressors.gp.predict.html#module-dora.regressors.gp.predict" title="dora.regressors.gp.predict"><tt class="xref py py-obj docutils literal"><span class="pre">predict</span></tt></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Available Regressors</a><ul>
+<li><a class="reference internal" href="#delaunay-triangulation">Delaunay Triangulation</a></li>
+<li><a class="reference internal" href="#nicta-revrand">NICTA/revrand</a></li>
+<li><a class="reference internal" href="#gaussian-process-regression">Gaussian Process Regression</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/dora.server.retrieve_trainingdata.html"
+                        title="previous chapter">dora.server.retrieve_trainingdata</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/dora.regressors.gp.condition.html"
+                        title="next chapter">dora.regressors.gp.condition</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.regressors.gp.condition.html" title="dora.regressors.gp.condition"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/dora.server.retrieve_trainingdata.html" title="dora.server.retrieve_trainingdata"
+             >previous</a> |</li>
+        <li><a href="index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

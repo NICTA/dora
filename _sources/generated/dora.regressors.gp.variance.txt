@@ -1,0 +1,6 @@
+dora.regressors.gp.variance
+===========================
+
+.. currentmodule:: dora.regressors.gp
+
+.. autofunction:: variance
