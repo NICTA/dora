@@ -1,0 +1,41 @@
+dora.active_sampling.GaussianProcess
+====================================
+
+.. currentmodule:: dora.active_sampling
+
+.. autoclass:: GaussianProcess
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GaussianProcess.__init__
+      ~GaussianProcess.get_acq_func
+      ~GaussianProcess.get_explore_priority
+      ~GaussianProcess.get_hyperparams
+      ~GaussianProcess.get_kerneldef
+      ~GaussianProcess.get_min_training_size
+      ~GaussianProcess.get_real_data
+      ~GaussianProcess.learn_hyperparams
+      ~GaussianProcess.pick
+      ~GaussianProcess.predict
+      ~GaussianProcess.print_kernel
+      ~GaussianProcess.refresh
+      ~GaussianProcess.set_acq_name
+      ~GaussianProcess.set_explore_priority
+      ~GaussianProcess.set_hyperparams
+      ~GaussianProcess.set_kerneldef
+      ~GaussianProcess.set_min_training_size
+      ~GaussianProcess.train
+      ~GaussianProcess.update
+      ~GaussianProcess.update_regressors
+   
+   
+
+   
+   
+   
