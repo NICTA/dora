@@ -5,6 +5,7 @@ Active Sampling - Python API
 
 .. autosummary::
    :toctree: generated/
+
    active_sampling   
    ArrayBuffer
    Sampler
