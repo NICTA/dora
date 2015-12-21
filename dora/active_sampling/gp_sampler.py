@@ -14,23 +14,22 @@ class GaussianProcess(Sampler):
 
     Attributes
     ----------
-    n_tasks : int
-        The number of Gaussian process 'stacks', which is also the
-        dimensionality of the target output
+    kerneldef : function
+        Kernel function definition. See the 'gp' module.
+    n_min : int
+        Number of training samples required before sampler can be trained
+    acq_name : str
+        A string specifying the type of acquisition function used
+    explore_priority : float, optional
+        The priority of exploration against exploitation
     hyperparams : numpy.ndarray
         The hyperparameters of the Gaussian Process Inference Model
     regressors : list
         List of regressor objects. See 'gp.types.RegressionParams'
-    mean : float
+    y_mean : float
         Mean of the training target outputs
-    trained_flag : bool
-        Whether the GP model have been trained or not
-    acq_name : str
-        A string specifying the type of acquisition function used
-    explore_priority : float
-        The priority of exploration against exploitation
-    n_min : int
-        Number of training samples required before sampler can be trained
+    n_tasks : int
+        Number of tasks or, equivalently, number of target outputs
 
     See Also
     --------
@@ -50,25 +49,15 @@ class GaussianProcess(Sampler):
             Lower or minimum bounds for the parameter space
         upper : array_like
             Upper or maximum bounds for the parameter space
-        X : numpy.ndarray, optional
-            Training features for the Gaussian process model
-        y : numpy.ndarray, optional
-            Training targets for the Gaussian process model
-        n_tasks : int
-            The number of Gaussian process 'stacks', which is also the
-            dimensionality of the target output
-        hyperparams : tuple
-            Hyperparameters of the Gaussian process
+        kerneldef : function
+            Kernel function definition. See the 'gp' module.
         n_min : int
             Number of training samples required before sampler can be trained
-        y_mean : float
-            Mean of the training target outputs
         acq_name : str
             A string specifying the type of acquisition function used
         explore_priority : float, optional
             The priority of exploration against exploitation
         """
-
         Sampler.__init__(self, lower, upper)
 
         if kerneldef is None:
@@ -79,89 +68,48 @@ class GaussianProcess(Sampler):
         else:
             self.kerneldef = kerneldef
 
+        self.n_min = n_min if n_min is not None else (4 ** self.dims)
+        self.acq_name = acq_name
+        self.explore_priority = explore_priority
         self.hyperparams = None
         self.regressors = None
         self.y_mean = None
-        self.acq_name = acq_name
-        self.explore_priority = explore_priority
         self.n_tasks = None
-        self.n_min = n_min if n_min is not None else (4 ** self.dims)
-
-    def set_kerneldef(self, kerneldef):
-        assert callable(kerneldef)
-        self.kerneldef = kerneldef
-
-    def get_kerneldef(self):
-        return self.kerneldef
-
-    def print_kernel(self, kerneldef):
-        # TO DO: Use the printer method to print the current kernel!
-        pass
-
-    def set_hyperparams(self, hyperparams):
-        if isinstance(hyperparams, list):
-            self.hyperparams = hyperparams
-        else:
-            self.hyperparams = [hyperparams for i in range(self.n_tasks)]
-
-        self.update_regressors()
-
-    def get_hyperparams(self):
-        return self.hyperparams
-
-    def set_acq_name(self, acq_name):
-        assert type(acq_name) is str
-        self.acq_name = acq_name
-
-    def get_acq_func(self):
-        return acq_defs(y_mean=self.y_mean,
-                        explore_priority=self.explore_priority)[self.acq_name]
-
-    def set_explore_priority(self, explore_priority):
-        self.explore_priority = explore_priority
-
-    def get_explore_priority(self):
-        return self.explore_priority
-
-    def set_min_training_size(self, n_min):
-        self.n_min = n_min
-
-    def get_min_training_size(self):
-        return self.n_min
 
     def update_y_mean(self):
         """
+        Update the mean of the target outputs
+
         .. note :: At anytime, 'y_mean' should be the mean of all the output
         targets including the virtual ones, since that is what we are training
         upon
+
+        .. note :: [Properties Modified]
+                    y
+                    y_mean
         """
         if not self.y:
             return
         self.y = atleast_2d(self.y)
         self.y_mean = self.y().mean(axis=0) if len(self.y) else None
 
-    def get_real_data(self):
-
-        assert self.X
-        assert self.y
-
-        real_flag = ~self.virtual_flag()
-        return self.X()[real_flag], self.y()[real_flag]
-
     def learn_hyperparams(self):
         """
-        Trains the Gaussian process used for the sampler
+        Learns the kernel hyperparameters from the data collected so far
+        Equivalent to training the Gaussian process used for the sampler
+        The training result is summarised by the hyperparameters of the kernel
 
-        .. note :: No properties are modified in this method
 
-        Parameters
-        ----------
-        X : numpy.ndarray
-            Training features for the Gaussian process model
-        y : numpy.ndarray
-            Training targets for the Gaussian process model
-        hyperparams : tuple
-            Hyperparameters of the Gaussian process
+        .. note :: Learns common hyperparameters between all tasks
+
+        .. note :: [Properties Modified]
+                    (None)
+
+        Returns
+        -------
+        list
+            A list of hyperparameters with each element being the
+            hyperparameters of each corresponding task
         """
         # Compose the kernel and setup the optimiser
         kernel = gp.compose(self.kerneldef)
@@ -181,17 +129,22 @@ class GaussianProcess(Sampler):
         # Each regressor will use the same hyperparameters!
         # We will use folds to do this
         folds = gp.Folds(self.n_tasks, [], [], [])
-        for i_stack in range(self.n_tasks):
+        for i_task in range(self.n_tasks):
             folds.X.append(self.X())
-            folds.flat_y.append(self.y[:, i_stack] - self.y_mean[i_stack])
+            folds.flat_y.append(self.y[:, i_task] - self.y_mean[i_task])
         hyperparams = gp.train.learn_folds(folds, kernel, opt_config)
 
         # Use the same hyperparameters for each of the stacks
-        return [hyperparams for i_stack in range(self.n_tasks)]
+        return [hyperparams for i_task in range(self.n_tasks)]
 
     def update_regressors(self):
         """
-        .. note :: The only property modified is 'GaussianProcess.regressors'.
+        Update the regressors of the Gaussian process model
+        Only makes sense to do this after hyperparameters are learned
+
+        .. note :: [Properties Modified]
+                    regressors
+
         .. note :: [Further Work] Use Cholesky Update here correctly to cache
                     regressors and improve efficiency
         """
@@ -204,21 +157,28 @@ class GaussianProcess(Sampler):
         # if self.regressors is None:
         kernel = gp.compose(self.kerneldef)
         self.regressors = []
-        for i_stack in range(self.n_tasks):
+        for i_task in range(self.n_tasks):
             self.regressors.append(
-                gp.condition(self.X(), self.y()[:, i_stack]
-                             - self.y_mean[i_stack],
-                             kernel, self.hyperparams[i_stack]))
+                gp.condition(self.X(), self.y()[:, i_task]
+                             - self.y_mean[i_task],
+                             kernel, self.hyperparams[i_task]))
 
         # # Otherwise, simply update the regressors
         # else:
-        #     for i_stack, regressor in enumerate(self.regressors):
-        #         regressor.y = y[:, i_stack] - self.y_mean[i_stack]
+        #     for i_task, regressor in enumerate(self.regressors):
+        #         regressor.y = y[:, i_task] - self.y_mean[i_task]
         #         regressor.alpha = gp.predict.alpha(regressor.y, regressor.L)
 
     def train(self):
         """
-        .. note :: Only self.hyperpararms and self.regressors are changed
+        Trains the Gaussian process model
+        A wrapper function that learns the hyperparameters and updates the
+        regressors, which is equivalent to a fully trained model that is
+        ready to perform Inference
+
+        .. note :: [Properties Modified]
+                    hyperparameters
+                    regressors
         """
         # Learn hyperparameters
         self.hyperparams = self.learn_hyperparams()
@@ -230,6 +190,12 @@ class GaussianProcess(Sampler):
         """
         Updates a job with its observed value
 
+        .. note :: [Properties Modified]
+                    y
+                    virtual_flag
+                    y_mean
+                    regressors
+
         Parameters
         ----------
         uid : str
@@ -240,8 +206,8 @@ class GaussianProcess(Sampler):
         Returns
         -------
         int
-            Index location in the data lists 'Delaunay.X' and
-            'Delaunay.y' corresponding to the job being updated
+            Index location in the data buffer 'GaussianProcess.X' and
+            'GaussianProcess.y' corresponding to the job being updated
         """
         y_true = atleast_1d(y_true)
         assert y_true.ndim == 1
@@ -254,6 +220,15 @@ class GaussianProcess(Sampler):
         """
         Picks the next location in parameter space for the next observation
         to be taken, with a Gaussian process model
+
+        .. note :: [Properties Modified]
+                    X
+                    y
+                    virtual_flag
+                    pending_results
+                    y_mean
+                    hyperparameters
+                    regressors
 
         Parameters
         ----------
@@ -325,14 +300,20 @@ class GaussianProcess(Sampler):
 
         return xq, uid
 
-    def predict(self, Xq):
+    def predict(self, Xq, real=True):
         """
         Infers the mean and variance of the Gaussian process at given locations
         using the data collected so far
 
+        .. note :: [Properties Modified]
+                    (None)
+
         Parameters
         ----------
-        Xq : Query points
+        Xq : numpy.ndarray
+            Query points
+        real : bool
+            To use only the real observations or also the virtual observations
 
         Returns
         -------
@@ -341,27 +322,81 @@ class GaussianProcess(Sampler):
         numpy.ndarray
             Variance of the prediction at the given locations
         """
-        # extract only the real observations for conditioning the predictor
-        # TODO Consider moving y_real inside of the for loop use regressor.y
+        assert self.hyperparams, "Sampler is not trained yet. " \
+                                 "Possibly not enough observations provided."
 
-        assert self.trained_flag, "Sampler is not trained yet. " \
-                                  "Possibly not enough observations provided."
+        # To use only the real data, extract the real data and compute the
+        # regressors using only the real data
+        if real:
+            X_real, y_real = self.get_real_data()
+            kernel = gp.compose(self.kerneldef)
+            regressors = [gp.condition(X_real, y_real[:, i_task]
+                          - self.y_mean[i_task],
+                          kernel, self.hyperparams[i_task])
+                          for i_task in range(self.n_tasks)]
 
-        real_flag = ~np.asarray(self.virtual_flag)
-        X_real = np.asarray(self.X)[real_flag]
-        y_real = np.asarray(self.y)[real_flag]
+        # Otherwise, just use the regressors we already have
+        else:
+            regressors = self.regressors
 
-        post_mu = []
-        post_var = []
+        # Compute using the standard predictor sequence
+        predictors = [gp.query(Xq, r) for r in regressors]
+        yq_exp = [gp.mean(r, p)
+                  for r, p in zip(regressors, predictors)]
+        yq_var = [gp.variance(r, p)
+                  for r, p in zip(regressors, predictors)]
 
-        for i_stack in range(self.n_tasks):
-            regressor = gp.condition(X_real, y_real[:, i_stack] - self.y_mean,
-                                     self.kernel, self.hyperparams[i_stack])
-            predictor = gp.query(Xq, regressor)
-            post_mu.append(gp.mean(regressor, predictor))
-            post_var.append(gp.variance(regressor, predictor))
+        return np.asarray(yq_exp).T + self.y_mean, np.asarray(yq_var).T
 
-        return np.asarray(post_mu).T + self.y_mean, np.asarray(post_var).T
+    def set_kerneldef(self, kerneldef):
+        assert callable(kerneldef)
+        self.kerneldef = kerneldef
+
+    def get_kerneldef(self):
+        return self.kerneldef
+
+    def print_kernel(self, kerneldef):
+        # TO DO: Use the printer method to print the current kernel!
+        pass
+
+    def set_hyperparams(self, hyperparams):
+        if isinstance(hyperparams, list):
+            self.hyperparams = hyperparams
+        else:
+            self.hyperparams = [hyperparams for i in range(self.n_tasks)]
+
+        self.update_regressors()
+
+    def get_hyperparams(self):
+        return self.hyperparams
+
+    def set_acq_name(self, acq_name):
+        assert type(acq_name) is str
+        self.acq_name = acq_name
+
+    def get_acq_func(self):
+        return acq_defs(y_mean=self.y_mean,
+                        explore_priority=self.explore_priority)[self.acq_name]
+
+    def set_explore_priority(self, explore_priority):
+        self.explore_priority = explore_priority
+
+    def get_explore_priority(self):
+        return self.explore_priority
+
+    def set_min_training_size(self, n_min):
+        self.n_min = n_min
+
+    def get_min_training_size(self):
+        return self.n_min
+
+    def get_real_data(self):
+
+        assert self.X
+        assert self.y
+
+        real_flag = ~self.virtual_flag()
+        return self.X()[real_flag], self.y()[real_flag]
 
 
 def atleast_2d(y):
@@ -372,6 +407,16 @@ def atleast_2d(y):
     ..note : This currently only accepts homogenous lists or arrays. It will
     NOT raise errors if the list is non-homogenous as it only uses the
     first element for checking.
+
+    Parameters
+    ----------
+    y : numpy.ndarray or list
+        The array or list to make 2D
+
+    Returns
+    -------
+    numpy.ndarray or list
+        The 2D array or list
     """
     if isinstance(y, list):
         if type(y[0]) is not np.ndarray:
@@ -397,6 +442,16 @@ def atleast_1d(y_obs):
     """
     Make sure the input comes in a standard vector form as a 'numpy.ndarray'
     type of one dimension.
+
+    Parameters
+    ----------
+    y : numpy.ndarray or list
+        The array or list to make 1D
+
+    Returns
+    -------
+    numpy.ndarray or list
+        The 1D array or list
     """
     if type(y_obs) is np.ndarray:
         if y_obs.ndim == 0:
@@ -416,12 +471,25 @@ def atleast_1d(y_obs):
 
 
 def acq_defs(y_mean=0, explore_priority=0.0001):
+    """
+    Generates a dictionary of acquisition functions
 
+    Parameters
+    ----------
+    y_mean : int or np.ndarray
+        The mean of the target outputs
+    explore_priority : float
+        Exploration priority against exploitation
+
+    Returns
+    -------
+    dict
+        A dictionary of acquisition functions to be used for the GP Sampler
+    """
     # Aquisition Functions
     # u: Mean matrix (n x n_tasks)
     # v: Variance matrix (n x n_tasks)
     # Returns an array of n values
-
     return {
         'var_sum': lambda u, v: np.sum(v, axis=1),
         'pred_max': lambda u, v: np.max(u + 3 * np.sqrt(v), axis=1),
