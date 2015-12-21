@@ -1,7 +1,8 @@
-from dora.active_sampling import Sampler, random_sample
+from dora.active_sampling import Sampler, random_sample, grid_sample
 import numpy as np
 import dora.regressors.gp as gp
 import scipy.stats as stats
+from dora.active_sampling.util import ArrayBuffer
 
 
 class GaussianProcess(Sampler):
@@ -35,9 +36,8 @@ class GaussianProcess(Sampler):
     --------
     Sampler : Base Class
     """
-    def __init__(self, lower, upper, X=None, y=None, add_train=True,
-                 kerneldef=None, hyperparams=None, n_min=None,
-                 acq_name='var_sum', explore_priority=0.0001, n_tasks=None):
+    def __init__(self, lower, upper, kerneldef=None, n_min=None,
+                 acq_name='var_sum', explore_priority=0.0001):
         """
         Initialises the GaussianProcess class
 
@@ -50,15 +50,13 @@ class GaussianProcess(Sampler):
             Lower or minimum bounds for the parameter space
         upper : array_like
             Upper or maximum bounds for the parameter space
-        X : numpy.ndarray
+        X : numpy.ndarray, optional
             Training features for the Gaussian process model
-        y : numpy.ndarray
+        y : numpy.ndarray, optional
             Training targets for the Gaussian process model
         n_tasks : int
             The number of Gaussian process 'stacks', which is also the
             dimensionality of the target output
-        add_train : boolean
-            Whether to add training data to the sampler or not
         hyperparams : tuple
             Hyperparameters of the Gaussian process
         n_min : int
@@ -81,18 +79,12 @@ class GaussianProcess(Sampler):
         else:
             self.kerneldef = kerneldef
 
-        self.hyperparams = hyperparams
+        self.hyperparams = None
         self.regressors = None
         self.y_mean = None
         self.acq_name = acq_name
         self.explore_priority = explore_priority
-
-        if n_tasks is None:
-            if y is None:
-                n_tasks = 1
-            else:
-                n_tasks = len(y[0])
-        self.n_tasks = n_tasks
+        self.n_tasks = None
         self.n_min = n_min if n_min is not None else (4 ** self.dims)
 
     def set_kerneldef(self, kerneldef):
@@ -137,34 +129,30 @@ class GaussianProcess(Sampler):
     def get_min_training_size(self):
         return self.n_min
 
-    def refresh(self):
-        if len(self.y):
-            real_x, real_y = self.get_real_data()
-            if real_y is not None:
-                real_y = atleast_2d(real_y)
-                self.y_mean = real_y.mean(axis=0)
-                self.n_tasks = len(self.y_mean)
-            else:
-                self.y_mean = None
-        else:
-            self.y_mean = None
+    def update_y_mean(self):
+        """
+        .. note :: At anytime, 'y_mean' should be the mean of all the output
+        targets including the virtual ones, since that is what we are training
+        upon
+        """
+        if not self.y:
+            return
+        self.y = atleast_2d(self.y)
+        self.y_mean = self.y().mean(axis=0) if len(self.y) else None
 
     def get_real_data(self):
 
-        assert len(self.X)
-        assert len(self.y)
+        assert self.X
+        assert self.y
 
         real_flag = ~self.virtual_flag()
-        X_real = np.asarray(self.X)[real_flag]
-        y_real = np.asarray(self.y)[real_flag]
+        return self.X()[real_flag], self.y()[real_flag]
 
-        return X_real, y_real
-
-    def learn_hyperparams(self, X, y):
+    def learn_hyperparams(self):
         """
         Trains the Gaussian process used for the sampler
 
-        .. note : No properties are modified in this method
+        .. note :: No properties are modified in this method
 
         Parameters
         ----------
@@ -183,49 +171,43 @@ class GaussianProcess(Sampler):
         opt_config.walltime = 50.0
         opt_config.global_opt = False
 
-        # Make consistent the data format
-        if type(X) is not np.ndarray:
-            X = np.asarray(X)
-        if type(y) is not np.ndarray:
-            y = np.asarray(y)
-
-        # Find the mean of the target outputs
-        y_mean = y.mean(axis=0)
-
         # Make sure the number of stacks recorded is consistent
         if self.n_tasks is None:
-            self.n_tasks = y_mean.shape[0]
+            self.n_tasks = self.y_mean.shape[0]
         else:
-            assert self.n_tasks == y_mean.shape[0]
+            assert self.n_tasks == self.y_mean.shape[0]
 
         # We need to train a regressor for each of the stacks
         # Each regressor will use the same hyperparameters!
         # We will use folds to do this
         folds = gp.Folds(self.n_tasks, [], [], [])
         for i_stack in range(self.n_tasks):
-            folds.X.append(X)
-            folds.flat_y.append(y[:, i_stack] - y_mean[i_stack])
+            folds.X.append(self.X())
+            folds.flat_y.append(self.y[:, i_stack] - self.y_mean[i_stack])
         hyperparams = gp.train.learn_folds(folds, kernel, opt_config)
 
         # Use the same hyperparameters for each of the stacks
         return [hyperparams for i_stack in range(self.n_tasks)]
 
     def update_regressors(self):
-        """ THE ONLY THING MODIFIED IS self.regressors """
-        """ I can probably cache the regressors more efficiently sometime
-        atleast right now this is correct """
-
+        """
+        .. note :: The only property modified is 'GaussianProcess.regressors'.
+        .. note :: [Further Work] Use Cholesky Update here correctly to cache
+                    regressors and improve efficiency
+        """
         if self.hyperparams is None:
             return
+            # raise ValueError('Hyperparameters are not learned yet.' +
+            #                  'Regressors cannot be updated.')
 
-        X, y = self.get_real_data()
         # Create the regressors if it hasn't already been
         # if self.regressors is None:
         kernel = gp.compose(self.kerneldef)
         self.regressors = []
         for i_stack in range(self.n_tasks):
             self.regressors.append(
-                gp.condition(X, y[:, i_stack] - self.y_mean[i_stack],
+                gp.condition(self.X(), self.y()[:, i_stack]
+                             - self.y_mean[i_stack],
                              kernel, self.hyperparams[i_stack]))
 
         # # Otherwise, simply update the regressors
@@ -234,12 +216,12 @@ class GaussianProcess(Sampler):
         #         regressor.y = y[:, i_stack] - self.y_mean[i_stack]
         #         regressor.alpha = gp.predict.alpha(regressor.y, regressor.L)
 
-    def train(self, X, y):
+    def train(self):
         """
-        .. note : Only self.hyperpararms and self.regressors are changed
+        .. note :: Only self.hyperpararms and self.regressors are changed
         """
         # Learn hyperparameters
-        self.hyperparams = self.learn_hyperparams(X, y)
+        self.hyperparams = self.learn_hyperparams()
 
         # Update the regressors
         self.update_regressors()
@@ -261,16 +243,12 @@ class GaussianProcess(Sampler):
             Index location in the data lists 'Delaunay.X' and
             'Delaunay.y' corresponding to the job being updated
         """
-        if type(y_true) is not np.ndarray:
-            if type(y_true) is list:
-                y_true = np.array(y_true)
-            else:
-                y_true = np.array([y_true])
+        y_true = atleast_1d(y_true)
+        assert y_true.ndim == 1
         ind = self._update(uid, y_true)
-        self.refresh()
+        self.update_y_mean()
         self.update_regressors()
         return ind
-
 
     def pick(self, n_test=500, train=False):
         """
@@ -282,6 +260,8 @@ class GaussianProcess(Sampler):
         n_test : int, optional
             The number of random query points across the search space to pick
             from
+        train : bool, optional
+            To train the model or not before picking, if allowed
 
         Returns
         -------
@@ -294,7 +274,7 @@ class GaussianProcess(Sampler):
         n = len(self.X)
         n_corners = 2 ** self.dims
 
-        self.refresh()
+        self.update_y_mean()
 
         # If we do not have enough samples yet, randomly sample for more!
         if n < self.n_min:
@@ -310,7 +290,7 @@ class GaussianProcess(Sampler):
         else:
 
             if train or self.regressors is None:
-                self.train(self.X, self.y)
+                self.train()
 
             # Randomly sample the volume for test points
             Xq = random_sample(self.lower, self.upper, n_test)
@@ -341,8 +321,7 @@ class GaussianProcess(Sampler):
         # Place a virtual observation...
         if yq_exp is None:
             yq_exp = np.zeros(self.n_tasks)  # can't insert None
-
-        uid = Sampler._assign(self, xq, yq_exp)
+        uid = Sampler._assign(self, xq, atleast_1d(yq_exp))
 
         return xq, uid
 
@@ -387,25 +366,53 @@ class GaussianProcess(Sampler):
 
 def atleast_2d(y):
     """
-    ..note : Assumes homogenous list or arrays
+    Make sure the input data is two dimensional, either in the form of a list
+    of vectors, or a matrix as a 'numpy.ndarray' of two dimensions.
+
+    ..note : This currently only accepts homogenous lists or arrays. It will
+    NOT raise errors if the list is non-homogenous as it only uses the
+    first element for checking.
     """
     if isinstance(y, list):
         if type(y[0]) is not np.ndarray:
             return [np.array([y_i]) for y_i in y]
-        elif len(y[0].shape) == 1:
+        elif y[0].ndim == 1:
             return y
         else:
             raise ValueError("List element already has more than 1 dimension")
     elif isinstance(y, np.ndarray):
-        if len(y.shape) == 1:
+        if y.ndim == 1:
             return y[:, np.newaxis]
-        elif len(y.shape) == 2:
+        elif y.ndim == 2:
             return y
         else:
             raise ValueError("Object already has more than 2 dimensions")
+    elif isinstance(y, ArrayBuffer):
+        return y
     else:
         raise ValueError('Object is not a list or an array')
 
+
+def atleast_1d(y_obs):
+    """
+    Make sure the input comes in a standard vector form as a 'numpy.ndarray'
+    type of one dimension.
+    """
+    if type(y_obs) is np.ndarray:
+        if y_obs.ndim == 0:
+            return y_obs.flatten()
+        elif y_obs.ndim > 1:
+            raise ValueError('Target output is not vector valued!')
+        else:
+            return y_obs
+    else:
+        if type(y_obs) is list:
+            return np.array(y_obs)
+        elif np.isscalar(y_obs):
+            return np.array([y_obs])
+        else:
+            raise ValueError('Unexpected target output type: %s'
+                             % str(type(y_obs)))
 
 
 def acq_defs(y_mean=0, explore_priority=0.0001):
@@ -432,4 +439,3 @@ def acq_defs(y_mean=0, explore_priority=0.0001):
                                        loc=0.5,
                                        scale=explore_priority)).sum(axis=1)
     }
-
