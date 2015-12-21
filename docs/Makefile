@@ -52,6 +52,10 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
+ghp: html
+	ghp-import -n -p $(BUILDDIR)/html
+	@echo "Deployment to Github Pages finished."
+
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo

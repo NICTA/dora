@@ -1,16 +1,14 @@
 Active Sampling - Python API
 =============================
+.. still something wrong in this autogeneration path
 
 .. currentmodule:: dora.active_sampling
 
 .. autosummary::
    :toctree: generated/
 
-   Base_Sampler
-   Delaunay
-   Gaussian_Process
-   Stacked_Gaussian_Process
-   active_sampling
-   candidates
-   grid_sample
-   random_sample
+
+   util.ArrayBuffer
+   active_sampling.Sampler 
+   active_sampling.Delaunay
+   active_sampling.GaussianProcess
