@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dora.active_sampling.gp_sampler.GaussianProcess &mdash; Dora 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Dora 0.1 documentation" href="../index.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dora-active-sampling-gp-sampler-gaussianprocess">
+<h1>dora.active_sampling.gp_sampler.GaussianProcess<a class="headerlink" href="#dora-active-sampling-gp-sampler-gaussianprocess" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess">
+<em class="property">class </em><tt class="descclassname">dora.active_sampling.gp_sampler.</tt><tt class="descname">GaussianProcess</tt><big>(</big><em>lower</em>, <em>upper</em>, <em>kerneldef=None</em>, <em>n_min=None</em>, <em>acq_name='var_sum'</em>, <em>explore_priority=0.0001</em><big>)</big><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>GaussianProcess Class</p>
+<p>Inherits from the Sampler class and augments pick and update with the
+mechanics of the GP method</p>
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.kerneldef">
+<tt class="descname">kerneldef</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.kerneldef" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>function</em> -- Kernel function definition. See the 'gp' module.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.n_min">
+<tt class="descname">n_min</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.n_min" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> -- Number of training samples required before sampler can be trained</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.acq_name">
+<tt class="descname">acq_name</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.acq_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> -- A string specifying the type of acquisition function used</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.explore_priority">
+<tt class="descname">explore_priority</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.explore_priority" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float, optional</em> -- The priority of exploration against exploitation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.hyperparams">
+<tt class="descname">hyperparams</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.hyperparams" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy.ndarray</em> -- The hyperparameters of the Gaussian Process Inference Model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.regressors">
+<tt class="descname">regressors</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.regressors" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list</em> -- List of regressor objects. See 'gp.types.RegressionParams'</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.y_mean">
+<tt class="descname">y_mean</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.y_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> -- Mean of the training target outputs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.n_tasks">
+<tt class="descname">n_tasks</tt><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.n_tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> -- Number of tasks or, equivalently, number of target outputs</p>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><tt class="xref py py-class docutils literal"><span class="pre">Sampler</span></tt></dt>
+<dd>Base Class</dd>
+</dl>
+</div>
+<dl class="method">
+<dt id="dora.active_sampling.gp_sampler.GaussianProcess.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>lower</em>, <em>upper</em>, <em>kerneldef=None</em>, <em>n_min=None</em>, <em>acq_name='var_sum'</em>, <em>explore_priority=0.0001</em><big>)</big><a class="headerlink" href="#dora.active_sampling.gp_sampler.GaussianProcess.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialises the GaussianProcess class</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently only supports rectangular type restrictions on the</p>
+</div>
+<p>parameter space</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>lower</strong> (<em>array_like</em>) -- Lower or minimum bounds for the parameter space</li>
+<li><strong>upper</strong> (<em>array_like</em>) -- Upper or maximum bounds for the parameter space</li>
+<li><strong>kerneldef</strong> (<em>function</em>) -- Kernel function definition. See the 'gp' module.</li>
+<li><strong>n_min</strong> (<em>int</em>) -- Number of training samples required before sampler can be trained</li>
+<li><strong>acq_name</strong> (<em>str</em>) -- A string specifying the type of acquisition function used</li>
+<li><strong>explore_priority</strong> (<em>float, optional</em>) -- The priority of exploration against exploitation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#dora.active_sampling.gp_sampler.GaussianProcess.__init__" title="dora.active_sampling.gp_sampler.GaussianProcess.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(lower,&nbsp;upper[,&nbsp;kerneldef,&nbsp;n_min,&nbsp;...])</td>
+<td>Initialises the GaussianProcess class</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_acq_func</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_explore_priority</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_hyperparams</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_kerneldef</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_min_training_size</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">get_real_data</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">learn_hyperparams</span></tt>()</td>
+<td>Learns the kernel hyperparameters from the data collected so far</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">pick</span></tt>([n_test,&nbsp;train])</td>
+<td>Picks the next location in parameter space for the next observation</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">predict</span></tt>(Xq[,&nbsp;real])</td>
+<td>Infers the mean and variance of the Gaussian process at given locations</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">print_kernel</span></tt>(kerneldef)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">set_acq_name</span></tt>(acq_name)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">set_explore_priority</span></tt>(explore_priority)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">set_hyperparams</span></tt>(hyperparams)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">set_kerneldef</span></tt>(kerneldef)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">set_min_training_size</span></tt>(n_min)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">train</span></tt>()</td>
+<td>Trains the Gaussian process model</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">update</span></tt>(uid,&nbsp;y_true)</td>
+<td>Updates a job with its observed value</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">update_regressors</span></tt>()</td>
+<td>Update the regressors of the Gaussian process model</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">update_y_mean</span></tt>()</td>
+<td>Update the mean of the target outputs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Dora 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alistair Reid and Simon O&#39;Callaghan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
