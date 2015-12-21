@@ -1,0 +1,30 @@
+dora.active_sampling.util.ArrayBuffer
+=====================================
+
+.. currentmodule:: dora.active_sampling.util
+
+.. autoclass:: ArrayBuffer
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ArrayBuffer.__init__
+      ~ArrayBuffer.append
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ArrayBuffer.initial_size
+      ~ArrayBuffer.shape
+   
+   
