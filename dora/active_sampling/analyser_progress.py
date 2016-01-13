@@ -1,6 +1,7 @@
 import numpy as np
 from dora.regressors import gp
-from dora.regressors.active_sampling import StackedGaussianProcess as StackedGP
+from dora.active_sampling import GaussianProcess as GPsampler
+from dora.regressors.active_sampling import GaussianProcess as GPsampler
 import logging
 import pickle
 import visvis
@@ -9,7 +10,7 @@ log = logging.getLogger(__name__)
 
 path = 'logs/'
 filename = 'sampler_2015_09_18__17_25_06.pkl'
-data = pickle.load(open(path+filename,"rb"))
+data = pickle.load(open(path+filename, "rb"))
 
 # Use the redis workers to evaluate an initial batch of jobs
 X_train = np.asarray(data['X'])
@@ -22,7 +23,7 @@ meany = np.mean(y_train)
 # y_train -= np.mean(y_train)
 log.info('Init Sampler')
 # import ipdb; ipdb.set_trace()
-sampler = StackedGP(lower, upper, X_train, y_train, mean=meany, n_stacks=n_GP_slices,
+sampler = GPsampler(lower, upper, X_train, y_train, mean=meany, n_stacks=n_GP_slices,
                     add_train_data=True)
 qx, qy = np.mgrid[lower[0]:upper[0]:30j, lower[1]:upper[1]:30j]
 

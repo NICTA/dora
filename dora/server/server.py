@@ -1,6 +1,6 @@
 import flask as fl
 from dora.server.response import returns_json
-from computers.active_sampling import Stacked_Gaussian_Process as StackedGP
+from dora.active_sampling import GaussianProcess as GPsampler
 import numpy as np
 
 app = fl.Flask(__name__)
@@ -51,7 +51,7 @@ def initialise_sampler():
 
     samplerid = len(fl.current_app.samplers)
     fl.current_app.samplers[samplerid] \
-        = StackedGP(initDict['lower'], initDict['upper'], **mapDict)
+        = GPsampler(initDict['lower'], initDict['upper'], **mapDict)
 
     obs_uri = fl.url_for('.get_query', samplerid=samplerid, _external=True)
     pred_uri = fl.url_for('.predict', samplerid=samplerid, _external=True)
