@@ -1,2 +1,2 @@
-from . import response
-from .server import *
+from . import response  # NOQA
+from .server import *  # NOQA

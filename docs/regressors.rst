@@ -15,7 +15,6 @@ models that scale to large data. See more at:
     http://github.com/nicta/revrand
 
 
-
 Gaussian Process Regression
 ----------------------------
 

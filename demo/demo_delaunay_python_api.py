@@ -18,6 +18,7 @@ import logging
 import matplotlib.pyplot as pl
 import matplotlib as mpl
 import dora.active_sampling as sampling
+import time
 from example_processes import simulate_measurement
 
 # The plotting subpackage is throwing FutureWarnings
@@ -45,6 +46,7 @@ def main():
     plot_triggers = [8, 9, 10, 50, 100, target_samples - 1]
 
     # Run the active sampling:
+    ta = time.time()
     for i in range(target_samples):
 
         xq, uid = sampler.pick()
@@ -54,6 +56,8 @@ def main():
         if i in plot_triggers:
             plot_progress(plots, sampler)
 
+    tb = time.time()
+    print("That took {0:.3f} seconds!".format(tb-ta))
     pl.show()
 
 
@@ -63,19 +67,20 @@ def plot_progress(plots, sampler):
     custom = mpl.colors.ListedColormap(cols * 0.5 + 0.5)
     fig.add_subplot(*(plots['shape'] + (1 + plots['count'],)))
     plots['count'] += 1
-    y = np.asarray(sampler.y)
+    y = sampler.y()
     w = 4. / np.log(1 + len(y))
 
     if isinstance(sampler, sampling.Delaunay):
         # todo (AL): only show the measured samples!
-        X = np.asarray(sampler.X)
-
-        pl.tripcolor(X[:, 0], X[:, 1], y, shading='gouraud', edgecolors='k',
-                     linewidth=w, cmap=custom)
+        X = sampler.X()
+        if y.ndim == 2:
+            y = y[:, 0]
+        pl.tripcolor(X[:, 0], X[:, 1], y, shading='gouraud',
+                     edgecolors='k', linewidth=w, cmap=custom)
         pl.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
 
     elif isinstance(sampler, sampling.GaussianProcess):
-        X = sampler.regressor.X
+        X = sampler.regressor.X()
         minv = np.min(X, axis=0)
         maxv = np.max(X, axis=0)
         res = 400

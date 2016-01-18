@@ -27,7 +27,7 @@ def main():
     upper = [1, 1]
 
     # Initialise the sampler
-    sampler = sampling.GaussianProcess(lower, upper, acq_name = 'sigmoid')
+    sampler = sampling.GaussianProcess(lower, upper, acq_name='sigmoid')
 
     # Set up plotting
     plot_triggers = [20, 50, 100, 150, 200, 300]
@@ -45,7 +45,7 @@ def main():
     for i in range(n_target_samples):
 
         # Pick a location to sample
-        xq, uid = sampler.pick(train = train_triggers[i])
+        xq, uid = sampler.pick(train=train_triggers[i])
 
         # Sample that location
         yq_true = simulate_measurement(xq)
@@ -55,8 +55,8 @@ def main():
 
         # Plot the sampler progress
         if i in plot_triggers:
-            sampler.train(sampler.X, sampler.y)
-            pltutils.plot_sampler_progress(sampler, ax = next(axs))
+            sampler.train()
+            pltutils.plot_sampler_progress(sampler, ax=next(axs))
 
         logging.info('Iteration: %d' % i)
 
