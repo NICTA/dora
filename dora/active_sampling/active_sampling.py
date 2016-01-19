@@ -61,6 +61,7 @@ class Sampler:
         self.y = ArrayBuffer()
         self.virtual_flag = ArrayBuffer()
         self.pending_results = {}
+        self.n_outputs = None  # Unknown
 
     def pick(self):
         """
@@ -133,8 +134,13 @@ class Sampler:
         # Place a virtual observation onto the collected data
         n = len(self.X)
         self.X.append(xq)
-        self.y.append(yq_exp)
         self.virtual_flag.append(True)
+
+        # If we get a None, insert zeros instead
+        if yq_exp is None and self.n_outputs is not None:
+            self.y.append(np.zeros(self.n_outputs))
+        else:
+            self.y.append(yq_exp)  # then add the real one
 
         # Create an uid for this observation
         # m = hashlib.md5()
@@ -146,6 +152,7 @@ class Sampler:
         self.pending_results[uid] = n
 
         return uid
+
 
     def _update(self, uid, y_true):
         """
@@ -171,6 +178,15 @@ class Sampler:
 
         # Kill the job and update collected data with true observation
         ind = self.pending_results.pop(uid)
+
+        # If the user has been pushing Nones until now, we will init properly
+        if self.n_outputs is None:
+            self.n_outputs = len(np.atleast_1d(y_true))
+            pending_count = len(self.y)
+            self.y = ArrayBuffer()
+            for _ in range(pending_count):
+                self.y.append(np.zeros(self.n_outputs))
+
         self.y()[ind] = y_true
         self.virtual_flag()[ind] = False
 

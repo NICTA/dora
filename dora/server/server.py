@@ -2,8 +2,12 @@ import flask as fl
 from dora.server.response import returns_json
 from dora.active_sampling import GaussianProcess as GPsampler
 import numpy as np
+import logging
 
 app = fl.Flask(__name__)
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 @app.route('/samplers', methods=['POST'])
@@ -33,17 +37,11 @@ def initialise_sampler():
     """
     initDict = fl.request.json
 
-    if 'X_train' in initDict.keys():
-        initDict['X_train'] = np.asarray(initDict['X_train'])
-        initDict['y_train'] = np.asarray(initDict['y_train'])
+    mapping = {'mean': 'mean', 'n_train_threshold': 'n_train',
+               'acquisition_func': 'acq_name',
+               'explore_factor': 'explore_priority'}
 
-    mapping = {'X_train': 'X_train', 'y_train': 'y_train',
-               'add_train_data': 'add_train_data',
-               'n_outputs': 'n_stacks',
-               'mean': 'mean', 'n_train_threshold': 'n_train_threshold',
-               'acquisition_func': 'acq_func',
-               'explore_factor': 'explore_factor'}
-
+    # Ignore additional parameters
     mapDict = {mapping[k]: v for k, v in initDict.items() if k in mapping}
 
     if not hasattr(fl.current_app, 'samplers'):
@@ -150,10 +148,11 @@ def retrieve_settings(samplerid):
     lower = fl.current_app.samplers[int(samplerid)].lower.tolist()
     upper = fl.current_app.samplers[int(samplerid)].upper.tolist()
 
-    n_stacks = fl.current_app.samplers[int(samplerid)].n_stacks
+    # n_stacks = fl.current_app.samplers[int(samplerid)].n_stacks
 
-    mean = fl.current_app.samplers[int(samplerid)].mean
-    trained_flag = fl.current_app.samplers[int(samplerid)].trained_flag
+    mean = list(fl.current_app.samplers[int(samplerid)].y_mean)
+    # trained_flag = fl.current_app.samplers[int(samplerid)].trained_flag
+
     # TODO <SIMON> add ability to retrieve full state
     # hyper_params = fl.current_app.samplers[int(samplerid)].hyper_params
     # regressors = [reg.tolist() for reg in
@@ -171,8 +170,10 @@ def retrieve_settings(samplerid):
     # virt_X = [x for x, real in zip(X, real_id) if real is False]
     # virt_y = [y for y, real in zip(y, real_id) if real is False]
 
-    response_data = {"lower": lower, "upper": upper, 'n_stacks': n_stacks,
-                     "mean": mean, "trained_flag": trained_flag}
+    response_data = {"lower": lower, "upper": upper,
+                     "mean": mean}
+    # , "trained_flag": trained_flag}
+    #'n_stacks': n_stacks,
     return response_data, 200
 
 if __name__ == '__main__':

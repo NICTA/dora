@@ -12,18 +12,20 @@ from scipy.linalg import solve_triangular
 import scipy.linalg as la
 import copy
 
+
 # Compute the log marginal likelihood
 def negative_log_marginal_likelihood(Y, L, alpha):
     n = L.shape[0]
-    t1 = np.dot(Y.ravel(),alpha.ravel())
+    t1 = np.dot(Y.ravel(), alpha.ravel())
     log_det_k = 2.*np.sum(np.log(np.diag(L)))
     nll = 0.5 * (t1 + log_det_k + n * np.log(2.0 * np.pi))
     return nll
 
+
 # neCompute the leave one out neg log prob
 def negative_log_prob_cross_val(Y, L, alpha):
     n = L.shape[0]
-    Kinv = np.linalg.solve(L.T,solve_triangular(L,np.eye(n),lower=True))
+    Kinv = np.linalg.solve(L.T, solve_triangular(L, np.eye(n), lower=True))
     logprob = 0
     for i in range(n):
         Kinvii = Kinv[i][i]
@@ -32,11 +34,13 @@ def negative_log_prob_cross_val(Y, L, alpha):
         logprob += stats.norm.logpdf(Y[i], loc=mu_i, scale=sig2i)
     return -float(logprob)
 
+
 # The inverse of opt_config_copys_to_vector - gets called a lot
 def unpack(theta, unpackinfo):
     return [[theta[tup[0]].reshape(tup[1]) if tup[1]!=() else theta[tup[0]][0] for tup in item] for item in unpackinfo]
 
-def make_folds(X,y, target_size, method='random'):
+
+def make_folds(X, y, target_size, method='random'):
     n_Y = y.shape[0]
     n_folds = int(n_Y/target_size) + int(target_size>n_Y)
 
@@ -45,7 +49,7 @@ def make_folds(X,y, target_size, method='random'):
     elif method == 'cluster':
         # Thanks scikit
         print('Clustering [sklearn.cluster] inputs')
-        clusterer = skcluster.MiniBatchKMeans(n_clusters=n_folds,batch_size=1000)
+        clusterer = skcluster.MiniBatchKMeans(n_clusters=n_folds, batch_size=1000)
         fold_assignment = clusterer.fit_predict(X)
     elif method == 'rcluster':
         print('Clustering [sklearn.cluster] inputs')
@@ -66,13 +70,13 @@ def make_folds(X,y, target_size, method='random'):
             assign_prob[i] = row
 
         # now use these as selection probabilities
-        assign_prob = np.cumsum(assign_prob,axis=0)
+        assign_prob = np.cumsum(assign_prob, axis=0)
 
         rvec = np.random.random(n_X)
-        fold_assignment = np.sum(rvec[np.newaxis,:] <assign_prob,axis=0)
+        fold_assignment = np.sum(rvec[np.newaxis, :] <assign_prob, axis=0)
 
         # veryfy fold assignment?
-        # pl.scatter(X[:,0], X[:,1], c=fold_assignment)
+        # pl.scatter(X[:, 0], X[:, 1], c=fold_assignment)
         # pl.show()
         # exit()
 
@@ -80,13 +84,13 @@ def make_folds(X,y, target_size, method='random'):
         raise NameError('Unrecognised fold method:'+method)
 
     fold_inds = np.unique(fold_assignment)
-    folds = Folds(n_folds,[],[], [])  # might contain lists in the multitask case
+    folds = Folds(n_folds, [], [], [])  # might contain lists in the multitask case
     where = lambda y, v:y[np.where(v)[0]]
     for f in fold_inds:
-        folds.X.append(where(X,fold_assignment==f))
+        folds.X.append(where(X, fold_assignment==f))
         folds.Y.append(where(y, fold_assignment==f))
         folds.flat_y.append(where(y, fold_assignment==f))
-    
+
     return folds
 
 # Extended to allow lists of arrays of opt_config_copyeters for sigma, signal and noise so we can use multiple kernels etc
@@ -102,18 +106,18 @@ def pack(theta, noisepar):
             aopt_config_copys.append(newval)
             packshape = aitem.shape
             nextcount = count+newval.shape[0]
-            unpackinfo[ind].append((list(range(count,nextcount)), packshape)) # had to make these lists for comptibility with python3.4
+            unpackinfo[ind].append((list(range(count, nextcount)), packshape))  # had to make these lists for comptibility with python3.4
             count = nextcount
     opt_config_copys = np.concatenate(aopt_config_copys)
     return opt_config_copys, unpackinfo
 
 def condition(X, y, kernelFn, hyper_opt_config_copys):
-    assert len(y.shape) == 1    #y must be shapeless (n,)
+    assert len(y.shape) == 1    #y must be shapeless (n, )
     h_kernel, noise_std = hyper_opt_config_copys
     kernel = lambda x1, x2: kernelFn(x1, x2, h_kernel)
     noise_vector = predict.noise_vector(X, noise_std)
     L = linalg.cholesky(X, kernel, noise_vector)
-    alpha = predict.alpha(y,L)
+    alpha = predict.alpha(y, L)
     return types.RegressionParams(X, L, alpha, kernel, y, noise_std)
 
 
@@ -128,7 +132,7 @@ def chol_up(L, Sn, Snn, Snn_noise_std_vec):
     return np.concatenate((top, bottom), axis=0)
 
 
-def chol_up_insert(L, V12, V23, V22, Snn_noise_std_vec,insertionID):
+def chol_up_insert(L, V12, V23, V22, Snn_noise_std_vec, insertionID):
 
     R = L.T
     N = R.shape[0]
@@ -138,17 +142,17 @@ def chol_up_insert(L, V12, V23, V22, Snn_noise_std_vec,insertionID):
     R33 = R[insertionID:, insertionID:]
     S11 = R11
     S12 = la.solve_triangular(R11.T, V12, lower=True)
-    S13 = R[:insertionID,insertionID:]
+    S13 = R[:insertionID, insertionID:]
     S22 = linalg.jitchol(V22+noise - S12.T.dot(S12)).T
-    if V23.shape[1] != 0: # The data is being inserted between columns
-        S23 = la.solve_triangular(S22.T,(V23-S12.T.dot(S13)), lower=True)
+    if V23.shape[1] != 0:  # The data is being inserted between columns
+        S23 = la.solve_triangular(S22.T, (V23-S12.T.dot(S13)), lower=True)
         S33 = linalg.jitchol(R33.T.dot(R33)-S23.T.dot(S23)).T
-    else: #the data is being appended at the end of the matrix
-        S23 = np.zeros((n,0))
-        S33 = np.zeros((0,0))
+    else:  #the data is being appended at the end of the matrix
+        S23 = np.zeros((n, 0))
+        S33 = np.zeros((0, 0))
     On1 = np.zeros((n, insertionID))
     On2 = np.zeros((N-insertionID, insertionID))
-    On3 = np.zeros((N-insertionID,n))
+    On3 = np.zeros((N-insertionID, n))
 
     top = np.concatenate((S11, S12, S13), axis=1)
     middle = np.concatenate((On1, S22, S23), axis=1)
@@ -168,12 +172,12 @@ def chol_down(L, remIDList):
         n = S.shape[0]
         On = np.zeros((n-(remID+1), remID))
         # Incremental cholesky downdate
-        top = np.concatenate((S[:remID,:remID],S[:(remID),(remID+1):]),axis=1)
-        S23 = S[remID,(remID+1):][np.newaxis,:]
+        top = np.concatenate((S[:remID, :remID], S[:(remID), (remID+1):]), axis=1)
+        S23 = S[remID, (remID+1):][np.newaxis, :]
         S23TS23 = S23.T.dot(S23)
-        S33TS33 = S[(remID+1):,(remID+1):].T.dot(S[(remID+1):,(remID+1):])
+        S33TS33 = S[(remID+1):, (remID+1):].T.dot(S[(remID+1):, (remID+1):])
         R33 = linalg.jitchol(S23TS23+S33TS33).T
-        bottom = np.concatenate((On,R33),axis=1)
+        bottom = np.concatenate((On, R33), axis=1)
         L = np.concatenate((top, bottom), axis=0).T
         remIDList -= 1
     return L
@@ -185,7 +189,7 @@ def add_data(newX, newY, regressor, query=None, insertionID=None):
     assert(len(newX.shape) == 2)
     assert(len(newY.shape) == 1)
 
-    if not(insertionID): #No insterionID provide. Append data to the end.
+    if not(insertionID):  #No insterionID provide. Append data to the end.
         # Compute the new rows and columns of the covariance matrix
         Kxn = regressor.kernel(regressor.X, newX)
         Knn = regressor.kernel(newX, newX)
@@ -205,12 +209,12 @@ def add_data(newX, newY, regressor, query=None, insertionID=None):
             query.K_xxs = np.vstack((query.K_xxs, Kxsn))
     else:
         # Compute the new rows and columns of the covariance matrix
-        Kx1n = regressor.kernel(regressor.X[:insertionID,:], newX)
-        Knx2 = regressor.kernel(newX,regressor.X[insertionID:,:])
+        Kx1n = regressor.kernel(regressor.X[:insertionID, :], newX)
+        Knx2 = regressor.kernel(newX, regressor.X[insertionID:, :])
         Knn = regressor.kernel(newX, newX)
         nn_noise_std = predict.noise_vector(newX, regressor.noise_std)
-        regressor.X = np.vstack((regressor.X[:insertionID,:], newX,
-                                 regressor.X[insertionID:,:]))
+        regressor.X = np.vstack((regressor.X[:insertionID, :], newX,
+                                 regressor.X[insertionID:, :]))
         regressor.y = np.hstack((regressor.y[:insertionID], newY,
                                  regressor.y[insertionID:]))
         regressor.L = chol_up_insert(regressor.L, Kx1n, Knx2, Knn,
@@ -244,14 +248,14 @@ def remove_data(regressor, remID, query=None):
         query.K_xxs = np.delete(query.K_xxs, remID, axis=0)
 
 
-def learn(X, Y, cov_fn, optParams, optCrition='logMarg', returnLogMarg = False, 
-    verbose=True):
+def learn(X, Y, cov_fn, optParams, optCrition='logMarg', returnLogMarg=False,
+          verbose=False):
     # Normal criterion with all the data
     def criterion(sigma, noise):
-        k = lambda x1,x2: cov_fn(x1, x2, sigma)
+        k = lambda x1, x2: cov_fn(x1, x2, sigma)
         X_noise = predict.noise_vector(X, noise)
         L = linalg.cholesky(X, k, X_noise)
-        a = predict.alpha(Y,L)
+        a = predict.alpha(Y, L)
         if optCrition == 'logMarg':
             val = negative_log_marginal_likelihood(Y, L, a)
         elif optCrition == 'crossVal':
@@ -271,18 +275,18 @@ def learn(X, Y, cov_fn, optParams, optCrition='logMarg', returnLogMarg = False,
         return sigma, noise
 
 
-def learn_folds(folds, cov_fn, optParams, optCrition='logMarg', verbose=True):
+def learn_folds(folds, cov_fn, optParams, optCrition='logMarg', verbose=False):
     # Same as learn, but using multiple folds jointly
     # todo: distribute computation!
     def criterion(sigma, noise):
-        k = lambda x1,x2: cov_fn(x1, x2, sigma)
+        k = lambda x1, x2: cov_fn(x1, x2, sigma)
         val = 0
         for f in range(folds.n_folds):
             Xf = folds.X[f]
             Yf = folds.flat_y[f]
             Xf_noise = predict.noise_vector(Xf, noise)
             Lf = linalg.cholesky(Xf, k, Xf_noise)
-            af = predict.alpha(Yf,Lf)
+            af = predict.alpha(Yf, Lf)
             if optCrition == 'logMarg':
                 val += negative_log_marginal_likelihood(Yf, Lf, af)
             elif optCrition == 'crossVal':
@@ -325,6 +329,7 @@ def optimise_hypers(criterion, optParams):
     sigma, noise_sigma = unpack(theta_opt, unpackinfo)
     opt_val = opt.last_optimum_value()
     return sigma, noise_sigma, opt_val
+
 
 def batch_start(opt_config, initial_values):
     """

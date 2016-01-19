@@ -27,25 +27,24 @@ def main():
     upper = [1, 1]
 
     # Initialise the sampler
-    sampler = sampling.GaussianProcess(lower, upper, acq_name='sigmoid')
+    sampler = sampling.GaussianProcess(lower, upper, acq_name='sigmoid',
+                                       n_train=49)
 
     # Set up plotting
-    plot_triggers = [20, 50, 100, 150, 200, 300]
+    plot_triggers = [50, 100, 150, 200, 300]
     n_triggers = len(plot_triggers)
     plt_size = pltutils.split_subplots(n_triggers)
     fig = pl.figure()
     axs = iter([fig.add_subplot(*(plt_size + (i + 1,)))
                 for i in range(n_triggers)])
 
-    # We do not have to train every iteration
-    train_triggers = [False if i % 25 > 0 else True
-                      for i in range(n_target_samples)]
+    retrain = [100, 200]
 
     # Start active sampling!
     for i in range(n_target_samples):
 
         # Pick a location to sample
-        xq, uid = sampler.pick(train=train_triggers[i])
+        xq, uid = sampler.pick()
 
         # Sample that location
         yq_true = simulate_measurement(xq)
@@ -53,9 +52,12 @@ def main():
         # Update the sampler about the new observation
         sampler.update(uid, yq_true)
 
+        if i in retrain:
+            sampler.train()
+
         # Plot the sampler progress
         if i in plot_triggers:
-            sampler.train()
+            # sampler.train()  Be careful - retraining on biased data
             pltutils.plot_sampler_progress(sampler, ax=next(axs))
 
         logging.info('Iteration: %d' % i)

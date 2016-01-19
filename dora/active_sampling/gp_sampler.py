@@ -3,6 +3,9 @@ import numpy as np
 import dora.regressors.gp as gp
 import scipy.stats as stats
 from dora.active_sampling.util import ArrayBuffer
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class GaussianProcess(Sampler):
@@ -35,7 +38,8 @@ class GaussianProcess(Sampler):
     --------
     Sampler : Base Class
     """
-    def __init__(self, lower, upper, kerneldef=None, n_min=None,
+
+    def __init__(self, lower, upper, kerneldef=None, n_train=50,
                  acq_name='var_sum', explore_priority=0.0001):
         """
         Initialises the GaussianProcess class
@@ -60,15 +64,8 @@ class GaussianProcess(Sampler):
         """
         Sampler.__init__(self, lower, upper)
 
-        if kerneldef is None:
-            onez = np.ones(self.dims)
-            self.kerneldef = lambda h, k: \
-                h(1e-3, 1e+2, 1) * k('matern3on2',
-                                     h(1e-2 * onez, 1e+3 * onez, 1e+0 * onez))
-        else:
-            self.kerneldef = kerneldef
-
-        self.n_min = n_min if n_min is not None else (4 ** self.dims)
+        self.kerneldef = kerneldef
+        self.n_min = n_train
         self.acq_name = acq_name
         self.explore_priority = explore_priority
         self.hyperparams = None
@@ -90,7 +87,6 @@ class GaussianProcess(Sampler):
         """
         if not self.y:
             return
-        self.y = atleast_2d(self.y)
         self.y_mean = self.y().mean(axis=0) if len(self.y) else None
 
     def learn_hyperparams(self):
@@ -132,7 +128,10 @@ class GaussianProcess(Sampler):
         for i_task in range(self.n_tasks):
             folds.X.append(self.X())
             folds.flat_y.append(self.y[:, i_task] - self.y_mean[i_task])
+
+        logging.info('Training hyperparameters...')
         hyperparams = gp.train.learn_folds(folds, kernel, opt_config)
+        logging.info('Done.')
 
         # Use the same hyperparameters for each of the stacks
         return [hyperparams for i_task in range(self.n_tasks)]
@@ -180,6 +179,13 @@ class GaussianProcess(Sampler):
                     hyperparameters
                     regressors
         """
+        assert(self.dims is not None)
+
+        if self.kerneldef is None:
+            onez = np.ones(self.dims)
+            self.kerneldef = lambda h, k: \
+                h(1e-3, 1e+2, 1) * k('matern3on2',
+                                     h(1e-2 * onez, 1e+3 * onez, 1e+0 * onez))
         # Learn hyperparameters
         self.hyperparams = self.learn_hyperparams()
 
@@ -209,14 +215,14 @@ class GaussianProcess(Sampler):
             Index location in the data buffer 'GaussianProcess.X' and
             'GaussianProcess.y' corresponding to the job being updated
         """
-        y_true = atleast_1d(y_true)
+        y_true = np.atleast_1d(y_true)
         assert y_true.ndim == 1
         ind = self._update(uid, y_true)
         self.update_y_mean()
         self.update_regressors()
         return ind
 
-    def pick(self, n_test=500, train=False):
+    def pick(self, n_test=500):
         """
         Picks the next location in parameter space for the next observation
         to be taken, with a Gaussian process model
@@ -235,8 +241,6 @@ class GaussianProcess(Sampler):
         n_test : int, optional
             The number of random query points across the search space to pick
             from
-        train : bool, optional
-            To train the model or not before picking, if allowed
 
         Returns
         -------
@@ -247,7 +251,6 @@ class GaussianProcess(Sampler):
             A random hexadecimal ID to identify the corresponding job
         """
         n = len(self.X)
-        n_corners = 2 ** self.dims
 
         self.update_y_mean()
 
@@ -257,14 +260,9 @@ class GaussianProcess(Sampler):
             xq = random_sample(self.lower, self.upper, 1)[0]
             yq_exp = self.y_mean  # Note: Can be 'None' initially
 
-        # Bootstrap with a regular sampling strategy to get it started
-        elif n < n_corners + 1:
-            xq = grid_sample(self.lower, self.upper, n)
-            yq_exp = self.y_mean  # Note: Can be 'None' initially
-            # Counter note (Al): none can't be inserted into a numpy array...
         else:
 
-            if train or self.regressors is None:
+            if self.regressors is None:
                 self.train()
 
             # Randomly sample the volume for test points
@@ -294,9 +292,7 @@ class GaussianProcess(Sampler):
             yq_exp = Yq_exp[iq_acq, :]
 
         # Place a virtual observation...
-        if yq_exp is None:
-            yq_exp = np.zeros(self.n_tasks)  # can't insert None
-        uid = Sampler._assign(self, xq, atleast_1d(yq_exp))
+        uid = Sampler._assign(self, xq, yq_exp)  # it can be None...
 
         return xq, uid
 
@@ -397,77 +393,6 @@ class GaussianProcess(Sampler):
 
         real_flag = ~self.virtual_flag()
         return self.X()[real_flag], self.y()[real_flag]
-
-
-def atleast_2d(y):
-    """
-    Make sure the input data is two dimensional, either in the form of a list
-    of vectors, or a matrix as a 'numpy.ndarray' of two dimensions.
-
-    ..note : This currently only accepts homogenous lists or arrays. It will
-    NOT raise errors if the list is non-homogenous as it only uses the
-    first element for checking.
-
-    Parameters
-    ----------
-    y : numpy.ndarray or list
-        The array or list to make 2D
-
-    Returns
-    -------
-    numpy.ndarray or list
-        The 2D array or list
-    """
-    if isinstance(y, list):
-        if type(y[0]) is not np.ndarray:
-            return [np.array([y_i]) for y_i in y]
-        elif y[0].ndim == 1:
-            return y
-        else:
-            raise ValueError("List element already has more than 1 dimension")
-    elif isinstance(y, np.ndarray):
-        if y.ndim == 1:
-            return y[:, np.newaxis]
-        elif y.ndim == 2:
-            return y
-        else:
-            raise ValueError("Object already has more than 2 dimensions")
-    elif isinstance(y, ArrayBuffer):
-        return y
-    else:
-        raise ValueError('Object is not a list or an array')
-
-
-def atleast_1d(y_obs):
-    """
-    Make sure the input comes in a standard vector form as a 'numpy.ndarray'
-    type of one dimension.
-
-    Parameters
-    ----------
-    y : numpy.ndarray or list
-        The array or list to make 1D
-
-    Returns
-    -------
-    numpy.ndarray or list
-        The 1D array or list
-    """
-    if type(y_obs) is np.ndarray:
-        if y_obs.ndim == 0:
-            return y_obs.flatten()
-        elif y_obs.ndim > 1:
-            raise ValueError('Target output is not vector valued!')
-        else:
-            return y_obs
-    else:
-        if type(y_obs) is list:
-            return np.array(y_obs)
-        elif np.isscalar(y_obs):
-            return np.array([y_obs])
-        else:
-            raise ValueError('Unexpected target output type: %s'
-                             % str(type(y_obs)))
 
 
 def acq_defs(y_mean=0, explore_priority=0.0001):

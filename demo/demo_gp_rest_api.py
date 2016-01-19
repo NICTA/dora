@@ -18,7 +18,7 @@ import requests
 import time
 import visvis as vv
 from example_processes import simulate_measurement_vector
-
+import traceback
 # The plotting subpackage is throwing FutureWarnings
 import warnings
 warnings.simplefilter("ignore", FutureWarning)
@@ -26,61 +26,82 @@ warnings.simplefilter("ignore", FutureWarning)
 
 def main():
 
+    reqlog = logging.getLogger('requests')
+    reqlog.setLevel(logging.ERROR)
+    log = logging.getLogger(__name__)
+
     server = subprocess.Popen([sys.executable, '../dora/server/server.py'])
     time.sleep(5)
 
-    # Set up a sampling problem:
-    target_samples = 100
-    n_train = 12
-    lower = [1., 1.]
-    upper = [3., 3.]
-    explore_factor = 0.3
-    n_outputs = 20
+    try:
 
-    initialiseArgs = {'lower': lower, 'upper': upper, 'n_outputs': n_outputs,
-                      'n_train_threshold': n_train, 'acquisition_func':
-                      'prodmax', 'explore_factor': explore_factor}
+        # Set up a sampling problem:
+        target_samples = 100
+        n_train = 12
+        lower = [1., 1.]
+        upper = [3., 3.]
+        explore_factor = 0.01
+        n_outputs = 20  # number of tasks!
 
-    # initialise sampler
-    sampler_info = requests.post('http://localhost:5000/samplers',
-                                 json=initialiseArgs).json()
-    logging.info("Model Info: " + str(sampler_info))
+        initialiseArgs = {'lower': lower, 'upper': upper,
+                          'n_outputs': n_outputs,
+                          'n_train_threshold': n_train,
+                          'acquisition_func': 'var_sum',
+                          'explore_factor': explore_factor}
 
-    # Set up plotting:
-    plots = {'fig': vv.figure(),
-             'count': 0,
-             'shape': (2, 3)}
-    plot_triggers = [16, 30, 40, 50, 65, target_samples-1]
+        # initialise sampler
+        sampler_info = requests.post('http://localhost:5000/samplers',
+                                     json=initialiseArgs).json()
+        log.info("Model Info: " + str(sampler_info))
 
-    # Run the active sampling:
-    for i in range(target_samples):
-        logging.info('Samples: %d' % i)
+        # Set up plotting:
+        plots = {'fig': vv.figure(),
+                 'count': 0,
+                 'shape': (2, 3)}
+        plot_triggers = [17, 30, 40, 50, 65, target_samples-1]
 
-        # post a request to the sampler for a query location
-        r = requests.post(sampler_info['obs_uri'])
-        r.raise_for_status()
+        # Run the active sampling:
+        for i in range(target_samples):
 
-        query_loc = r.json()
+            log.info('Iteration: %d' % i)
 
-        # Evaluate the sampler's query on the forward model
-        characteristic = np.array(query_loc['query'])
-        uid = query_loc['uid']
-        uid, measurement = simulate_measurement_vector(characteristic, uid)
-        print(measurement)
-        # Update the sampler with the new observation from the forward model
-        r = requests.put(query_loc['uri'], json=measurement.tolist())
+            # post a request to the sampler for a query location
+            r = requests.post(sampler_info['obs_uri'])
+            r.raise_for_status()
 
-        if i in plot_triggers:
-            plot_progress(plots, sampler_info)
+            query_loc = r.json()
 
-    # Retrieve Training Data:
-    training_data = requests.get(sampler_info['training_data_uri']).json()
-    logging.info('X:' + str(training_data['X']))
-    logging.info('y:' + str(training_data['y']))
-    logging.info('Virtual X:' + str(training_data['virtual_X']))
-    logging.info('Virtual y:' + str(training_data['virtual_y']))
+            # Evaluate the sampler's query on the forward model
+            characteristic = np.array(query_loc['query'])
+            uid = query_loc['uid']
+            uid, measurement = simulate_measurement_vector(characteristic, uid)
+            # log.info('Generated measurement ' + measurement.__repr__())
+
+            # Update the sampler with the new observation
+            r = requests.put(query_loc['uri'], json=measurement.tolist())
+
+            if i in plot_triggers:
+                log.info("Plotting")
+                plot_progress(plots, sampler_info)
+        
+        print('Finished.')
+
+        # # Retrieve Training Data:
+        # log.info('Retrieving training data')
+        # training_data = requests.get(sampler_info['training_data_uri']).json()
+        # log.info('X:' + str(training_data['X']))
+        # log.info('y:' + str(training_data['y']))
+        # log.info('Virtual X:' + str(training_data['virtual_X']))
+        # log.info('Virtual y:' + str(training_data['virtual_y']))
+
+        vv.use().Run()
+
+    except Exception:
+        etype, evalue, etraceback = sys.exc_info()
+        tb = traceback.extract_tb(etraceback)
+        print(tb.to_dict())
+
     server.terminate()
-    vv.use().Run()
 
 
 def plot_progress(plots, sampler_info):
@@ -88,7 +109,7 @@ def plot_progress(plots, sampler_info):
     settings = requests.get(sampler_info['settings']).json()
     lower = settings['lower']
     upper = settings['upper']
-    n_outputs = settings['n_stacks']
+    # n_outputs = settings['n_stacks']
 
     # fig = plots['fig']
     subplt = vv.subplot(*(plots['shape'] + (1+plots['count'],)))
@@ -105,9 +126,12 @@ def plot_progress(plots, sampler_info):
     r = requests.get(sampler_info['pred_uri'], json=Xquery.tolist())
     r.raise_for_status()
     pred = r.json()
-    pred_mean = pred['predictive_mean']
+    pred_mean = np.array(pred['predictive_mean'])
     id_matrix = np.reshape(np.arange(Xquery.shape[0])[:, np.newaxis],
                            xeva.shape)
+
+    n, n_outputs = pred_mean.shape
+
     vol = np.zeros((n_outputs, xeva.shape[0], xeva.shape[1]))
     for x in range(xres):
         for y in range(yres):
@@ -128,5 +152,5 @@ def plot_progress(plots, sampler_info):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     main()
