@@ -37,16 +37,16 @@ def main():
 
         # Set up a sampling problem:
         target_samples = 100
-        n_train = 12
+        n_train = 15
         lower = [1., 1.]
         upper = [3., 3.]
-        explore_factor = 0.01
+        explore_factor = 0.1
         n_outputs = 20  # number of tasks!
 
         initialiseArgs = {'lower': lower, 'upper': upper,
                           'n_outputs': n_outputs,
                           'n_train_threshold': n_train,
-                          'acquisition_func': 'var_sum',
+                          'acquisition_func': 'prod_max',
                           'explore_factor': explore_factor}
 
         # initialise sampler
