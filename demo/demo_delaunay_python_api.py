@@ -26,6 +26,11 @@ import warnings
 warnings.simplefilter("ignore", FutureWarning)
 
 
+logging.basicConfig(level=logging.INFO)
+
+
+
+
 def main():
 
     # Set up a sampling problem

@@ -1,4 +1,4 @@
-""" Setup utility for the revrand package. """
+""" Setup utility for the dora package. """
 from setuptools import setup, find_packages
 # from setuptools.command.test import test as TestCommand
 

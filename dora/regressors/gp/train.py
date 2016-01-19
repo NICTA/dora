@@ -1,11 +1,9 @@
-import operator
 import numpy as np
 import nlopt as nl
 from .types import Folds
 from dora.regressors.gp import predict
 from dora.regressors.gp import linalg
 from dora.regressors.gp import types
-import matplotlib.pyplot as pl
 import sklearn.cluster as skcluster
 import scipy.interpolate as interp
 from scipy.spatial import Delaunay
