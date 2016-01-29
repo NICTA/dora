@@ -24,6 +24,9 @@ setup(
     dependency_links=['https://github.com/nicta/revrand'],
     extras_require={
         # 'nonlinear': ['NLopt'],
+        'server': [
+            'flask' 
+            ],
         'demos': [
             'unipath',
             'requests',
