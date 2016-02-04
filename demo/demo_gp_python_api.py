@@ -31,7 +31,7 @@ def main():
                                        n_train=49)
 
     # Set up plotting
-    plot_triggers = [50, 100, 150, 200, 300]
+    plot_triggers = [50, 100, 150, 200, 250, 300]
     n_triggers = len(plot_triggers)
     plt_size = pltutils.split_subplots(n_triggers)
     fig = pl.figure()

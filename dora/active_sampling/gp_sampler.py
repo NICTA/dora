@@ -1,8 +1,7 @@
-from dora.active_sampling import Sampler, random_sample, grid_sample
+from dora.active_sampling import Sampler, random_sample
 import numpy as np
 import dora.regressors.gp as gp
 import scipy.stats as stats
-from dora.active_sampling.util import ArrayBuffer
 import logging
 
 log = logging.getLogger(__name__)
@@ -10,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class GaussianProcess(Sampler):
     """
-    GaussianProcess Class
+    GaussianProcess Class.
 
     Inherits from the Sampler class and augments pick and update with the
     mechanics of the GP method
@@ -42,7 +41,7 @@ class GaussianProcess(Sampler):
     def __init__(self, lower, upper, kerneldef=None, n_train=50,
                  acq_name='var_sum', explore_priority=0.0001):
         """
-        Initialises the GaussianProcess class
+        Initialise the GaussianProcess class.
 
         .. note:: Currently only supports rectangular type restrictions on the
         parameter space
@@ -55,7 +54,7 @@ class GaussianProcess(Sampler):
             Upper or maximum bounds for the parameter space
         kerneldef : function
             Kernel function definition. See the 'gp' module.
-        n_min : int
+        n_train : int
             Number of training samples required before sampler can be trained
         acq_name : str
             A string specifying the type of acquisition function used
@@ -75,7 +74,7 @@ class GaussianProcess(Sampler):
 
     def update_y_mean(self):
         """
-        Update the mean of the target outputs
+        Update the mean of the target outputs.
 
         .. note :: At anytime, 'y_mean' should be the mean of all the output
         targets including the virtual ones, since that is what we are training
@@ -91,10 +90,10 @@ class GaussianProcess(Sampler):
 
     def learn_hyperparams(self):
         """
-        Learns the kernel hyperparameters from the data collected so far
+        Learn the kernel hyperparameters from the data collected so far.
+
         Equivalent to training the Gaussian process used for the sampler
         The training result is summarised by the hyperparameters of the kernel
-
 
         .. note :: Learns common hyperparameters between all tasks
 
@@ -138,7 +137,8 @@ class GaussianProcess(Sampler):
 
     def update_regressors(self):
         """
-        Update the regressors of the Gaussian process model
+        Update the regressors of the Gaussian process model.
+
         Only makes sense to do this after hyperparameters are learned
 
         .. note :: [Properties Modified]
@@ -158,8 +158,8 @@ class GaussianProcess(Sampler):
         self.regressors = []
         for i_task in range(self.n_tasks):
             self.regressors.append(
-                gp.condition(self.X(), self.y()[:, i_task]
-                             - self.y_mean[i_task],
+                gp.condition(self.X(), self.y()[:, i_task] -
+                             self.y_mean[i_task],
                              kernel, self.hyperparams[i_task]))
 
         # # Otherwise, simply update the regressors
@@ -170,7 +170,8 @@ class GaussianProcess(Sampler):
 
     def train(self):
         """
-        Trains the Gaussian process model
+        Train the Gaussian process model.
+
         A wrapper function that learns the hyperparameters and updates the
         regressors, which is equivalent to a fully trained model that is
         ready to perform Inference
@@ -194,7 +195,7 @@ class GaussianProcess(Sampler):
 
     def update(self, uid, y_true):
         """
-        Updates a job with its observed value
+        Update a job with its observed value.
 
         .. note :: [Properties Modified]
                     y
@@ -224,8 +225,8 @@ class GaussianProcess(Sampler):
 
     def pick(self, n_test=500):
         """
-        Picks the next location in parameter space for the next observation
-        to be taken, with a Gaussian process model
+        Pick the next location in parameter space for the next observation
+        to be taken, with a Gaussian process model.
 
         .. note :: [Properties Modified]
                     X
