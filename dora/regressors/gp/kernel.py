@@ -1,5 +1,6 @@
 """ Kernel module
-Defines basic kernel functions of the form:
+Defines basic kernel functions of the form::
+
   funcname(x_p, x_q, par) that return a covariance matrix.
   x_p is n1*d, x_q is n2*d, the result should be n1*n2
   par can be a scalar, array, or list of these.
@@ -7,7 +8,7 @@ Defines basic kernel functions of the form:
 All kernels must allow x_q=None, and efficiently compute the diagonal
 of K(x_p, x_p) as a (n1,) shaped vector.
 
-Multi-task kernels must begin with mt_, and such kernels must use the
+Multi-task kernels must begin with ``mt_``, and such kernels must use the
 last dimension of x_p and x_q as an indicator of the task.
 
 This file also contains code for composing these kernels into multi-use
