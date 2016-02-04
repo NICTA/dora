@@ -1,7 +1,7 @@
 """
-Active Sampling module.
+Base Sampler Module.
 
-Provides the Active Sampler Classes which contains strategies for
+Provides the Base Sampler Class which contains the basic strategies for
 active sampling a spatial field
 """
 import uuid
@@ -31,7 +31,9 @@ class Sampler:
         outputs corresponding to the feature vectors 'X'
     virtual_flag : ArrayBuffer
         A contiguous array of boolean flags indicating virtual elements of 'y'
+
             True: Corresponding target output is virtual
+
             False: Corresponding target output is observed
     pending_results : dict
         A dictionary that maps the job ID to the corresponding index in both
@@ -63,7 +65,7 @@ class Sampler:
         self.y = ArrayBuffer()
         self.virtual_flag = ArrayBuffer()
         self.pending_results = {}
-        self.n_outputs = None  # Unknown
+        self.n_tasks = None
 
     def pick(self):
         """
@@ -93,8 +95,10 @@ class Sampler:
         """
         Update a job with its observed value.
 
-        .. note:: Currently a dummy function whose functionality will be
-        filled by subclasses of the Sampler class
+        .. note::
+
+            Currently a dummy function whose functionality will be
+            filled by subclasses of the Sampler class
 
         Parameters
         ----------
@@ -139,8 +143,8 @@ class Sampler:
         self.virtual_flag.append(True)
 
         # If we get a None, insert zeros instead
-        if yq_exp is None and self.n_outputs is not None:
-            self.y.append(np.zeros(self.n_outputs))
+        if yq_exp is None and self.n_tasks is not None:
+            self.y.append(np.zeros(self.n_tasks))
         else:
             self.y.append(yq_exp)  # then add the real one
 
@@ -181,12 +185,12 @@ class Sampler:
         ind = self.pending_results.pop(uid)
 
         # If the user has been pushing Nones until now, we will init properly
-        if self.n_outputs is None:
-            self.n_outputs = len(np.atleast_1d(y_true))
+        if self.n_tasks is None:
+            self.n_tasks = len(np.atleast_1d(y_true))
             pending_count = len(self.y)
             self.y = ArrayBuffer()
             for _ in range(pending_count):
-                self.y.append(np.zeros(self.n_outputs))
+                self.y.append(np.zeros(self.n_tasks))
 
         self.y()[ind] = y_true
         self.virtual_flag()[ind] = False
@@ -197,6 +201,7 @@ class Sampler:
 def random_sample(lower, upper, n):
     """
     Used to randomly sample the search space.
+
     Provide search parameters and the number of samples desired.
 
     Parameters
@@ -223,8 +228,9 @@ def random_sample(lower, upper, n):
 
 def grid_sample(lower, upper, n):
     """
-    Used to seed an algorithm with a regular pattern of the corners and
-    the centre. Provide search parameters and the indices.
+    Used to seed an algorithm with a regular pattern of corners and centres.
+
+    This can be used to provide search parameters and the indices.
 
     Parameters
     ----------
@@ -252,4 +258,3 @@ def grid_sample(lower, upper, n):
     else:
         assert(False)
     return xq
-

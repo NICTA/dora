@@ -1,4 +1,4 @@
 from . import util
-from .active_sampling import *
+from .base_sampler import *
 from .gp_sampler import GaussianProcess
 from .delaunay_sampler import Delaunay 
