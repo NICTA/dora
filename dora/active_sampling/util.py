@@ -1,25 +1,32 @@
-""" Common utilities used across active sampling modules in dora
 """
-import numpy as np
+Common utilities used across active sampling modules in dora.
+"""
 import time
+
+import numpy as np
 
 
 class ArrayBuffer:
     """
-    ArrayBuffer Class
+    ArrayBuffer Class.
 
     Provides an efficient structure for numpy arrays growing on the first axis.
-    Implemented with an automatically resising buffer, providing matrices as
+    Implemented with an automatically resizing buffer, providing matrices as
     views to this data by slicing along the first axis.
 
-    Attributes:
-
+    Attributes
+    ----------
+    initial_size : int
+        The initial size of all ArrayBuffer instances.
+    shape : tuple
+        The shape of the ArrayBuffer
     """
+
     initial_size = 10
 
     def __init__(self):
         """
-        Initialise Buffer
+        Initialise the ArrayBuffer.
         """
         self.__buffer = None
         self.__value = None
@@ -27,30 +34,69 @@ class ArrayBuffer:
 
     @property
     def shape(self):
+        """
+        The shape of the ArrayBuffer.
+
+        See Also
+        --------
+        numpy.ndarray.shape : Analogous Class Property
+        """
         return self.__value.shape
 
     def __len__(self):
+        """
+        Private Method.
+
+        .. note :: DOCUMENTATION INCOMPLETE
+        """
         return self.__count
 
     def __getitem__(self, index):
+        """
+        Private Method.
+
+        .. note :: DOCUMENTATION INCOMPLETE
+        """
         return self.__value.__getitem__(index)
 
     def __setitem__(self, index, val):
+        """
+        Private Method.
+
+        .. note :: DOCUMENTATION INCOMPLETE
+        """
         return self.__value.__setitem__(index, val)
 
     def __delitem__(self, index):
+        """
+        Private Method.
+
+        .. note :: DOCUMENTATION INCOMPLETE
+        """
         return self.__value.__delitem__(index)
 
     def __repr__(self):
+        """
+        Private Method.
+
+        .. note :: DOCUMENTATION INCOMPLETE
+        """
         return 'Buffer Contains:\n' + self.__value.__repr__()
 
     def __call__(self):
+        """
+        Private Method.
+
+        .. note :: DOCUMENTATION INCOMPLETE
+        """
         return self.__value
 
     def append(self, value):
         """
-        Adds an array_like to the buffer, extending its first axis by
-        adding a (1 x value.shape) row onto the end.
+        Add an array_like to the buffer.
+
+        This extending its first axis by adding a (1 x value.shape) row
+        onto the end.
 
         Parameters
         ----------
@@ -71,15 +117,15 @@ class ArrayBuffer:
         if self.__count >= self.__buffer.shape[0]:
             growth_factor = 2.0
             newsize = list(self.__buffer.shape)
-            newsize[0] = np.floor(growth_factor*newsize[0] + 2.0)
+            newsize[0] = np.floor(growth_factor * newsize[0] + 2.0)
             self.__buffer = np.resize(self.__buffer, newsize)
 
-        self.__buffer[self.__count-1] = value
+        self.__buffer[self.__count - 1] = value
         self.__value = self.__buffer[:self.__count]
-        return
 
 
 def demo():
+
     d = 20
     n_stack = 10000
 
@@ -91,21 +137,23 @@ def demo():
         buf.append(np.random.random(d))  # NOQA we dont do anything with a
 
     ft = time.time()
-    print('Efficient buffer took {0:.5f} seconds'.format(ft-st))
+    print('Efficient buffer took {0:.5f} seconds'.format(ft - st))
 
     a = buf()
 
-    import IPython; IPython.embed(); import sys; sys.exit()
+    import IPython
+    IPython.embed()
+    import sys
+    sys.exit()
     print(a)
     exit()
-
 
     st = time.time()
     b = np.zeros((0, d))
     for i in range(n_stack):
         b = np.vstack((b, np.random.random(d)))
     ft = time.time()
-    print('Repeated Vstack took {0:.5f} seconds'.format(ft-st))
+    print('Repeated Vstack took {0:.5f} seconds'.format(ft - st))
 
     st = time.time()
     b_buf = []
@@ -113,9 +161,7 @@ def demo():
         b_buf.append(np.random.random(d))
         b = np.array(b_buf)
     ft = time.time()
-    print('List buffering and casting took {0:.5f} seconds'.format(ft-st))
-
-    return
+    print('List buffering and casting took {0:.5f} seconds'.format(ft - st))
 
 
 if __name__ == '__main__':
