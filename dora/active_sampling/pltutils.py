@@ -1,11 +1,28 @@
-import numpy as np
-import matplotlib.pyplot as pl
+"""
+Utilities for plotting purposes.
+"""
 import dora.regressors.gp as gp
+
+import matplotlib.pyplot as pl
+
+import numpy as np
 
 
 def split_subplots(n):
     """
-    Automatically generates a suitable subplot layout
+    Automatically generate a suitable subplot layout.
+
+    Parameters
+    ----------
+    n : int
+        The number of subplots required
+
+    Returns
+    -------
+    int
+        The number of rows required
+    int
+        The number of columns required
     """
     n_sqrt = np.sqrt(n)
     c = np.ceil(n_sqrt).astype(int)
@@ -19,9 +36,17 @@ def split_subplots(n):
 
 def plot_sampler_progress(sampler, ax=None):
     """
-    .. note : Only if n_dims = 2 and n_tasks = 1
-    """
+    Plot the progress of a particular sampler.
 
+    .. note :: Only works if n_dims = 2 and n_tasks = 1
+
+    Parameters
+    ----------
+    sampler : Sampler
+        An instance of the sampler class or its subclasses
+    ax : matplotlib.axes._subplots.AxesSubplot
+        The axes or subplot the plotting is to be performed on
+    """
     assert sampler.dims == 2
     assert sampler.n_tasks == 1
 
