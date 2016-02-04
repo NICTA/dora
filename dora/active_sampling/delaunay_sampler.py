@@ -1,11 +1,19 @@
+"""
+Delaunay Sampler Module.
+
+Provides the Delaunay Sampler Class which contains the strategies for
+active sampling a spatial field
+"""
 from dora.active_sampling import Sampler, grid_sample
+
 import numpy as np
+
 from scipy.spatial import Delaunay as ScipyDelaunay
 
 
 class Delaunay(Sampler):
     """
-    Delaunay Class
+    Delaunay Class.
 
     Inherits from the Sampler class and augments pick and update with the
     mechanics of the Delanauy triangulation method
@@ -23,12 +31,15 @@ class Delaunay(Sampler):
     --------
     Sampler : Base Class
     """
+
     def __init__(self, lower, upper, explore_priority=0.0001):
         """
-        Initialises the Delaunay class
+        Initialise the Delaunay class.
 
-        .. note:: Currently only supports rectangular type restrictions on the
-        parameter space
+        .. note ::
+
+            Currently only supports rectangular type restrictions on the
+            parameter space
 
         Parameters
         ----------
@@ -46,7 +57,7 @@ class Delaunay(Sampler):
 
     def update(self, uid, y_true):
         """
-        Updates a job with its observed value
+        Update a job with its observed value.
 
         Parameters
         ----------
@@ -65,8 +76,9 @@ class Delaunay(Sampler):
 
     def pick(self):
         """
-        Picks the next location in parameter space for the next observation
-        to be taken, using the recursive Delaunay subdivision algorithm
+        Pick the next feature location for the next observation to be taken.
+
+        This uses the recursive Delaunay subdivision algorithm.
 
         Returns
         -------
@@ -128,11 +140,10 @@ class Delaunay(Sampler):
             eps = 1e-3
             weight = eps + np.abs(simplex_v - np.mean(simplex_v))
             weight /= np.sum(weight)
-            xq = np.sum(weight*simplex, axis=0)  # dot
-            yq_exp = np.sum(weight*simplex_v, axis=0)
+            xq = np.sum(weight * simplex, axis=0)  # dot
+            yq_exp = np.sum(weight * simplex_v, axis=0)
 
             self.triangulation.add_points(xq[np.newaxis, :])  # incremental
 
         uid = Sampler._assign(self, xq, yq_exp)
         return xq, uid
-
