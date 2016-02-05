@@ -86,7 +86,9 @@ class GaussianProcess(Sampler):
         """
         Update the mean of the target outputs.
 
-        [Properties Modified] y, y_mean
+        .. note :: [Properties Modified]
+                    y,
+                    y_mean
 
         .. note :: At anytime, 'y_mean' should be the mean of all the output
                    targets including the virtual ones, since that is what
@@ -105,7 +107,8 @@ class GaussianProcess(Sampler):
 
         .. note :: Learns common hyperparameters between all tasks
 
-        .. note :: [Properties Modified] (None)
+        .. note :: [Properties Modified]
+                    (None)
 
         Returns
         -------
@@ -149,7 +152,6 @@ class GaussianProcess(Sampler):
         Only makes sense to do this after hyperparameters are learned
 
         .. note :: [Properties Modified]
-
                     regressors
 
         .. note :: [Further Work] Use Cholesky Update here correctly to cache
@@ -185,7 +187,7 @@ class GaussianProcess(Sampler):
         ready to perform Inference
 
         .. note :: [Properties Modified]
-                    hyperparameters
+                    hyperparameters,
                     regressors
         """
         assert(self.dims is not None)
@@ -206,9 +208,9 @@ class GaussianProcess(Sampler):
         Update a job with its observed value.
 
         .. note :: [Properties Modified]
-                    y
-                    virtual_flag
-                    y_mean
+                    y,
+                    virtual_flag,
+                    y_mean,
                     regressors
 
         Parameters
@@ -236,12 +238,12 @@ class GaussianProcess(Sampler):
         Pick the next feature location for the next observation to be taken.
 
         .. note :: [Properties Modified]
-                    X
-                    y
-                    virtual_flag
-                    pending_results
-                    y_mean
-                    hyperparameters
+                    X,
+                    y,
+                    virtual_flag,
+                    pending_results,
+                    y_mean,
+                    hyperparameters,
                     regressors
 
         Parameters
