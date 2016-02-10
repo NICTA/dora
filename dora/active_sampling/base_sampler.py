@@ -1,19 +1,19 @@
 """
-Active Sampling module
+Base Sampler Module.
 
-Provides the Active Sampler Classes which contains strategies for
+Provides the Base Sampler Class which contains the basic strategies for
 active sampling a spatial field
 """
-import numpy as np
 import uuid
+
 from dora.active_sampling.util import ArrayBuffer
+
+import numpy as np
 
 
 class Sampler:
     """
-    Sampler Class
-
-    Provides a basic template and interface to specific Sampler subclasses
+    Provide a basic template and interface to specific Sampler subclasses.
 
     Attributes
     ----------
@@ -31,7 +31,9 @@ class Sampler:
         outputs corresponding to the feature vectors 'X'
     virtual_flag : ArrayBuffer
         A contiguous array of boolean flags indicating virtual elements of 'y'
+
             True: Corresponding target output is virtual
+
             False: Corresponding target output is observed
     pending_results : dict
         A dictionary that maps the job ID to the corresponding index in both
@@ -40,10 +42,12 @@ class Sampler:
 
     def __init__(self, lower, upper):
         """
-        Initialises the Sampler class
+        Initialise the Sampler class.
 
-        .. note:: Currently only supports rectangular type restrictions on the
-        parameter space
+        .. note::
+
+            Currently only supports rectangular type restrictions on the
+            parameter space
 
         Parameters
         ----------
@@ -61,15 +65,16 @@ class Sampler:
         self.y = ArrayBuffer()
         self.virtual_flag = ArrayBuffer()
         self.pending_results = {}
-        self.n_outputs = None  # Unknown
+        self.n_tasks = None
 
     def pick(self):
         """
-        Picks the next location in parameter space for the next observation
-        to be taken
+        Pick the next feature location for the next observation to be taken.
 
-        .. note:: Currently a dummy function whose functionality will be
-        filled by subclasses of the Sampler class
+        .. note::
+
+            Currently only supports rectangular type restrictions on the
+            parameter space
 
         Returns
         -------
@@ -88,10 +93,12 @@ class Sampler:
 
     def update(self, uid, y_true):
         """
-        Updates a job with its observed value
+        Update a job with its observed value.
 
-        .. note:: Currently a dummy function whose functionality will be
-        filled by subclasses of the Sampler class
+        .. note::
+
+            Currently a dummy function whose functionality will be
+            filled by subclasses of the Sampler class
 
         Parameters
         ----------
@@ -115,7 +122,7 @@ class Sampler:
 
     def _assign(self, xq, yq_exp):
         """
-        Assigns a pair (location in parameter space, virtual target) a job ID
+        Assign a pair (location in parameter space, virtual target) a job ID.
 
         Parameters
         ----------
@@ -130,15 +137,14 @@ class Sampler:
         str
             A random hexadecimal ID to identify the corresponding job
         """
-
         # Place a virtual observation onto the collected data
         n = len(self.X)
         self.X.append(xq)
         self.virtual_flag.append(True)
 
         # If we get a None, insert zeros instead
-        if yq_exp is None and self.n_outputs is not None:
-            self.y.append(np.zeros(self.n_outputs))
+        if yq_exp is None and self.n_tasks is not None:
+            self.y.append(np.zeros(self.n_tasks))
         else:
             self.y.append(yq_exp)  # then add the real one
 
@@ -153,10 +159,9 @@ class Sampler:
 
         return uid
 
-
     def _update(self, uid, y_true):
         """
-        Updates a job with its observed value
+        Update a job with its observed value.
 
         Parameters
         ----------
@@ -180,12 +185,12 @@ class Sampler:
         ind = self.pending_results.pop(uid)
 
         # If the user has been pushing Nones until now, we will init properly
-        if self.n_outputs is None:
-            self.n_outputs = len(np.atleast_1d(y_true))
+        if self.n_tasks is None:
+            self.n_tasks = len(np.atleast_1d(y_true))
             pending_count = len(self.y)
             self.y = ArrayBuffer()
             for _ in range(pending_count):
-                self.y.append(np.zeros(self.n_outputs))
+                self.y.append(np.zeros(self.n_tasks))
 
         self.y()[ind] = y_true
         self.virtual_flag()[ind] = False
@@ -196,6 +201,7 @@ class Sampler:
 def random_sample(lower, upper, n):
     """
     Used to randomly sample the search space.
+
     Provide search parameters and the number of samples desired.
 
     Parameters
@@ -222,8 +228,9 @@ def random_sample(lower, upper, n):
 
 def grid_sample(lower, upper, n):
     """
-    Used to seed an algorithm with a regular pattern of the corners and
-    the centre. Provide search parameters and the i_stackex.
+    Used to seed an algorithm with a regular pattern of corners and centres.
+
+    This can be used to provide search parameters and the indices.
 
     Parameters
     ----------
@@ -251,4 +258,3 @@ def grid_sample(lower, upper, n):
     else:
         assert(False)
     return xq
-

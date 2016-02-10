@@ -1,5 +1,5 @@
 """
-Active Sampling Demo
+Active Sampling Demo.
 
 This demo uses the Dora active sampling module as a python library that can be
 directly called from within the process.
@@ -13,10 +13,14 @@ model
 
 """
 import logging
-import matplotlib.pyplot as pl
-from dora.active_sampling import pltutils
+
 import dora.active_sampling as sampling
+
+from dora.active_sampling import pltutils
+
 from example_processes import simulate_measurement
+
+import matplotlib.pyplot as pl
 
 
 def main():
@@ -31,7 +35,7 @@ def main():
                                        n_train=49)
 
     # Set up plotting
-    plot_triggers = [50, 100, 150, 200, 300]
+    plot_triggers = [50, 100, 150, 200, 250, 300]
     n_triggers = len(plot_triggers)
     plt_size = pltutils.split_subplots(n_triggers)
     fig = pl.figure()

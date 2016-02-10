@@ -1,16 +1,25 @@
-from dora.active_sampling import Sampler, random_sample, grid_sample
-import numpy as np
-import dora.regressors.gp as gp
-import scipy.stats as stats
-from dora.active_sampling.util import ArrayBuffer
+"""
+Gaussian Process Sampler Module.
+
+Provides the Gaussian Process Sampler Class which contains the strategies for
+active sampling a spatial field using a non-parametric, Bayesian model
+"""
 import logging
+
+from dora.active_sampling import Sampler, random_sample
+
+import dora.regressors.gp as gp
+
+import numpy as np
+
+import scipy.stats as stats
 
 log = logging.getLogger(__name__)
 
 
 class GaussianProcess(Sampler):
     """
-    GaussianProcess Class
+    GaussianProcess Class.
 
     Inherits from the Sampler class and augments pick and update with the
     mechanics of the GP method
@@ -42,7 +51,7 @@ class GaussianProcess(Sampler):
     def __init__(self, lower, upper, kerneldef=None, n_train=50,
                  acq_name='var_sum', explore_priority=0.0001):
         """
-        Initialises the GaussianProcess class
+        Initialise the GaussianProcess class.
 
         .. note:: Currently only supports rectangular type restrictions on the
         parameter space
@@ -55,7 +64,7 @@ class GaussianProcess(Sampler):
             Upper or maximum bounds for the parameter space
         kerneldef : function
             Kernel function definition. See the 'gp' module.
-        n_min : int
+        n_train : int
             Number of training samples required before sampler can be trained
         acq_name : str
             A string specifying the type of acquisition function used
@@ -75,15 +84,15 @@ class GaussianProcess(Sampler):
 
     def update_y_mean(self):
         """
-        Update the mean of the target outputs
-
-        .. note :: At anytime, 'y_mean' should be the mean of all the output
-        targets including the virtual ones, since that is what we are training
-        upon
+        Update the mean of the target outputs.
 
         .. note :: [Properties Modified]
-                    y
+                    y,
                     y_mean
+
+        .. note :: At anytime, 'y_mean' should be the mean of all the output
+                   targets including the virtual ones, since that is what
+                   we are training upon
         """
         if not self.y:
             return
@@ -91,10 +100,10 @@ class GaussianProcess(Sampler):
 
     def learn_hyperparams(self):
         """
-        Learns the kernel hyperparameters from the data collected so far
+        Learn the kernel hyperparameters from the data collected so far.
+
         Equivalent to training the Gaussian process used for the sampler
         The training result is summarised by the hyperparameters of the kernel
-
 
         .. note :: Learns common hyperparameters between all tasks
 
@@ -138,7 +147,8 @@ class GaussianProcess(Sampler):
 
     def update_regressors(self):
         """
-        Update the regressors of the Gaussian process model
+        Update the regressors of the Gaussian process model.
+
         Only makes sense to do this after hyperparameters are learned
 
         .. note :: [Properties Modified]
@@ -158,8 +168,8 @@ class GaussianProcess(Sampler):
         self.regressors = []
         for i_task in range(self.n_tasks):
             self.regressors.append(
-                gp.condition(self.X(), self.y()[:, i_task]
-                             - self.y_mean[i_task],
+                gp.condition(self.X(), self.y()[:, i_task] -
+                             self.y_mean[i_task],
                              kernel, self.hyperparams[i_task]))
 
         # # Otherwise, simply update the regressors
@@ -170,13 +180,14 @@ class GaussianProcess(Sampler):
 
     def train(self):
         """
-        Trains the Gaussian process model
+        Train the Gaussian process model.
+
         A wrapper function that learns the hyperparameters and updates the
         regressors, which is equivalent to a fully trained model that is
         ready to perform Inference
 
         .. note :: [Properties Modified]
-                    hyperparameters
+                    hyperparameters,
                     regressors
         """
         assert(self.dims is not None)
@@ -194,12 +205,12 @@ class GaussianProcess(Sampler):
 
     def update(self, uid, y_true):
         """
-        Updates a job with its observed value
+        Update a job with its observed value.
 
         .. note :: [Properties Modified]
-                    y
-                    virtual_flag
-                    y_mean
+                    y,
+                    virtual_flag,
+                    y_mean,
                     regressors
 
         Parameters
@@ -224,16 +235,15 @@ class GaussianProcess(Sampler):
 
     def pick(self, n_test=500):
         """
-        Picks the next location in parameter space for the next observation
-        to be taken, with a Gaussian process model
+        Pick the next feature location for the next observation to be taken.
 
         .. note :: [Properties Modified]
-                    X
-                    y
-                    virtual_flag
-                    pending_results
-                    y_mean
-                    hyperparameters
+                    X,
+                    y,
+                    virtual_flag,
+                    pending_results,
+                    y_mean,
+                    hyperparameters,
                     regressors
 
         Parameters
@@ -298,8 +308,10 @@ class GaussianProcess(Sampler):
 
     def predict(self, Xq, real=True):
         """
-        Infers the mean and variance of the Gaussian process at given locations
-        using the data collected so far
+        Predict the query mean and variance using the Gaussian process model.
+
+            Infers the mean and variance of the Gaussian process at given
+            locations using the data collected so far
 
         .. note :: [Properties Modified]
                     (None)
@@ -326,8 +338,8 @@ class GaussianProcess(Sampler):
         if real:
             X_real, y_real = self.get_real_data()
             kernel = gp.compose(self.kerneldef)
-            regressors = [gp.condition(X_real, y_real[:, i_task]
-                          - self.y_mean[i_task],
+            regressors = [gp.condition(X_real, y_real[:, i_task] -
+                          self.y_mean[i_task],
                           kernel, self.hyperparams[i_task])
                           for i_task in range(self.n_tasks)]
 
@@ -345,17 +357,51 @@ class GaussianProcess(Sampler):
         return np.asarray(yq_exp).T + self.y_mean, np.asarray(yq_var).T
 
     def set_kerneldef(self, kerneldef):
+        """
+        Set the current kernel definition for the Gaussian process model.
+
+        Parameters
+        ----------
+        kerneldef : function
+            The kernel definition from the gp module
+        """
         assert callable(kerneldef)
         self.kerneldef = kerneldef
 
     def get_kerneldef(self):
+        """
+        Get the current kernel definition for the Gaussian process model.
+
+        Returns
+        -------
+        function
+            The kernel definition from the gp module
+        """
         return self.kerneldef
 
     def print_kernel(self, kerneldef):
+        """
+        Print the current kernel for the Gaussian process model.
+
+        .. note :: Not implemented yet
+        """
         # TO DO: Use the printer method to print the current kernel!
         pass
 
     def set_hyperparams(self, hyperparams):
+        """
+        Set the hyperparameters for the Gaussian process model.
+
+        If only one set of hyperparameters is given, all tasks will receive
+        the same set of hyperparameters
+
+        .. note :: update_regressors will be automatically called
+
+        Parameters
+        ----------
+        hyperparams : list or numpy.ndarray
+            The hyperparameter(s) of the Gaussian process model
+        """
         if isinstance(hyperparams, list):
             self.hyperparams = hyperparams
         else:
@@ -364,30 +410,97 @@ class GaussianProcess(Sampler):
         self.update_regressors()
 
     def get_hyperparams(self):
+        """
+        Get the hyperparameters for the Gaussian process model.
+
+        Returns
+        -------
+        list
+            The hyperparameters for each task
+        """
         return self.hyperparams
 
     def set_acq_name(self, acq_name):
+        """
+        Set the acquisition function through a string.
+
+        Parameters
+        ----------
+        acq_name : str
+            The name of the acquisition function
+        """
         assert type(acq_name) is str
         self.acq_name = acq_name
 
     def get_acq_func(self):
+        """
+        Get the acquisition function.
+
+        Returns
+        -------
+        function
+            The acquisition function
+        """
         return acq_defs(y_mean=self.y_mean,
                         explore_priority=self.explore_priority)[self.acq_name]
 
     def set_explore_priority(self, explore_priority):
+        """
+        Set the exploration priority of the active sampler.
+
+        Parameters
+        ----------
+        explore_priority : float
+            The exploration priority of the active sampler
+        """
         self.explore_priority = explore_priority
 
     def get_explore_priority(self):
+        """
+        Get the exploration priority of the active sampler.
+
+        Returns
+        -------
+        float
+            The exploration priority of the active sampler
+        """
         return self.explore_priority
 
     def set_min_training_size(self, n_min):
+        """
+        Set the minimum training size of the active sampler.
+
+        Parameters
+        ----------
+        n_min : int
+            The minimum training size of the active sampler
+        """
         self.n_min = n_min
 
     def get_min_training_size(self):
+        """
+        Get the minimum training size of the active sampler.
+
+        Returns
+        -------
+        int
+            The minimum training size of the active sampler
+        """
         return self.n_min
 
     def get_real_data(self):
+        """
+        Obtain the observed data.
 
+        This excludes all the virtual data.
+
+        Returns
+        -------
+        numpy.ndarray
+            The observed feature locations
+        numpy.ndarray
+            The observed target outputs
+        """
         assert self.X
         assert self.y
 
@@ -397,7 +510,7 @@ class GaussianProcess(Sampler):
 
 def acq_defs(y_mean=0, explore_priority=0.0001):
     """
-    Generates a dictionary of acquisition functions
+    Generate a dictionary of acquisition functions.
 
     Parameters
     ----------
