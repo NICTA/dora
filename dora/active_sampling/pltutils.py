@@ -65,8 +65,8 @@ def plot_sampler_progress(sampler, ax=None):
 
     xg, yg = np.meshgrid(xi, yi)
     X_test = np.array([xg.flatten(), yg.flatten()]).T
-    predictor = gp.query(X_test, sampler.regressors[0])
-    zg = np.reshape(gp.mean(sampler.regressors[0], predictor), xg.shape)
+    predictor = gp.query(sampler.regressors[0], X_test)
+    zg = np.reshape(gp.mean(predictor), xg.shape)
 
     if ax is None:
         ax = pl.gca()

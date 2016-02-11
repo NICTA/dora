@@ -8,7 +8,7 @@ import logging
 
 from dora.active_sampling import Sampler, random_sample
 
-import dora.regressors.gp as gp
+import revrand.legacygp as gp
 
 import numpy as np
 
@@ -87,8 +87,8 @@ class GaussianProcess(Sampler):
         Update the mean of the target outputs.
 
         .. note :: [Properties Modified]
-                    y,
-                    y_mean
+                    y_mean,
+                    n_tasks
 
         .. note :: At anytime, 'y_mean' should be the mean of all the output
                    targets including the virtual ones, since that is what
@@ -98,7 +98,13 @@ class GaussianProcess(Sampler):
             return
         self.y_mean = self.y().mean(axis=0) if len(self.y) else None
 
-    def learn_hyperparams(self):
+        # Make sure the number of stacks recorded is consistent
+        if self.n_tasks is None:
+            self.n_tasks = self.y_mean.shape[0]
+        else:
+            assert self.n_tasks == self.y_mean.shape[0]
+
+    def learn_hyperparams(self, verbose=False, ftol=1e-15, maxiter=2000):
         """
         Learn the kernel hyperparameters from the data collected so far.
 
@@ -116,33 +122,14 @@ class GaussianProcess(Sampler):
             A list of hyperparameters with each element being the
             hyperparameters of each corresponding task
         """
-        # Compose the kernel and setup the optimiser
-        kernel = gp.compose(self.kerneldef)
-        opt_config = gp.OptConfig()
-        opt_config.sigma = gp.auto_range(self.kerneldef)
-        opt_config.noise = gp.Range([0.0001], [0.5], [0.05])
-        opt_config.walltime = 50.0
-        opt_config.global_opt = False
-
-        # Make sure the number of stacks recorded is consistent
-        if self.n_tasks is None:
-            self.n_tasks = self.y_mean.shape[0]
-        else:
-            assert self.n_tasks == self.y_mean.shape[0]
-
-        # We need to train a regressor for each of the stacks
-        # Each regressor will use the same hyperparameters!
-        # We will use folds to do this
-        folds = gp.Folds(self.n_tasks, [], [], [])
-        for i_task in range(self.n_tasks):
-            folds.X.append(self.X())
-            folds.flat_y.append(self.y[:, i_task] - self.y_mean[i_task])
+        self.update_y_mean()
 
         logging.info('Training hyperparameters...')
-        hyperparams = gp.train.learn_folds(folds, kernel, opt_config)
+        hyperparams = gp.learn(self.X(), self.y(), self.kerneldef,
+                               optCriterion=gp.criterions.snlml,
+                               verbose=verbose, ftol=ftol, maxiter=maxiter)
         logging.info('Done.')
 
-        # Use the same hyperparameters for each of the stacks
         return [hyperparams for i_task in range(self.n_tasks)]
 
     def update_regressors(self):
@@ -163,20 +150,12 @@ class GaussianProcess(Sampler):
             #                  'Regressors cannot be updated.')
 
         # Create the regressors if it hasn't already been
-        # if self.regressors is None:
-        kernel = gp.compose(self.kerneldef)
         self.regressors = []
         for i_task in range(self.n_tasks):
             self.regressors.append(
                 gp.condition(self.X(), self.y()[:, i_task] -
                              self.y_mean[i_task],
-                             kernel, self.hyperparams[i_task]))
-
-        # # Otherwise, simply update the regressors
-        # else:
-        #     for i_task, regressor in enumerate(self.regressors):
-        #         regressor.y = y[:, i_task] - self.y_mean[i_task]
-        #         regressor.alpha = gp.predict.alpha(regressor.y, regressor.L)
+                             self.kerneldef, self.hyperparams[i_task]))
 
     def train(self):
         """
@@ -279,15 +258,13 @@ class GaussianProcess(Sampler):
             Xq = random_sample(self.lower, self.upper, n_test)
 
             # Generate cached predictors for those test points
-            predictors = [gp.query(Xq, r) for r in self.regressors]
+            predictors = [gp.query(r, Xq) for r in self.regressors]
 
             # Compute the posterior distributions at those points
             # Note: No covariance information implemented at this stage
-            Yq_exp = self.y_mean + np.asarray([gp.mean(r, q) for r, q in
-                                               zip(self.regressors,
-                                                   predictors)]).T
-            Yq_var = np.asarray([gp.variance(r, q) for r, q in
-                                 zip(self.regressors, predictors)]).T
+            Yq_exp = np.asarray([gp.mean(p) for p in predictors]).T + \
+                self.y_mean
+            Yq_var = np.asarray([gp.variance(p) for p in predictors]).T
 
             # Aquisition Functions
             acq_defs_current = acq_defs(y_mean=self.y_mean,
@@ -337,10 +314,9 @@ class GaussianProcess(Sampler):
         # regressors using only the real data
         if real:
             X_real, y_real = self.get_real_data()
-            kernel = gp.compose(self.kerneldef)
             regressors = [gp.condition(X_real, y_real[:, i_task] -
                           self.y_mean[i_task],
-                          kernel, self.hyperparams[i_task])
+                          self.kerneldef, self.hyperparams[i_task])
                           for i_task in range(self.n_tasks)]
 
         # Otherwise, just use the regressors we already have
@@ -348,11 +324,9 @@ class GaussianProcess(Sampler):
             regressors = self.regressors
 
         # Compute using the standard predictor sequence
-        predictors = [gp.query(Xq, r) for r in regressors]
-        yq_exp = [gp.mean(r, p)
-                  for r, p in zip(regressors, predictors)]
-        yq_var = [gp.variance(r, p)
-                  for r, p in zip(regressors, predictors)]
+        predictors = [gp.query(r, Xq) for r in regressors]
+        yq_exp = [gp.mean(p) for p in predictors]
+        yq_var = [gp.variance(p) for p in predictors]
 
         return np.asarray(yq_exp).T + self.y_mean, np.asarray(yq_var).T
 
