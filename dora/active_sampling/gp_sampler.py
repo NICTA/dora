@@ -172,10 +172,16 @@ class GaussianProcess(Sampler):
         assert(self.dims is not None)
 
         if self.kerneldef is None:
-            onez = np.ones(self.dims)
-            self.kerneldef = lambda h, k: \
-                h(1e-3, 1e+2, 1) * k('matern3on2',
-                                     h(1e-2 * onez, 1e+3 * onez, 1e+0 * onez))
+
+            def kerneldef(h, k):
+                a = h(1e-3, 1e+2, 1)
+                b = [h(1e-2, 1e+3, 1) for _ in range(self.dims)]
+                logsigma = h(-6, 2)
+                return a * k(gp.kernels.gaussian, b) + \
+                    k(gp.kernels.lognoise, logsigma)
+
+            self.kerneldef = kerneldef
+
         # Learn hyperparameters
         self.hyperparams = self.learn_hyperparams()
 

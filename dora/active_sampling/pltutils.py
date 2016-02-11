@@ -1,7 +1,7 @@
 """
 Utilities for plotting purposes.
 """
-import dora.regressors.gp as gp
+import revrand.legacygp as gp
 
 import matplotlib.pyplot as pl
 
