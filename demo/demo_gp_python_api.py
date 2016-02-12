@@ -23,6 +23,7 @@ from example_processes import simulate_measurement
 import matplotlib.pyplot as pl
 
 
+# TEST TRAVIS
 def main():
 
     # Set up a sampling problem
