@@ -3,6 +3,7 @@ PyTest Modele for Sampler Class Testing.
 """
 import dora.active_sampling as sampling
 import numpy as np
+import os
 
 # Set this to True if a new test reference is to be created
 # Otherwise, keep this as False for new tests
@@ -76,13 +77,16 @@ def test_gp():
     yq = ground_truth(xq)
     ind = sampler.update(uid, yq)
 
+    cwd = os.environ.get('TRAVIS_BUILD_DIR')
+    print(cwd)
+
     if NEW_TEST_REFERENCE:
 
-        np.savez('./tests/data/gp_ref_data_0.npz', xq=xq, ind=ind)
+        np.savez('%s/tests/data/gp_ref_data_0.npz' % cwd, xq=xq, ind=ind)
 
     else:
 
-        gp_ref_data_0 = np.load('./tests/data/gp_ref_data_0.npz')
+        gp_ref_data_0 = np.load('%s/tests/data/gp_ref_data_0.npz' % cwd)
         assert equality(xq, gp_ref_data_0['xq'])
         assert ind == gp_ref_data_0['ind']
 
@@ -101,19 +105,22 @@ def test_gp():
         if i in retrain:
             sampler.train()
             if NEW_TEST_REFERENCE:
-                np.savez('./tests/data/gp_ref_data_%d.npz' % i, xq=xq, ind=ind)
+                np.savez('%s/tests/data/gp_ref_data_%d.npz' % (cwd, i),
+                         xq=xq,
+                         ind=ind)
             else:
                 gp_ref_data_i = np.load('./tests/data/gp_ref_data_%d.npz' % i)
                 assert equality(xq, gp_ref_data_i['xq'])
                 assert ind == gp_ref_data_i['ind']
 
     if NEW_TEST_REFERENCE:
-        np.savez('./tests/data/gp_ref_data_final.npz',
+        np.savez('%s/tests/data/gp_ref_data_final.npz' % cwd,
                  X=sampler.X(),
                  y=sampler.y(),
                  v=sampler.virtual_flag())
     else:
-        gp_ref_data_final = np.load('./tests/data/gp_ref_data_final.npz')
+        gp_ref_data_final = \
+            np.load('%s/tests/data/gp_ref_data_final.npz' % cwd)
         assert equality(sampler.X(), gp_ref_data_final['X'])
         assert equality(sampler.y(), gp_ref_data_final['y'])
         assert equality(sampler.virtual_flag(), gp_ref_data_final['v'])
