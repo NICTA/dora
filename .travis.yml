@@ -6,7 +6,14 @@ python:
 
 before_install:
   - echo $TRAVIS_BUILD_DIR
-  - sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
+
+addons:
+  apt:
+    packages:
+    - libblas-dev
+    - liblapack-dev
+    - libatlas-base-dev
+    - gfortran
 
 install: 
   - python setup.py install
