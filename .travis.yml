@@ -4,9 +4,6 @@ python:
   - "2.7"
   - "3.4"
 
-before_install:
-  - echo $TRAVIS_BUILD_DIR
-
 addons:
   apt:
     packages:
@@ -15,7 +12,29 @@ addons:
     - libatlas-base-dev
     - gfortran
 
-install: 
+before_install:
+  - wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz
+  - tar -xvf nlopt-2.4.2.tar.gz
+
+install:
+  - cd nlopt-2.4.2
+  - PYTHON=$(which python) ./configure --prefix=$(dirname $(dirname $(which python))) --enable-shared
+  - make
+  - make install
+  - cd $TRAVIS_BUILD_DIR
+  - pip install --upgrade pip
+  - pip install --upgrade pytest pytest-cov
+  - pip install codecov unipath requests
   - python setup.py install
 
-script: py.test
+script:
+  - py.test --cov=./
+
+cache:
+  - apt
+  - pip
+  - directories:
+    - $HOME/.cache/pip
+
+after_success:
+  - codecov
