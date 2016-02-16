@@ -9,7 +9,7 @@ scheme. The underlying problem is to sample the boundaries of a circle, given
 no prior knowledge of its geometry.
 
 The sampler uses a Gaussian process to probabilistically approximate the true
-model
+model.
 
 """
 import logging
@@ -34,6 +34,11 @@ def main():
     sampler = sampling.GaussianProcess(lower, upper, acq_name='sigmoid',
                                        n_train=49)
 
+    # Add initial training data
+    X_init = [[0.5, 0.5], [0.25, 0.75], [0.9, 0.2]]
+    y_init = simulate_measurement(X_init)
+    sampler.add_data(X_init, y_init)
+
     # Set up plotting
     plot_triggers = [50, 100, 150, 200, 250, 300]
     n_triggers = len(plot_triggers)
@@ -41,8 +46,6 @@ def main():
     fig = pl.figure()
     axs = iter([fig.add_subplot(*(plt_size + (i + 1,)))
                 for i in range(n_triggers)])
-
-    retrain = [100, 200]
 
     # Start active sampling!
     for i in range(n_target_samples):
@@ -56,12 +59,8 @@ def main():
         # Update the sampler about the new observation
         sampler.update(uid, yq_true)
 
-        if i in retrain:
-            sampler.train()
-
         # Plot the sampler progress
         if i in plot_triggers:
-            # sampler.train()  Be careful - retraining on biased data
             pltutils.plot_sampler_progress(sampler, ax=next(axs))
 
         logging.info('Iteration: %d' % i)
