@@ -72,16 +72,16 @@ def test_gp():
     yq = ground_truth(xq)
     ind = sampler.update(uid, yq)
 
-    cwd = '.'  # os.environ.get('TRAVIS_BUILD_DIR')
+    cwd = os.path.dirname(__file__)  # os.environ.get('TRAVIS_BUILD_DIR')
     print(cwd)
 
     if NEW_TEST_REFERENCE:
 
-        np.savez('%s/tests/data/gp_ref_data_0.npz' % cwd, xq=xq, ind=ind)
+        np.savez('%s/data/gp_ref_data_0.npz' % cwd, xq=xq, ind=ind)
 
     else:
 
-        gp_ref_data_0 = np.load('%s/tests/data/gp_ref_data_0.npz' % cwd)
+        gp_ref_data_0 = np.load('%s/data/gp_ref_data_0.npz' % cwd)
         assert np.allclose(xq, gp_ref_data_0['xq'])
         assert ind == gp_ref_data_0['ind']
 
@@ -102,22 +102,23 @@ def test_gp():
             sampler.train()
 
             if NEW_TEST_REFERENCE:
-                np.savez('%s/tests/data/gp_ref_data_%d.npz' % (cwd, i),
+                np.savez('%s/data/gp_ref_data_%d.npz' % (cwd, i),
                          xq=xq,
                          ind=ind)
             else:
-                gp_ref_data_i = np.load('./tests/data/gp_ref_data_%d.npz' % i)
+                gp_ref_data_i = np.load('%s/data/gp_ref_data_%d.npz'
+                                        % (cwd, i))
                 assert np.allclose(xq, gp_ref_data_i['xq'])
                 assert ind == gp_ref_data_i['ind']
 
     if NEW_TEST_REFERENCE:
-        np.savez('%s/tests/data/gp_ref_data_final.npz' % cwd,
+        np.savez('%s/data/gp_ref_data_final.npz' % cwd,
                  X=sampler.X(),
                  y=sampler.y(),
                  v=sampler.virtual_flag())
     else:
         gp_ref_data_final = \
-            np.load('%s/tests/data/gp_ref_data_final.npz' % cwd)
+            np.load('%s/data/gp_ref_data_final.npz' % cwd)
         assert np.allclose(sampler.X(), gp_ref_data_final['X'])
         assert np.allclose(sampler.y(), gp_ref_data_final['y'])
         assert np.allclose(sampler.virtual_flag(), gp_ref_data_final['v'])
