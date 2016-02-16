@@ -10,52 +10,47 @@ import os
 NEW_TEST_REFERENCE = False
 
 
-def equality(a, b, tol=1e-4):
-    return np.sum((a - b) ** 2) < tol
-
-
 def ground_truth(x):
     return (np.sum((x - 0.5) ** 2, axis=-1) < 0.1).astype(float)
 
 
-# def test_delaunay():
+def test_delaunay():
 
-#     np.random.seed(100)
+    np.random.seed(100)
 
-#     lower = [0, 0]
-#     upper = [1, 1]
+    lower = [0, 0]
+    upper = [1, 1]
 
-#     n_samples = 10
-#     explore_priority = 0.0001
+    n_samples = 10
+    explore_priority = 0.0001
 
-#     sampler = sampling.Delaunay(lower, upper,
-#                                 explore_priority=explore_priority)
+    sampler = sampling.Delaunay(lower, upper,
+                                explore_priority=explore_priority)
 
-#     xq, uid = sampler.pick()
+    xq, uid = sampler.pick()
 
-#     assert equality(xq, np.array([0, 0]))
-#     assert uid == 'e99bf8c47ac0cebc187804b541ba1ac6'
+    assert np.allclose(xq, np.array([0, 0]))
 
-#     yq = ground_truth(xq)
-#     assert sampler.update(uid, yq) == 0
+    yq = ground_truth(xq)
+    assert sampler.update(uid, yq) == 0
 
-#     for i in range(n_samples - 1):
+    for i in range(n_samples - 1):
 
-#         xq, uid = sampler.pick()
-#         yq = ground_truth(xq)
-#         sampler.update(uid, yq)
+        xq, uid = sampler.pick()
+        yq = ground_truth(xq)
+        sampler.update(uid, yq)
 
-#     assert equality(np.array(sampler.X), np.array([
-#                     [0., 0.],
-#                     [1., 0.],
-#                     [0., 1.],
-#                     [1., 1.],
-#                     [0.5, 0.5],
-#                     [0.5, 0.24981292],
-#                     [0.24981292, 0.5],
-#                     [0.75018708, 0.5],
-#                     [0.5, 0.75018708],
-#                     [0.87518701, 0.5]]))
+    assert np.allclose(np.array(sampler.X), np.array([
+                       [0., 0.],
+                       [1., 0.],
+                       [0., 1.],
+                       [1., 1.],
+                       [0.5, 0.5],
+                       [0.5, 0.24981292],
+                       [0.24981292, 0.5],
+                       [0.75018708, 0.5],
+                       [0.5, 0.75018708],
+                       [0.87518701, 0.5]]))
 
 
 def test_gp():
@@ -87,7 +82,7 @@ def test_gp():
     else:
 
         gp_ref_data_0 = np.load('%s/tests/data/gp_ref_data_0.npz' % cwd)
-        assert equality(xq, gp_ref_data_0['xq'])
+        assert np.allclose(xq, gp_ref_data_0['xq'])
         assert ind == gp_ref_data_0['ind']
 
     # Start active sampling!
@@ -103,14 +98,16 @@ def test_gp():
         ind = sampler.update(uid, yq_true)
 
         if i in retrain:
+
             sampler.train()
+
             if NEW_TEST_REFERENCE:
                 np.savez('%s/tests/data/gp_ref_data_%d.npz' % (cwd, i),
                          xq=xq,
                          ind=ind)
             else:
                 gp_ref_data_i = np.load('./tests/data/gp_ref_data_%d.npz' % i)
-                assert equality(xq, gp_ref_data_i['xq'])
+                assert np.allclose(xq, gp_ref_data_i['xq'])
                 assert ind == gp_ref_data_i['ind']
 
     if NEW_TEST_REFERENCE:
@@ -121,6 +118,6 @@ def test_gp():
     else:
         gp_ref_data_final = \
             np.load('%s/tests/data/gp_ref_data_final.npz' % cwd)
-        assert equality(sampler.X(), gp_ref_data_final['X'])
-        assert equality(sampler.y(), gp_ref_data_final['y'])
-        assert equality(sampler.virtual_flag(), gp_ref_data_final['v'])
+        assert np.allclose(sampler.X(), gp_ref_data_final['X'])
+        assert np.allclose(sampler.y(), gp_ref_data_final['y'])
+        assert np.allclose(sampler.virtual_flag(), gp_ref_data_final['v'])
