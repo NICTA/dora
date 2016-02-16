@@ -527,7 +527,11 @@ def acq_defs(y_mean=0, explore_priority=0.0001):
     """
     Generate a dictionary of acquisition functions.
 
-    EXPLAIN each acquisition function
+    var_sum : Favours observations with high variance
+
+    pred_max : Favours observations with high predicted target outputs
+
+    sigmoid : Favours observations around decision boundaries
 
     Parameters
     ----------
