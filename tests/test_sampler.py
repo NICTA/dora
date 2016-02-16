@@ -77,7 +77,7 @@ def test_gp():
     yq = ground_truth(xq)
     ind = sampler.update(uid, yq)
 
-    cwd = os.environ.get('TRAVIS_BUILD_DIR')
+    cwd = '.'  # os.environ.get('TRAVIS_BUILD_DIR')
     print(cwd)
 
     if NEW_TEST_REFERENCE:

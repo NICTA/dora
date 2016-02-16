@@ -82,6 +82,31 @@ class GaussianProcess(Sampler):
         self.y_mean = None
         self.n_tasks = None
 
+    def add_data(self, X, y, train=False):
+        """
+        Add training data set.
+
+        .. note :: [Properties Modified]
+                    X,
+                    y,
+                    virtual_flag
+
+        Parameters
+        ----------
+        X : array_like
+            The initial training features
+        y : array_like
+            The initial target outputs
+        train : bool, optional
+            To train on the current dataset immediately or not
+        """
+        [self.X.append(xi) for xi in X]
+        [self.y.append(np.atleast_1d(yi)) for yi in y]
+        [self.virtual_flag.append(False) for yi in y]
+
+        if train:
+            self.train()
+
     def update_y_mean(self):
         """
         Update the mean of the target outputs.
@@ -115,6 +140,15 @@ class GaussianProcess(Sampler):
 
         .. note :: [Properties Modified]
                     (None)
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            To log the progress of the hyperparameter learning stage
+        ftol : float, optional
+            The tolerance level to reach for the learning objective
+        maxiter : int, optional
+            The maximum number of iterations allowed for optimisation
 
         Returns
         -------
@@ -304,7 +338,7 @@ class GaussianProcess(Sampler):
         ----------
         Xq : numpy.ndarray
             Query points
-        real : bool
+        real : bool, optional
             To use only the real observations or also the virtual observations
 
         Returns
@@ -492,6 +526,8 @@ class GaussianProcess(Sampler):
 def acq_defs(y_mean=0, explore_priority=0.0001):
     """
     Generate a dictionary of acquisition functions.
+
+    EXPLAIN each acquisition function
 
     Parameters
     ----------
