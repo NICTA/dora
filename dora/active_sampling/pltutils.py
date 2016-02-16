@@ -1,10 +1,6 @@
 """
 Utilities for plotting purposes.
 """
-import revrand.legacygp as gp
-
-import matplotlib.pyplot as pl
-
 import numpy as np
 
 
@@ -34,7 +30,7 @@ def split_subplots(n):
     return r, c
 
 
-def plot_sampler_progress(sampler, ax=None):
+def plot_sampler_progress(sampler, ax):
     """
     Plot the progress of a particular sampler.
 
@@ -65,11 +61,7 @@ def plot_sampler_progress(sampler, ax=None):
 
     xg, yg = np.meshgrid(xi, yi)
     X_test = np.array([xg.flatten(), yg.flatten()]).T
-    predictor = gp.query(sampler.regressors[0], X_test)
-    zg = np.reshape(gp.mean(predictor), xg.shape)
-
-    if ax is None:
-        ax = pl.gca()
+    zg = np.reshape(sampler.predict(X_test)[0], xg.shape)
 
     extent = [sampler.lower[0], sampler.upper[0],
               sampler.upper[1], sampler.lower[1]]

@@ -6,7 +6,7 @@ active sampling a spatial field using a non-parametric, Bayesian model
 """
 import logging
 
-from dora.active_sampling import Sampler, random_sample
+from dora.active_sampling.base_sampler import Sampler, random_sample
 
 import revrand.legacygp as gp
 
