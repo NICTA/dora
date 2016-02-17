@@ -61,7 +61,7 @@ def main():
 
         # Plot the sampler progress
         if i in plot_triggers:
-            pltutils.plot_sampler_progress(sampler, ax=next(axs))
+            pltutils.plot_sampler_progress(sampler, next(axs))
 
         logging.info('Iteration: %d' % i)
 

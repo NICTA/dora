@@ -1,4 +1,6 @@
-from . import util
-from .base_sampler import *
+"""
+Initialise the active sampling module.
+"""
 from .gp_sampler import GaussianProcess
-from .delaunay_sampler import Delaunay 
+
+from .delaunay_sampler import Delaunay

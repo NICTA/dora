@@ -4,7 +4,7 @@ Delaunay Sampler Module.
 Provides the Delaunay Sampler Class which contains the strategies for
 active sampling a spatial field
 """
-from dora.active_sampling import Sampler, grid_sample
+from dora.active_sampling.base_sampler import Sampler, grid_sample
 
 import numpy as np
 

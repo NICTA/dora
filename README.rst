@@ -2,6 +2,9 @@
 dora 
 =======
 
+.. image:: https://travis-ci.org/NICTA/dora.svg?branch=master
+    :target: https://travis-ci.org/NICTA/dora
+
 ------------------------------------------------------------------------------
 A library for Bayesian active sampling with non-parametric models
 ------------------------------------------------------------------------------
