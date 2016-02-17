@@ -40,7 +40,7 @@ def test_delaunay():
         yq = ground_truth(xq)
         sampler.update(uid, yq)
 
-    assert np.allclose(np.array(sampler.X), np.array([
+    assert np.allclose(sampler.X(), np.array([
                        [0., 0.],
                        [1., 0.],
                        [0., 1.],
