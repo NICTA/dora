@@ -21,7 +21,8 @@ setup(
         # 'six >= 1.9.0',
         # NLopt >= 2.4.2
     ],
-    dependency_links=['https://github.com/nicta/revrand'],
+    dependency_links=[
+        'git+https://github.com/nicta/revrand.git@master#egg=revrand'],
     extras_require={
         # 'nonlinear': ['NLopt'],
         'demos': [
