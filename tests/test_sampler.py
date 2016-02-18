@@ -5,16 +5,16 @@ import dora.active_sampling as sampling
 import numpy as np
 import os
 
-# Set this to True if a new test reference is to be created
-# Otherwise, keep this as False for new tests
-NEW_TEST_REFERENCE = False
+# # Set this to True if a new test reference is to be created
+# # Otherwise, keep this as False for new tests
+# update_ref_data = False
 
 
 def ground_truth(x):
     return (np.sum((x - 0.5) ** 2, axis=-1) < 0.1).astype(float)
 
 
-def test_delaunay():
+def test_delaunay(update_ref_data):
 
     np.random.seed(100)
 
@@ -53,7 +53,7 @@ def test_delaunay():
                        [0.87518701, 0.5]]))
 
 
-def test_gp():
+def test_gp(update_ref_data):
 
     np.random.seed(100)
 
@@ -75,7 +75,7 @@ def test_gp():
     cwd = os.path.dirname(__file__)  # os.environ.get('TRAVIS_BUILD_DIR')
     print(cwd)
 
-    if NEW_TEST_REFERENCE:
+    if update_ref_data:
 
         np.savez('%s/data/gp_ref_data_0.npz' % cwd, xq=xq, ind=ind)
 
@@ -101,7 +101,7 @@ def test_gp():
 
             sampler.train()
 
-            if NEW_TEST_REFERENCE:
+            if update_ref_data:
                 np.savez('%s/data/gp_ref_data_%d.npz' % (cwd, i),
                          xq=xq,
                          ind=ind)
@@ -111,7 +111,7 @@ def test_gp():
                 assert np.allclose(xq, gp_ref_data_i['xq'])
                 assert ind == gp_ref_data_i['ind']
 
-    if NEW_TEST_REFERENCE:
+    if update_ref_data:
         np.savez('%s/data/gp_ref_data_final.npz' % cwd,
                  X=sampler.X(),
                  y=sampler.y(),
