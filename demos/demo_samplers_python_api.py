@@ -18,29 +18,37 @@ import dora.active_sampling as sampling
 
 from dora.active_sampling import pltutils
 
-from .example_processes import simulate_measurement
+from demos.example_processes import simulate_measurement
 
 import matplotlib.pyplot as pl
 
 
-def main():
+def main(sampling_method='GaussianProcess'):
 
     # Set up a sampling problem
     lower = [0, 0]
     upper = [1, 1]
-    acq_name = 'sigmoid'
-    n_train = 49
 
     # Initialise the sampler
-    sampler = sampling.GaussianProcess(lower, upper, acq_name=acq_name,
-                                       n_train=n_train, seed=100)
+    if sampling_method == 'GaussianProcess':
+        acq_name = 'sigmoid'
+        n_train = 49
+        sampler = sampling.GaussianProcess(lower, upper, acq_name=acq_name,
+                                           n_train=n_train, seed=100)
+    elif sampling_method == 'Delaunay':
+        explore_priority = 0.0001
+        sampler = sampling.Delaunay(lower, upper,
+                                    explore_priority=explore_priority)
+    else:
+        raise ValueError('Sampling method "%s" not implemented yet'
+                         % sampling_method)
+
+        # # Add initial training data
+        # X_init = [[0.5, 0.5], [0.25, 0.75], [0.9, 0.2]]
+        # y_init = simulate_measurement(X_init)
+        # sampler.add_data(X_init, y_init)
 
     n_samples = 301
-
-    # # Add initial training data
-    # X_init = [[0.5, 0.5], [0.25, 0.75], [0.9, 0.2]]
-    # y_init = simulate_measurement(X_init)
-    # sampler.add_data(X_init, y_init)
 
     # Set up plotting
     plot_triggers = [50, 100, 150, 200, 250, 300]
@@ -72,5 +80,6 @@ def main():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    main()
+    main(sampling_method='Delaunay')
+    main(sampling_method='GaussianProcess')
     pl.show()

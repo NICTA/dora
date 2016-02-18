@@ -32,6 +32,8 @@ class Delaunay(Sampler):
     Sampler : Base Class
     """
 
+    name = 'Delaunay'
+
     def __init__(self, lower, upper, explore_priority=0.0001):
         """
         Initialise the Delaunay class.

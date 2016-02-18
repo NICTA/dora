@@ -48,6 +48,8 @@ class GaussianProcess(Sampler):
     Sampler : Base Class
     """
 
+    name = 'GaussianProcess'
+
     def __init__(self, lower, upper, kerneldef=None, n_train=50,
                  acq_name='var_sum', explore_priority=0.0001, seed=None):
         """
