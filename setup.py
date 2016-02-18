@@ -17,7 +17,8 @@ setup(
     tests_require=['pytest'],
     install_requires=[
         'scipy >= 0.14.1',
-        'numpy >= 1.8.2',
+        'numpy >= 1.8.2'
+        'matplotlib >= 1.5.1',
         # 'six >= 1.9.0',
         # NLopt >= 2.4.2
     ],
