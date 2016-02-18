@@ -6,7 +6,7 @@ active sampling a spatial field
 """
 import uuid
 
-from dora.active_sampling.util import ArrayBuffer
+from dora.active_sampling.utils import ArrayBuffer
 
 import numpy as np
 
