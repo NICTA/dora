@@ -72,6 +72,6 @@ def verify_common_samplers(update_ref_data=False,
     else:
         ref_data = \
             np.load(filename)
-        assert np.allclose(sampler.X().flatten(), ref_data['X'].flatten())
-        assert np.allclose(sampler.y(), ref_data['y'])
-        assert np.allclose(sampler.virtual_flag(), ref_data['v'])
+        np.testing.assert_allclose(sampler.X(), ref_data['X'])
+        np.testing.assert_allclose(sampler.y(), ref_data['y'])
+        np.testing.assert_allclose(sampler.virtual_flag(), ref_data['v'])
