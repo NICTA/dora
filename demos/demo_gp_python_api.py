@@ -18,7 +18,7 @@ import dora.active_sampling as sampling
 
 from dora.active_sampling import pltutils
 
-from example_processes import simulate_measurement
+from .example_processes import simulate_measurement
 
 import matplotlib.pyplot as pl
 
@@ -26,18 +26,21 @@ import matplotlib.pyplot as pl
 def main():
 
     # Set up a sampling problem
-    n_target_samples = 301
     lower = [0, 0]
     upper = [1, 1]
+    acq_name = 'sigmoid'
+    n_train = 49
 
     # Initialise the sampler
-    sampler = sampling.GaussianProcess(lower, upper, acq_name='sigmoid',
-                                       n_train=49)
+    sampler = sampling.GaussianProcess(lower, upper, acq_name=acq_name,
+                                       n_train=n_train, seed=100)
 
-    # Add initial training data
-    X_init = [[0.5, 0.5], [0.25, 0.75], [0.9, 0.2]]
-    y_init = simulate_measurement(X_init)
-    sampler.add_data(X_init, y_init)
+    n_samples = 301
+
+    # # Add initial training data
+    # X_init = [[0.5, 0.5], [0.25, 0.75], [0.9, 0.2]]
+    # y_init = simulate_measurement(X_init)
+    # sampler.add_data(X_init, y_init)
 
     # Set up plotting
     plot_triggers = [50, 100, 150, 200, 250, 300]
@@ -48,7 +51,7 @@ def main():
                 for i in range(n_triggers)])
 
     # Start active sampling!
-    for i in range(n_target_samples):
+    for i in range(n_samples):
 
         # Pick a location to sample
         xq, uid = sampler.pick()
@@ -65,9 +68,9 @@ def main():
 
         logging.info('Iteration: %d' % i)
 
-    pl.show()
-
+    return sampler
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     main()
+    pl.show()

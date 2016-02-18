@@ -49,7 +49,7 @@ class GaussianProcess(Sampler):
     """
 
     def __init__(self, lower, upper, kerneldef=None, n_train=50,
-                 acq_name='var_sum', explore_priority=0.0001):
+                 acq_name='var_sum', explore_priority=0.0001, seed=None):
         """
         Initialise the GaussianProcess class.
 
@@ -81,6 +81,9 @@ class GaussianProcess(Sampler):
         self.regressors = None
         self.y_mean = None
         self.n_tasks = None
+
+        if seed:
+            np.random.seed(seed)
 
     def add_data(self, X, y, train=False):
         """

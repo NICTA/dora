@@ -16,8 +16,6 @@ def ground_truth(x):
 
 def test_delaunay(update_ref_data):
 
-    np.random.seed(100)
-
     lower = [0, 0]
     upper = [1, 1]
 
@@ -55,70 +53,19 @@ def test_delaunay(update_ref_data):
 
 def test_gp(update_ref_data):
 
-    np.random.seed(100)
+    from demos.demo_gp_python_api import main
 
-    lower = [0, 0]
-    upper = [1, 1]
-    acq_name = 'sigmoid'
-    n_train = 49
+    sampler = main()
 
-    sampler = sampling.GaussianProcess(lower, upper, acq_name=acq_name,
-                                       n_train=n_train)
-
-    n_samples = 301
-    retrain = [100, 200]
-
-    xq, uid = sampler.pick()
-    yq = ground_truth(xq)
-    ind = sampler.update(uid, yq)
-
-    cwd = os.path.dirname(__file__)  # os.environ.get('TRAVIS_BUILD_DIR')
-    print(cwd)
-
+    cwd = os.path.dirname(__file__)
     if update_ref_data:
-
-        np.savez('%s/data/gp_ref_data_0.npz' % cwd, xq=xq, ind=ind)
-
-    else:
-
-        gp_ref_data_0 = np.load('%s/data/gp_ref_data_0.npz' % cwd)
-        assert np.allclose(xq, gp_ref_data_0['xq'])
-        assert ind == gp_ref_data_0['ind']
-
-    # Start active sampling!
-    for i in range(n_samples):
-
-        # Pick a location to sample
-        xq, uid = sampler.pick()
-
-        # Sample that location
-        yq_true = ground_truth(xq)
-
-        # Update the sampler about the new observation
-        ind = sampler.update(uid, yq_true)
-
-        if i in retrain:
-
-            sampler.train()
-
-            if update_ref_data:
-                np.savez('%s/data/gp_ref_data_%d.npz' % (cwd, i),
-                         xq=xq,
-                         ind=ind)
-            else:
-                gp_ref_data_i = np.load('%s/data/gp_ref_data_%d.npz'
-                                        % (cwd, i))
-                assert np.allclose(xq, gp_ref_data_i['xq'])
-                assert ind == gp_ref_data_i['ind']
-
-    if update_ref_data:
-        np.savez('%s/data/gp_ref_data_final.npz' % cwd,
+        np.savez('%s/data/gp_ref_data.npz' % cwd,
                  X=sampler.X(),
                  y=sampler.y(),
                  v=sampler.virtual_flag())
     else:
         gp_ref_data_final = \
-            np.load('%s/data/gp_ref_data_final.npz' % cwd)
+            np.load('%s/data/gp_ref_data.npz' % cwd)
         assert np.allclose(sampler.X(), gp_ref_data_final['X'])
         assert np.allclose(sampler.y(), gp_ref_data_final['y'])
         assert np.allclose(sampler.virtual_flag(), gp_ref_data_final['v'])
