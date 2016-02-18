@@ -23,7 +23,7 @@ from demos.example_processes import simulate_measurement
 import matplotlib.pyplot as pl
 
 
-def main(sampling_method='GaussianProcess'):
+def main(sampling_method='GaussianProcess', plot=False):
 
     # Set up a sampling problem
     lower = [0, 0]
@@ -45,12 +45,13 @@ def main(sampling_method='GaussianProcess'):
                          % sampling_method)
 
     # Set up plotting
-    plot_triggers = [50, 100, 150, 200, 250, 300]
-    n_triggers = len(plot_triggers)
-    plt_size = pltutils.split_subplots(n_triggers)
-    fig = pl.figure()
-    axs = iter([fig.add_subplot(*(plt_size + (i + 1,)))
-                for i in range(n_triggers)])
+    if plot:
+        plot_triggers = [50, 100, 150, 200, 250, 300]
+        n_triggers = len(plot_triggers)
+        plt_size = pltutils.split_subplots(n_triggers)
+        fig = pl.figure()
+        axs = iter([fig.add_subplot(*(plt_size + (i + 1,)))
+                    for i in range(n_triggers)])
 
     # Start active sampling!
     for i in range(n_samples):
@@ -65,7 +66,7 @@ def main(sampling_method='GaussianProcess'):
         sampler.update(uid, yq_true)
 
         # Plot the sampler progress
-        if i in plot_triggers:
+        if plot and i in plot_triggers:
             pltutils.plot_sampler_progress(sampler, next(axs))
 
         # Log the iteration number
@@ -76,6 +77,6 @@ def main(sampling_method='GaussianProcess'):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    main(sampling_method='Delaunay')
-    main(sampling_method='GaussianProcess')
+    main(sampling_method='Delaunay', plot=True)
+    main(sampling_method='GaussianProcess', plot=True)
     pl.show()
