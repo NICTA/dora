@@ -28,6 +28,7 @@ def main(sampling_method='GaussianProcess'):
     # Set up a sampling problem
     lower = [0, 0]
     upper = [1, 1]
+    n_samples = 301
 
     # Initialise the sampler
     if sampling_method == 'GaussianProcess':
@@ -42,13 +43,6 @@ def main(sampling_method='GaussianProcess'):
     else:
         raise ValueError('Sampling method "%s" not implemented yet'
                          % sampling_method)
-
-        # # Add initial training data
-        # X_init = [[0.5, 0.5], [0.25, 0.75], [0.9, 0.2]]
-        # y_init = simulate_measurement(X_init)
-        # sampler.add_data(X_init, y_init)
-
-    n_samples = 301
 
     # Set up plotting
     plot_triggers = [50, 100, 150, 200, 250, 300]
@@ -74,8 +68,10 @@ def main(sampling_method='GaussianProcess'):
         if i in plot_triggers:
             pltutils.plot_sampler_progress(sampler, next(axs))
 
+        # Log the iteration number
         logging.info('Iteration: %d' % i)
 
+    # Sampler demos must return the sampler itself
     return sampler
 
 if __name__ == '__main__':
