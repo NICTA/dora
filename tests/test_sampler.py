@@ -70,8 +70,8 @@ def verify_common_samplers(update_ref_data=False,
                  y=sampler.y(),
                  v=sampler.virtual_flag())
     else:
-        gp_ref_data_final = \
+        ref_data = \
             np.load(filename)
-        assert np.allclose(sampler.X(), gp_ref_data_final['X'])
-        assert np.allclose(sampler.y(), gp_ref_data_final['y'])
-        assert np.allclose(sampler.virtual_flag(), gp_ref_data_final['v'])
+        assert np.allclose(sampler.X(), ref_data['X'])
+        assert np.allclose(sampler.y(), ref_data['y'])
+        assert np.allclose(sampler.virtual_flag(), ref_data['v'])
