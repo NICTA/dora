@@ -4,14 +4,6 @@ PyTest Modele for Sampler Class Testing.
 import numpy as np
 import os
 
-# # Set this to True if a new test reference is to be created
-# # Otherwise, keep this as False for new tests
-# update_ref_data = False
-
-
-def ground_truth(x):
-    return (np.sum((x - 0.5) ** 2, axis=-1) < 0.1).astype(float)
-
 
 def test_gp(update_ref_data):
 
