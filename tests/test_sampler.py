@@ -71,6 +71,24 @@ def verify_common_samplers(update_ref_data=False,
                  v=sampler.virtual_flag())
     else:
         ref_data = np.load(filename)
-        # np.testing.assert_allclose(sampler.X(), ref_data['X'])
+        # np.savez('%s/data/ref_data_TEST.npz' % cwd, X=sampler.X())
+        print(sampler.X() - ref_data['X'])
+        np.testing.assert_allclose(sampler.X(), ref_data['X'])
         np.testing.assert_allclose(sampler.y(), ref_data['y'])
         np.testing.assert_allclose(sampler.virtual_flag(), ref_data['v'])
+
+# def main():
+
+#     cwd = os.path.dirname(__file__)
+#     filename1 = '%s/data/ref_data_%s.npz' % (cwd, 'Delaunay')
+#     filename2 = '%s/data/ref_data_TEST.npz' % cwd
+
+#     ref_data1 = np.load(filename1)
+#     ref_data2 = np.load(filename2)
+
+#     print(ref_data1['X'])
+#     print(ref_data2['X'])
+#     print(ref_data2['X'] - ref_data1['X'])
+
+# if __name__ == '__main__':
+#     main()
