@@ -72,7 +72,7 @@ def verify_common_samplers(update_ref_data=False,
     else:
         ref_data = np.load(filename)
         # np.savez('%s/data/ref_data_TEST.npz' % cwd, X=sampler.X())
-        print(sampler.X() - ref_data['X'])
+        print(sampler.X())
         np.testing.assert_allclose(sampler.X(), ref_data['X'])
         np.testing.assert_allclose(sampler.y(), ref_data['y'])
         np.testing.assert_allclose(sampler.virtual_flag(), ref_data['v'])
