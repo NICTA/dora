@@ -17,7 +17,7 @@ setup(
     tests_require=['pytest'],
     install_requires=[
         'scipy == 0.14.0',
-        'numpy == 1.8.2'
+        'numpy >= 1.8.2'
         # 'six >= 1.9.0',
         # NLopt >= 2.4.2
     ],
