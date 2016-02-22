@@ -46,27 +46,40 @@ def plot_sampler_progress(sampler, ax):
     assert sampler.dims == 2
     assert sampler.n_tasks == 1
 
-    X = np.asarray(sampler.X)
-    y = np.asarray(sampler.y).flatten()
-    virtual_flags = np.asarray(sampler.virtual_flag)
+    X = sampler.X()
+    y = sampler.y().flatten()
 
-    X_real = X[~virtual_flags]
-    y_real = y[~virtual_flags]
-    X_virtual = X[virtual_flags]
-    y_virtual = y[virtual_flags]
+    if sampler.name == 'GaussianProcess':
 
-    n_grids = 400
-    xi = np.linspace(sampler.lower[0], sampler.upper[0], num=n_grids)
-    yi = np.linspace(sampler.lower[1], sampler.upper[1], num=n_grids)
+        n_grids = 400
+        xi = np.linspace(sampler.lower[0], sampler.upper[0], num=n_grids)
+        yi = np.linspace(sampler.lower[1], sampler.upper[1], num=n_grids)
 
-    xg, yg = np.meshgrid(xi, yi)
-    X_test = np.array([xg.flatten(), yg.flatten()]).T
-    zg = np.reshape(sampler.predict(X_test)[0], xg.shape)
+        xg, yg = np.meshgrid(xi, yi)
+        X_test = np.array([xg.flatten(), yg.flatten()]).T
+        zg = np.reshape(sampler.predict(X_test)[0], xg.shape)
 
-    extent = [sampler.lower[0], sampler.upper[0],
-              sampler.upper[1], sampler.lower[1]]
-    ax.imshow(zg, extent=extent)
-    ax.scatter(X_real[:, 0], X_real[:, 1], c=y_real)
-    ax.scatter(X_virtual[:, 0], X_virtual[:, 1], c=y_virtual, marker='x')
+        extent = [sampler.lower[0], sampler.upper[0],
+                  sampler.upper[1], sampler.lower[1]]
+        ax.imshow(zg, extent=extent)
+
+    elif sampler.name == 'Delaunay':
+
+        import matplotlib.pyplot as pl
+        import matplotlib as mpl
+
+        cols = pl.cm.jet(np.linspace(0, 1, 64))
+        custom = mpl.colors.ListedColormap(cols * 0.5 + 0.5)
+
+        w = 4. / np.log(1 + len(y))
+
+        ax.tripcolor(X[:, 0], X[:, 1], y, shading='gouraud',
+                     edgecolors='k', linewidth=w, cmap=custom)
+        ax.triplot(X[:, 0], X[:, 1], color='k', linewidth=w)
+    else:
+        raise ValueError('Sampler "%s" not implemented yet'
+                         % sampler.name)
+
+    ax.scatter(X[:, 0], X[:, 1], c=y)
     ax.set_title('%d Samples' % len(y))
     ax.axis('image')
