@@ -329,6 +329,49 @@ class GaussianProcess(Sampler):
 
         return xq, uid
 
+
+    def eval_acq(self, Xq):
+        """
+        Evaluates the acquistion function for a given Xq (query points)
+
+
+        Parameters
+        ----------
+        Xq : numpy.ndarray,
+            The query points on which the acquistion function will be evaluated
+
+        Returns
+        -------
+        numpy.ndarray
+            value of acquistion function at Xq
+        scalar
+            argmax of the evaluated points
+        """
+
+
+        # make the query points a 2d array if a 1d array is passed in
+        if len(Xq.shape)==1:
+            Xq = Xq[:,np.newaxis]
+
+        self.update_y_mean()
+
+        # Generate cached predictors for those test points
+        predictors = [gp.query(r, Xq) for r in self.regressors]
+
+        # Compute the posterior distributions at those points
+        # Note: No covariance information implemented at this stage
+        Yq_exp = np.asarray([gp.mean(p) for p in predictors]).T + \
+            self.y_mean
+        Yq_var = np.asarray([gp.variance(p) for p in predictors]).T
+
+        # Aquisition Functions
+        acq_defs_current = acq_defs(y_mean=self.y_mean,
+                                    explore_priority=self.explore_priority)
+        # Compute the acquisition levels at those test points
+        yq_acq = acq_defs_current[self.acq_name](Yq_exp, Yq_var)
+
+        return yq_acq, np.argmax(yq_acq)
+
     def predict(self, Xq, real=True):
         """
         Predict the query mean and variance using the Gaussian process model.
