@@ -16,7 +16,7 @@ def test_gp(update_ref_data):
     verify_common_samplers : The general sampler testing framework
     """
     verify_common_samplers(update_ref_data=update_ref_data,
-                           sampling_method='GaussianProcess')
+                           sampler_model='GaussianProcess')
 
 
 def test_delaunay(update_ref_data):
@@ -30,11 +30,11 @@ def test_delaunay(update_ref_data):
     verify_common_samplers : The general sampler testing framework
     """
     verify_common_samplers(update_ref_data=update_ref_data,
-                           sampling_method='Delaunay')
+                           sampler_model='Delaunay')
 
 
 def verify_common_samplers(update_ref_data=False,
-                           sampling_method='GaussianProcess'):
+                           sampler_model='GaussianProcess'):
     """
     Test a general sampler's output.
 
@@ -55,15 +55,15 @@ def verify_common_samplers(update_ref_data=False,
     ----------
     update_ref_data : bool, optional
         To update the reference data or not
-    sampling_method : str, optional
+    sampler_model : str, optional
         The sampling method to test and verify
     """
     from demos.demo_samplers_python_api import main
 
-    sampler = main(sampling_method=sampling_method)
+    sampler = main(sampler_model=sampler_model)
 
     cwd = os.path.dirname(__file__)
-    filename = '%s/data/ref_data_%s.npz' % (cwd, sampling_method)
+    filename = '%s/data/ref_data_%s.npz' % (cwd, sampler_model)
     if update_ref_data:
         np.savez(filename,
                  X=sampler.X(),
