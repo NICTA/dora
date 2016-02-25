@@ -51,7 +51,7 @@ class GaussianProcess(Sampler):
     name = 'GaussianProcess'
 
     def __init__(self, lower, upper, kerneldef=None, n_train=50,
-                 acq_name='var_sum', explore_priority=0.0001, seed=None):
+                 acq_name='var_sum', explore_priority=1., seed=None):
         """
         Initialise the GaussianProcess class.
 
@@ -571,13 +571,13 @@ class GaussianProcess(Sampler):
         return self.X()[real_flag], self.y()[real_flag]
 
 
-def acq_defs(y_mean=0, explore_priority=0.0001):
+def acq_defs(y_mean=0, explore_priority=1.):
     """
     Generate a dictionary of acquisition functions.
 
     var_sum : Favours observations with high variance
 
-    pred_max : Favours observations with high predicted target outputs
+    pred_upper_bound : Favours observations with high predicted target outputs
 
     sigmoid : Favours observations around decision boundaries
 
@@ -599,12 +599,13 @@ def acq_defs(y_mean=0, explore_priority=0.0001):
     # Returns an array of n values
     return {
         'var_sum': lambda u, v: np.sum(v, axis=1),
-        'pred_max': lambda u, v: np.max(u + 3 * np.sqrt(v), axis=1),
+        'pred_upper_bound': lambda u, v: np.max(u + 3 * explore_priority * np.sqrt(v),
+                                        axis=1),
         'prod_max': lambda u, v: np.max((u + (y_mean +
-                                        explore_priority / 3.0)) *
+                                        (explore_priority/10000) / 3.0)) *
                                         np.sqrt(v), axis=1),
         'prob_tail': lambda u, v: np.max((1 - stats.norm.cdf(
-                                         explore_priority *
+                                        (explore_priority/10000) *
                                          np.ones(u.shape), u,
                                          np.sqrt(v))), axis=1),
         'sigmoid': lambda u, v: np.abs(stats.logistic.cdf(u + np.sqrt(v),
