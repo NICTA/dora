@@ -17,39 +17,19 @@ def initialise_sampler():
     This expects a dict containing:
     lower : a list of the lower bounds of the region of interest
     upper : a list of the upper bounds of the region of interest
-    X_train : training data to train the sampler. a list of n elements where is
-              element is itself a list with d elements where n
-              is the number of
-              training points and d is the number of dimension (parameters of
-              the forward model)
-    y_train : the observed values outputted by the forward model for each set
-              of parameters in X_train. another list of lists. n x s where s
-              is the number of outputs of the forward model. s also corresponds
-              to the number of stacks in the sampler
-    Optional keys in the dict:
-    add_train_data : a boolean operator that tells the sampler to include the
-                     training data to the sampler rather than just using it to
-                     train its parameters. Default = True
-    n_stacks : the number of stacks in the sampler. this must be equal to the
-               number of outputs of the forward model
-    mean : the mean of the training data. this is redundant and will be
-           removed shortly. Default = 0. TODO(SIMON)
+
     """
     initDict = fl.request.json
 
-    mapping = {'mean': 'mean', 'n_train_threshold': 'n_train',
-               'acquisition_func': 'acq_name',
-               'explore_factor': 'explore_priority'}
-
-    # Ignore additional parameters
-    mapDict = {mapping[k]: v for k, v in initDict.items() if k in mapping}
 
     if not hasattr(fl.current_app, 'samplers'):
         fl.current_app.samplers = {}
 
     samplerid = len(fl.current_app.samplers)
+
     fl.current_app.samplers[samplerid] \
-        = GPsampler(initDict['lower'], initDict['upper'], **mapDict)
+        = GPsampler(initDict['lower'], initDict['upper'], acq_name=initDict['acq_name'],
+                    n_train= initDict['n_train'])
 
     obs_uri = fl.url_for('.get_query', samplerid=samplerid, _external=True)
     pred_uri = fl.url_for('.predict', samplerid=samplerid, _external=True)

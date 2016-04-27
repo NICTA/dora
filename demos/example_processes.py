@@ -8,7 +8,10 @@ def simulate_measurement(X):
     """
     A binary image of a circle as a test problem for sampling.
     """
-    return (np.sum((np.asarray(X) - 0.5)**2, axis=-1) < 0.1).astype(float)
+    # import IPython; IPython.embed()
+    result = (np.sum((np.asarray(X) - 0.5)**2, axis=-1) < 0.1).astype(float)
+    # return np.array([result, result, result])
+    return result
 
 
 def simulate_measurement_vector(X, uid=None):

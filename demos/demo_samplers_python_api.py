@@ -29,7 +29,7 @@ def main(sampler_model='GaussianProcess', plot=False):
     # Set up a sampling problem
     lower = [0, 0]
     upper = [1, 1]
-    n_samples = 301
+    n_samples = 151
 
     logging.info('\n \n Sampler Model: %s' % sampler_model)
     sleep(3)
@@ -38,7 +38,7 @@ def main(sampler_model='GaussianProcess', plot=False):
     # Initialise the sampler
     if sampler_model == 'GaussianProcess':
         acq_name = 'sigmoid'
-        n_train = 50
+        n_train = 30
         sampler = sampling.GaussianProcess(lower, upper, acq_name=acq_name,
                                            n_train=n_train, seed=100)
     elif sampler_model == 'Delaunay':
@@ -52,7 +52,8 @@ def main(sampler_model='GaussianProcess', plot=False):
 
     # Set up plotting
     if plot:
-        plot_triggers = [50, 100, 150, 200, 250, 300]
+        # plot_triggers = [50, 100, 150, 200, 250, 300]
+        plot_triggers = [30, 40, 50, 70, 100, 150]
         n_triggers = len(plot_triggers)
         plt_size = pltutils.split_subplots(n_triggers)
         fig = pl.figure()

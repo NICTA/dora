@@ -165,6 +165,7 @@ class GaussianProcess(Sampler):
 
         logging.info('Training hyperparameters...')
         snlml = gp.criterions.stacked_negative_log_marginal_likelihood
+        print('Kernel DEF!!!!!: ', self.kerneldef)
         hyperparams = gp.learn(self.X(), self.y(), self.kerneldef,
                                opt_criterion=snlml,
                                verbose=verbose, ftol=ftol, maxiter=maxiter)

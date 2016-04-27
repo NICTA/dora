@@ -42,12 +42,11 @@ def main():
         upper = [3., 3.]
         explore_factor = 0.1
         n_outputs = 20  # number of tasks!
+        acq_name = 'prod_max'
 
         initialiseArgs = {'lower': lower, 'upper': upper,
-                          'n_outputs': n_outputs,
-                          'n_train_threshold': n_train,
-                          'acquisition_func': 'prod_max',
-                          'explore_factor': explore_factor}
+                          'acq_name': acq_name,
+                          'n_train': n_train}
 
         # initialise sampler
         sampler_info = requests.post('http://localhost:5000/samplers',
@@ -67,6 +66,7 @@ def main():
 
             # post a request to the sampler for a query location
             r = requests.post(sampler_info['obs_uri'])
+
             r.raise_for_status()
 
             query_loc = r.json()
