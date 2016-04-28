@@ -165,7 +165,6 @@ class GaussianProcess(Sampler):
 
         logging.info('Training hyperparameters...')
         snlml = gp.criterions.stacked_negative_log_marginal_likelihood
-        print('Kernel DEF!!!!!: ', self.kerneldef)
         hyperparams = gp.learn(self.X(), self.y(), self.kerneldef,
                                opt_criterion=snlml,
                                verbose=verbose, ftol=ftol, maxiter=maxiter)
@@ -603,7 +602,7 @@ def acq_defs(y_mean=0, explore_priority=1.):
         'pred_upper_bound': lambda u, v: np.max(u + 3 * explore_priority * np.sqrt(v),
                                         axis=1),
         'prod_max': lambda u, v: np.max((u + (y_mean +
-                                        (explore_priority/10000) / 3.0)) *
+                                        (explore_priority/.1) / 3.0)) *
                                         np.sqrt(v), axis=1),
         'prob_tail': lambda u, v: np.max((1 - stats.norm.cdf(
                                         (explore_priority/10000) *

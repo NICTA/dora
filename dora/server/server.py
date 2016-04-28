@@ -15,9 +15,18 @@ log.setLevel(logging.ERROR)
 def initialise_sampler():
     """ Initialise the Sampler Model
     This expects a dict containing:
-    lower : a list of the lower bounds of the region of interest
-    upper : a list of the upper bounds of the region of interest
+        lower : a list of the lower bounds of the region of interest
+        upper : a list of the upper bounds of the region of interest
 
+        Optional dict entries for the model initialisation:
+            kerneldef : Kernel function definition. See the 'gp' module.
+            n_train : int
+                Number of training samples required before sampler can be
+                trained
+            acq_name : str
+                A string specifying the type of acquisition function used
+            explore_priority : float, optional
+                The priority of exploration against exploitation
     """
     initDict = fl.request.json
 
@@ -50,7 +59,11 @@ def initialise_sampler():
 def get_query(samplerid):
 
     """ Returns a set of parameters to query the forward model with
-        and an associated unique identifier
+        and an associated universal resource identifier:
+
+        query: list of the parameters to observe
+        uid : unique identifier for the sampler
+        uri : universal resource identifier for the observation
     """
 
     newX, uid = fl.current_app.samplers[int(samplerid)].pick()
@@ -82,10 +95,13 @@ def update_sampler(samplerid, uid):
 def predict(samplerid):
     """
     provides a prediction of the forward model at a set of given query
-    parameters it expects a list of lists with n elements in the main list
-    corrsponding to the number of queries and each element has d elements
-    corresponding to the number of parameters in the forward model.  It
-    returns a dict with a predictive mean and and predictive variance entry
+    parameters
+
+    It expects a list of lists with n elements in the main list
+    corresponding to the number of queries and each element has d elements
+    corresponding to the number of parameters in the forward model.
+
+    It returns a dict with a predictive mean and and predictive variance entry
     Each are n x n_stacks
     """
 
@@ -133,7 +149,7 @@ def retrieve_settings(samplerid):
     mean = list(fl.current_app.samplers[int(samplerid)].y_mean)
     # trained_flag = fl.current_app.samplers[int(samplerid)].trained_flag
 
-    # TODO <SIMON> add ability to retrieve full state
+    # TODO add ability to retrieve full state
     # hyper_params = fl.current_app.samplers[int(samplerid)].hyper_params
     # regressors = [reg.tolist() for reg in
     # fl.current_app.samplers[int(samplerid)].regressors] acq_func =

@@ -52,7 +52,6 @@ def main(sampler_model='GaussianProcess', plot=False):
 
     # Set up plotting
     if plot:
-        # plot_triggers = [50, 100, 150, 200, 250, 300]
         plot_triggers = [30, 40, 50, 70, 100, 150]
         n_triggers = len(plot_triggers)
         plt_size = pltutils.split_subplots(n_triggers)

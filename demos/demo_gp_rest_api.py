@@ -37,18 +37,16 @@ def main():
 
         # Set up a sampling problem:
         target_samples = 100
-        n_train = 15
+        n_train = 20
         lower = [1., 1.]
         upper = [3., 3.]
-        explore_factor = 0.1
-        n_outputs = 20  # number of tasks!
         acq_name = 'prod_max'
 
         initialiseArgs = {'lower': lower, 'upper': upper,
                           'acq_name': acq_name,
                           'n_train': n_train}
 
-        # initialise sampler
+        # Initialise the sampler
         sampler_info = requests.post('http://localhost:5000/samplers',
                                      json=initialiseArgs).json()
         log.info("Model Info: " + str(sampler_info))
@@ -57,7 +55,7 @@ def main():
         plots = {'fig': vv.figure(),
                  'count': 0,
                  'shape': (2, 3)}
-        plot_triggers = [17, 30, 40, 50, 65, target_samples-1]
+        plot_triggers = [22, 30, 40, 50, 65, target_samples-1]
 
         # Run the active sampling:
         for i in range(target_samples):
@@ -65,11 +63,8 @@ def main():
             log.info('Iteration: %d' % i)
 
             # post a request to the sampler for a query location
-            r = requests.post(sampler_info['obs_uri'])
-
-            r.raise_for_status()
-
-            query_loc = r.json()
+            req = requests.post(sampler_info['obs_uri'])
+            query_loc = req.json()
 
             # Evaluate the sampler's query on the forward model
             characteristic = np.array(query_loc['query'])
@@ -78,7 +73,8 @@ def main():
             # log.info('Generated measurement ' + measurement.__repr__())
 
             # Update the sampler with the new observation
-            r = requests.put(query_loc['uri'], json=measurement.tolist())
+            put_response = requests.put(query_loc['uri'],
+                                        json=measurement.tolist())
 
             if i in plot_triggers:
                 log.info("Plotting")
@@ -109,13 +105,11 @@ def plot_progress(plots, sampler_info):
     settings = requests.get(sampler_info['settings']).json()
     lower = settings['lower']
     upper = settings['upper']
-    # n_outputs = settings['n_stacks']
 
-    # fig = plots['fig']
     subplt = vv.subplot(*(plots['shape'] + (1+plots['count'],)))
     plots['count'] += 1
 
-    # Plot predictions and training data
+    # Request the training data
     training_data = requests.get(sampler_info['training_data_uri']).json()
 
     xres = 30
@@ -123,15 +117,17 @@ def plot_progress(plots, sampler_info):
     xeva, yeva = np.meshgrid(np.linspace(lower[0], upper[0], xres),
                              np.linspace(lower[1], upper[1], yres))
     Xquery = np.array([xeva.flatten(), yeva.flatten()]).T
+
+    #Request the predictions from the server
     r = requests.get(sampler_info['pred_uri'], json=Xquery.tolist())
     r.raise_for_status()
     pred = r.json()
     pred_mean = np.array(pred['predictive_mean'])
     id_matrix = np.reshape(np.arange(Xquery.shape[0])[:, np.newaxis],
                            xeva.shape)
-
     n, n_outputs = pred_mean.shape
 
+    # Plot the training data and the predictions
     vol = np.zeros((n_outputs, xeva.shape[0], xeva.shape[1]))
     for x in range(xres):
         for y in range(yres):
