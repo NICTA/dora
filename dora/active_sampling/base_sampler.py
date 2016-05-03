@@ -10,6 +10,8 @@ from dora.active_sampling.utils import ArrayBuffer
 
 import numpy as np
 
+import warnings
+
 
 class Sampler:
     """
@@ -178,7 +180,7 @@ class Sampler:
         """
         # Make sure the job uid given is valid
         if uid not in self.pending_results:
-            raise ValueError('Result was not pending!')
+            warnings.warn('Result was not pending!')
         assert uid in self.pending_results
 
         # Kill the job and update collected data with true observation
