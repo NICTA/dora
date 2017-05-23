@@ -25,7 +25,6 @@ install:
   - pip install --upgrade pip
   - pip install --upgrade pytest pytest-cov
   - pip install codecov unipath requests
-  - pip install git+https://github.com/nicta/revrand.git@master#egg=revrand
   - pip install matplotlib
   - python setup.py install
 

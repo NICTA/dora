@@ -13,9 +13,6 @@ Minimal
 Optional
 ********
 
-A library of scalable Bayesian generalised linear models with fancy features
-  - revrand
-
 Nonlinear Hyperparameter Optimization (mainly for `BOBYCA`)
   - nlopt
 

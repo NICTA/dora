@@ -8,7 +8,7 @@ import logging
 
 from dora.active_sampling.base_sampler import Sampler, random_sample
 
-import revrand.legacygp as gp
+import dora.regressors.gp as gp
 
 import numpy as np
 
