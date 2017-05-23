@@ -59,3 +59,9 @@ docs/node_modules
 docs/_static
 docs/_build
 docs/generated
+
+# pycharm
+.idea/
+
+# jupyter
+demos/.ipynb_checkpoints/
