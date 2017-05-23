@@ -41,6 +41,17 @@ class ArrayBuffer:
         """
         return self.__value.shape
 
+    @property
+    def ndim(self):
+        """
+        The number of dimensions of the ArrayBuffer.
+
+        See Also
+        --------
+        numpy.ndarray.ndim : Analogous Class Property
+        """
+        return self.__value.ndim
+
     def __len__(self):
         """
         Private Method.
@@ -115,7 +126,7 @@ class ArrayBuffer:
         if self.__count >= self.__buffer.shape[0]:
             growth_factor = 2.0
             newsize = list(self.__buffer.shape)
-            newsize[0] = np.floor(growth_factor * newsize[0] + 2.0)
+            newsize[0] = int(np.floor(growth_factor * newsize[0] + 2.0))
             self.__buffer = np.resize(self.__buffer, newsize)
 
         self.__buffer[self.__count - 1] = value
