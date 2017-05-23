@@ -164,10 +164,13 @@ class GaussianProcess(Sampler):
         self.update_y_mean()
 
         logging.info('Training hyperparameters...')
-        snlml = gp.criterions.stacked_negative_log_marginal_likelihood
+        optParams = gp.OptConfig()
+        optParams.sigma = gp.Range(list(self.lower), list(self.upper),
+                                   list(np.random.uniform(self.lower,
+                                                          self.upper)))
+        optParams.noise = optParams.sigma
         hyperparams = gp.learn(self.X(), self.y(), self.kerneldef,
-                               opt_criterion=snlml,
-                               verbose=verbose, ftol=ftol, maxiter=maxiter)
+                               optCrition='logMarg', optParams=optParams)
         logging.info('Done.')
 
         return [hyperparams for i_task in range(self.n_tasks)]
