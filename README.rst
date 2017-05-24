@@ -73,6 +73,7 @@ sampling to efficiently continue the exploration.
 
 
 .. code:: python
+
     import dora.active_sampling as dora
     import dora.regressors.gp as gp
     from example_processes import simulate_measurement
