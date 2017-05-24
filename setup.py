@@ -22,7 +22,7 @@ setup(
         # NLopt >= 2.4.2
     ],
     dependency_links=[
-        'git+https://github.com/nicta/revrand.git@master#egg=revrand'],
+        'git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand'],
     extras_require={
         # 'nonlinear': ['NLopt'],
         'demos': [
