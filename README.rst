@@ -83,12 +83,12 @@ sampling to efficiently continue the exploration.
     n_initial_sample = 50
     lower = [0, 0]
     upper = [1, 1]
-    X_train = dora.random_sample(lower, upper, n_initial_sample)
+    X_train = dora.base_sampler.random_sample(lower, upper, n_initial_sample)
     y_train = np.asarray([simulate_measurement(i) for i in X_train])
 
     # Set up a sampler using Dora
-    sampler = dora.Gaussian_Process(lower, upper, X_train, y_train,
-                                    add_train_data=False)
+    sampler = dora.GaussianProcess(lower, upper)
+    sampler.add_data(X_train, y_train)
 
     # Run the active sampling:
     logging.info('Actively sampling new points..')
