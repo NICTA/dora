@@ -14,6 +14,7 @@ dependencies:
   - requests      # required to run demos
   - matplotlib    # required to run demos
   - jupyter
+  - mesalib       # needed by visvis - we should maybe remove as v heavy?
   - pip:
     - revrand==0.6.5
     - unipath     # required to run demos
