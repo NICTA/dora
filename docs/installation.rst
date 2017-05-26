@@ -37,3 +37,15 @@ Documentation and deployment
 
 Testing
   - pytest
+
+
+Development with Conda
+----------------------
+
+Run in repository base dir:
+
+.. code:: console
+
+    conda env create -f environment.yml
+    source activate dora
+    pip install -e .
