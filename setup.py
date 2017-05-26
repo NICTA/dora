@@ -17,12 +17,13 @@ setup(
     tests_require=['pytest'],
     install_requires=[
         'scipy >= 0.14.0',
-        'numpy >= 1.8.2'
+        'numpy >= 1.8.2',
+        'revrand == 0.6.5'
         # 'six >= 1.9.0',
         # NLopt >= 2.4.2
     ],
     dependency_links=[
-        'git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand'],
+        'git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand-0.6.5'],
     extras_require={
         # 'nonlinear': ['NLopt'],
         'demos': [
