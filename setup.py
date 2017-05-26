@@ -18,7 +18,6 @@ setup(
     install_requires=[
         'scipy >= 0.14.0',
         'numpy >= 1.8.2',
-        'revrand == 0.6.5'
         # 'six >= 1.9.0',
         # NLopt >= 2.4.2
     ],
