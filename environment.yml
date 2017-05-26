@@ -1,0 +1,21 @@
+# Environment file for installing dora using Conda
+name: dora
+
+channels:
+  - conda-forge  # required to install nlopt
+
+dependencies:
+  - python=3.5
+  - numpy
+  - scipy
+  - nlopt
+  - flask
+  - scikit-learn  # required by revrand
+  - requests      # required to run demos
+  - matplotlib    # required to run demos
+  - jupyter
+  - pip:
+    - revrand==0.6.5
+    - unipath     # required to run demos
+    - pytest      # required to run tests
+    - visvis      # required to run tests
