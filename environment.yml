@@ -1,5 +1,5 @@
 # Environment file for installing dora using Conda
-name: dora
+name: dora-env
 
 channels:
   - conda-forge  # required to install nlopt
