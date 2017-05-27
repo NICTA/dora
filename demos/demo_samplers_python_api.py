@@ -24,6 +24,7 @@ import matplotlib.pyplot as pl
 
 from time import sleep
 
+
 def main(sampler_model='GaussianProcess', plot=False):
 
     # Set up a sampling problem
@@ -41,6 +42,12 @@ def main(sampler_model='GaussianProcess', plot=False):
         n_train = 30
         sampler = sampling.GaussianProcess(lower, upper, acq_name=acq_name,
                                            n_train=n_train, seed=100)
+    elif sampler_model == 'GPflowSampler':
+        acq_name = 'sigmoid'
+        n_train = 30
+        sampler = sampling.GPflowSampler(lower, upper, acq_name=acq_name,
+                                         n_train=n_train, seed=100)
+
     elif sampler_model == 'Delaunay':
 
         explore_priority = 0.0001
@@ -98,4 +105,5 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     main(sampler_model='Delaunay', plot=True)
     main(sampler_model='GaussianProcess', plot=True)
+    main(sampler_model='GPflowSampler', plot=True)
     pl.show()
