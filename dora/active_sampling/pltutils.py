@@ -49,7 +49,7 @@ def plot_sampler_progress(sampler, ax):
     X = sampler.X()
     y = sampler.y().flatten()
 
-    if sampler.name == 'GaussianProcess':
+    if sampler.name in ('GaussianProcess', 'GPflowSampler'):
 
         n_grids = 400
         xi = np.linspace(sampler.lower[0], sampler.upper[0], num=n_grids)

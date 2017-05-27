@@ -199,6 +199,25 @@ class Sampler:
 
         return ind
 
+    def get_real_data(self):
+        """
+        Obtain the observed data.
+
+        This excludes all the virtual data.
+
+        Returns
+        -------
+        numpy.ndarray
+            The observed feature locations
+        numpy.ndarray
+            The observed target outputs
+        """
+        assert self.X
+        assert self.y
+
+        real_flag = ~self.virtual_flag()
+        return self.X()[real_flag], self.y()[real_flag]
+
 
 def random_sample(lower, upper, n):
     """
