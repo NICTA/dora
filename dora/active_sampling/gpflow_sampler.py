@@ -49,7 +49,8 @@ class GPflowSampler(Sampler):
         else:
             if self.gpr is None:
                 self.kernel = gp.kernels.RBF(self.dims)
-                self.gpr = gp.gpr.GPR(self.X(), self.y(), kern=self.kernel)
+                self.gpr = gp.gpr.GPR(self.X(), self.y() - self.y_mean,
+                                      kern=self.kernel)
                 self.gpr.optimize()
                 self.params = self.gpr.get_parameter_dict()
 
@@ -58,6 +59,7 @@ class GPflowSampler(Sampler):
 
             # Compute the posterior distributions at those points
             Yq_exp, Yq_var = self.gpr.predict_y(Xq)
+            Yq_exp += self.y_mean
 
             # Aquisition Functions
             acq_defs_current = acq_defs(y_mean=self.y_mean,
@@ -99,11 +101,11 @@ class GPflowSampler(Sampler):
 
         if real:
             X_real, y_real = self.get_real_data()
-            m = gp.gpr.GPR(X_real, y_real, kern=self.kernel)
+            m = gp.gpr.GPR(X_real, y_real - self.y_mean, kern=self.kernel)
             m.set_parameter_dict(self.params)
         else:
             m = self.gpr
 
         Yq_exp, Yq_var = m.predict_y(Xq)
 
-        return Yq_exp, Yq_var
+        return Yq_exp + self.y_mean, Yq_var
