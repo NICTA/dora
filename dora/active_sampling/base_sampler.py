@@ -68,6 +68,7 @@ class Sampler:
         self.virtual_flag = ArrayBuffer()
         self.pending_results = {}
         self.n_tasks = None
+        self.y_mean = None
 
     def pick(self):
         """
@@ -217,6 +218,29 @@ class Sampler:
 
         real_flag = ~self.virtual_flag()
         return self.X()[real_flag], self.y()[real_flag]
+
+    def update_y_mean(self):
+        """
+        Update the mean of the target outputs.
+
+        .. note :: [Properties Modified]
+                    y_mean,
+                    n_tasks
+
+        .. note :: At anytime, 'y_mean' should be the mean of all the output
+                   targets including the virtual ones, since that is what
+                   we are training upon
+        """
+        if not self.y:
+            return
+
+        self.y_mean = self.y().mean(axis=0) if len(self.y) else None
+
+        # Make sure the number of stacks recorded is consistent
+        if self.n_tasks is None:
+            self.n_tasks = self.y_mean.shape[0]
+        else:
+            assert self.n_tasks == self.y_mean.shape[0]
 
 
 def random_sample(lower, upper, n):
