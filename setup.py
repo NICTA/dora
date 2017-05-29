@@ -18,12 +18,16 @@ setup(
     install_requires=[
         'scipy >= 0.14.0',
         'numpy >= 1.8.2',
-        'revrand == 0.6.5'
+        'revrand == 0.6.5',
+        'tensorflow >= 1.1.0',
+        'GPflow >= 0.3.5',
         # 'six >= 1.9.0',
         # NLopt >= 2.4.2
     ],
     dependency_links=[
-        'git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand-0.6.5'],
+        'git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand-0.6.5',
+        'git+https://github.com/GPflow/GPflow.git@master#egg=GPflow-0.3.5',
+    ],
     extras_require={
         # 'nonlinear': ['NLopt'],
         'demos': [
