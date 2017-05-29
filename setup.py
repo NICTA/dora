@@ -26,7 +26,7 @@ setup(
     ],
     dependency_links=[
         'git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand-0.6.5',
-        'git+https://github.com/GPflow/GPflow.git@master#egg=GPflow-0.3.5',
+        'git+https://github.com/GPflow/GPflow.git@0.3.5#egg=GPflow-0.3.5',
     ],
     extras_require={
         # 'nonlinear': ['NLopt'],

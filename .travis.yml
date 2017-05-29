@@ -25,6 +25,8 @@ install:
   - pip install --upgrade pip
   - pip install --upgrade pytest pytest-cov
   - pip install codecov unipath requests
+  - pip install 'tensorflow>=1.1.0'
+  - pip install git+https://github.com/GPflow/GPflow.git@0.3.5#egg=GPflow-0.3.5
   - pip install git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand-0.6.5
   - pip install matplotlib
   - python setup.py install
