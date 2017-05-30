@@ -84,6 +84,7 @@ class GPflowSampler(Sampler):
             Xq = Xq[:, np.newaxis]
 
         Yq_exp, Yq_var = self.gpr.predict_y(Xq)
+        Yq_exp += self.y_mean
 
         # Aquisition Functions
         acq_defs_current = acq_defs(y_mean=self.y_mean,
