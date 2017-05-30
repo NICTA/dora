@@ -1,26 +1,27 @@
 
-from dora.active_sampling.base_sampler import Sampler, random_sample
-from dora.active_sampling.gp_sampler import acq_defs
+from .base_sampler import Sampler, random_sample
+from .acquisition_functions import UpperBound
 
 import GPflow as gp
 
 import numpy as np
-import scipy.stats as stats
 
 
 class GPflowSampler(Sampler):
 
     name = 'GPflowSampler'
 
-    def __init__(self, lower, upper, n_train=50, acq_name='var_sum',
-                 explore_priority=1.0, seed=None):
+    def __init__(self, lower, upper, n_train=50, kern=None,
+                 mean_function=gp.mean_functions.Zero(),
+                 acquisition_function=UpperBound(), seed=None):
 
         super().__init__(lower, upper)
 
         self.n_min = n_train
-        self.acq_name = acq_name
-        self.explore_priority = explore_priority
-        self.kernel = None
+        self.acquisition_function = acquisition_function
+        self.kernel = kern if kern else gp.kernels.RBF(self.dims)
+        self.mean_func = mean_function
+
         self.gpr = None
         self.params = None
         self.y_mean = None
@@ -48,10 +49,12 @@ class GPflowSampler(Sampler):
 
         else:
             if self.gpr is None:
-                self.kernel = gp.kernels.RBF(self.dims)
-                self.gpr = gp.gpr.GPR(self.X(), self.y() - self.y_mean,
-                                      kern=self.kernel)
+                self.gpr = gp.gpr.GPR(self.X(), self.y(), kern=self.kernel,
+                                      mean_function=self.mean_func)
+                print(self.gpr)
                 self.gpr.optimize()
+
+                print(self.gpr)
                 self.params = self.gpr.get_parameter_dict()
 
             # Randomly sample the volume for test points
@@ -59,14 +62,9 @@ class GPflowSampler(Sampler):
 
             # Compute the posterior distributions at those points
             Yq_exp, Yq_var = self.gpr.predict_y(Xq)
-            Yq_exp += self.y_mean
 
-            # Aquisition Functions
-            acq_defs_current = acq_defs(y_mean=self.y_mean,
-                                        explore_priority=self.explore_priority)
-
-            # Compute the acquisition levels at those test points
-            yq_acq = acq_defs_current[self.acq_name](Yq_exp, Yq_var)
+            # Acquisition Function
+            yq_acq = self.acquisition_function(Yq_exp, Yq_var)
 
             # Find the test point with the highest acquisition level
             iq_acq = np.argmax(yq_acq)
@@ -86,14 +84,10 @@ class GPflowSampler(Sampler):
         Yq_exp, Yq_var = self.gpr.predict_y(Xq)
         Yq_exp += self.y_mean
 
-        # Aquisition Functions
-        acq_defs_current = acq_defs(y_mean=self.y_mean,
-                                    explore_priority=self.explore_priority)
-
-        # Compute the acquisition levels at those test points
-        yq_acq = acq_defs_current[self.acq_name](Yq_exp, Yq_var)
+        yq_acq = self.acquisition_function(Yq_exp, Yq_var)
 
         return yq_acq, np.argmax(yq_acq)
+
 
     def predict(self, Xq, real=True):
 
@@ -102,11 +96,12 @@ class GPflowSampler(Sampler):
 
         if real:
             X_real, y_real = self.get_real_data()
-            m = gp.gpr.GPR(X_real, y_real - self.y_mean, kern=self.kernel)
+            m = gp.gpr.GPR(X_real, y_real, kern=self.kernel,
+                           mean_function=self.mean_func)
             m.set_parameter_dict(self.params)
         else:
             m = self.gpr
 
         Yq_exp, Yq_var = m.predict_y(Xq)
 
-        return Yq_exp + self.y_mean, Yq_var
+        return Yq_exp, Yq_var
