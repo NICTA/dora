@@ -12,7 +12,7 @@ class GPflowSampler(Sampler):
     name = 'GPflowSampler'
 
     def __init__(self, lower, upper, n_train=50, kern=None,
-                 mean_function=gp.mean_functions.Zero(),
+                 mean_function=gp.mean_functions.Constant(),
                  acquisition_function=UpperBound(), seed=None):
 
         super().__init__(lower, upper)
@@ -34,8 +34,7 @@ class GPflowSampler(Sampler):
         ind = self._update(uid, y_true)
         self.update_y_mean()
         if self.params:
-            self.gpr = gp.gpr.GPR(self.X(), self.y(), kern=self.kernel)
-            self.gpr.set_parameter_dict(self.params)
+            self.gpr = self._create_gpr(self.X(), self.y(), params=self.params)
         return ind
 
     def pick(self, n_test=500):
@@ -49,12 +48,7 @@ class GPflowSampler(Sampler):
 
         else:
             if self.gpr is None:
-                self.gpr = gp.gpr.GPR(self.X(), self.y(), kern=self.kernel,
-                                      mean_function=self.mean_func)
-                print(self.gpr)
-                self.gpr.optimize()
-
-                print(self.gpr)
+                self.gpr = self._create_gpr(self.X(), self.y())
                 self.params = self.gpr.get_parameter_dict()
 
             # Randomly sample the volume for test points
@@ -82,7 +76,6 @@ class GPflowSampler(Sampler):
             Xq = Xq[:, np.newaxis]
 
         Yq_exp, Yq_var = self.gpr.predict_y(Xq)
-        Yq_exp += self.y_mean
 
         yq_acq = self.acquisition_function(Yq_exp, Yq_var)
 
@@ -96,12 +89,21 @@ class GPflowSampler(Sampler):
 
         if real:
             X_real, y_real = self.get_real_data()
-            m = gp.gpr.GPR(X_real, y_real, kern=self.kernel,
-                           mean_function=self.mean_func)
-            m.set_parameter_dict(self.params)
+            m = self._create_gpr(X_real, y_real, params=self.params)
         else:
             m = self.gpr
 
         Yq_exp, Yq_var = m.predict_y(Xq)
 
         return Yq_exp, Yq_var
+
+
+    def _create_gpr(self, X, y, params=None):
+
+        m = gp.gpr.GPR(X, y, kern=self.kernel,  mean_function=self.mean_func)
+        if params is not None:
+            m.set_parameter_dict(self.params)
+        else:
+            m.optimize()
+
+        return m
