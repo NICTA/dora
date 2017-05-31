@@ -75,7 +75,6 @@ sampling to efficiently continue the exploration.
 .. code:: python
 
     import dora.active_sampling as dora
-    import dora.regressors.gp as gp
     from example_processes import simulate_measurement
     import numpy as np
     
@@ -91,7 +90,7 @@ sampling to efficiently continue the exploration.
     sampler.add_data(X_train, y_train)
 
     # Run the active sampling:
-    logging.info('Actively sampling new points..')
+    print('Actively sampling new points..')
     target_samples = 501
     for i in range(target_samples):
         # Note - Dora provides a sample X, and a sample Id

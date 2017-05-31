@@ -7,9 +7,9 @@ import numpy as np
 
 
 class GPflowSampler(Sampler):
-    """ Gaussian Process sampler using GPflow.
+    """ Gaussian Process sampler using GPflow's `GPR` Gaussian Process
+        regressor.
     """
-
     name = 'GPflowSampler'
 
     def __init__(self, lower, upper, n_train=50, kern=None,
@@ -142,7 +142,7 @@ class GPflowSampler(Sampler):
 
 
     def _create_gpr(self, X, y, params=None):
-        """ Helper function to create (and optimise if neccessary) a GPflow
+        """ Helper function to create (and optimise if necessary) a GPflow
             Gaussian Process Regressor
         """
         m = gp.gpr.GPR(X, y, kern=self.kernel, mean_function=self.mean_function)
