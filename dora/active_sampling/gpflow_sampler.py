@@ -3,18 +3,19 @@ from .base_sampler import Sampler, random_sample
 from .acquisition_functions import UpperBound
 
 import GPflow as gp
-
 import numpy as np
 
 
 class GPflowSampler(Sampler):
+    """ Gaussian Process sampler using GPflow.
+    """
 
     name = 'GPflowSampler'
 
     def __init__(self, lower, upper, n_train=50, kern=None,
                  mean_function=gp.mean_functions.Constant(),
                  acquisition_function=UpperBound(), seed=None):
-
+        """ Initialise the GPflowSampler. """
         super().__init__(lower, upper)
 
         self.n_min = n_train
@@ -30,15 +31,20 @@ class GPflowSampler(Sampler):
             np.random.seed(seed)
 
     def update(self, uid, y_true):
-
+        """ Update a job id with an observed value. Makes a virtual
+            observation real.
+        """
         ind = self._update(uid, y_true)
         self.update_y_mean()
         if self.params:
             self.gpr = self._create_gpr(self.X(), self.y(), params=self.params)
+
         return ind
 
     def pick(self, n_test=500):
-
+        """ Pick a feature location for the next observation, which maximises
+            the acquisition function.
+        """
         n = len(self.X)
 
         # If we do not have enough samples yet, randomly sample for more!
@@ -71,7 +77,8 @@ class GPflowSampler(Sampler):
         return xq, uid
 
     def eval_acq(self, Xq):
-
+        """ Evaluate the acquisition function for a set of query points (Xq).
+        """
         if len(Xq.shape) == 1:
             Xq = Xq[:, np.newaxis]
 
@@ -81,9 +88,11 @@ class GPflowSampler(Sampler):
 
         return yq_acq, np.argmax(yq_acq)
 
-
     def predict(self, Xq, real=True):
+        """ Return the mean and variance of the GP model at query point.
 
+            Use `real=False` to use both real and virtual observations.
+        """
         assert self.params, "Sampler is not trained yet. " \
                             "Possibly not enough observations provided."
 
@@ -99,7 +108,9 @@ class GPflowSampler(Sampler):
 
 
     def _create_gpr(self, X, y, params=None):
-
+        """ Helper function to create (and optimise if neccessary) a GPflow
+            Gaussian Process Regressor
+        """
         m = gp.gpr.GPR(X, y, kern=self.kernel,  mean_function=self.mean_func)
         if params is not None:
             m.set_parameter_dict(self.params)
