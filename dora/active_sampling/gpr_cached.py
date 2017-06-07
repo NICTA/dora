@@ -35,13 +35,18 @@ class GPRCached(GPR):
 
         GPR.__setattr__(self, key, value)
 
-    def optimize(self, method='L-BFGS-B', tol=None, callback=None,
-                 maxiter=1000, **kw):
-        """Invalidate cache after optimizing."""
-        r = GPR.optimize(self, method=method, tol=tol, callback=callback,
-                         maxiter=maxiter, **kw)
+    def set_parameter_dict(self, d):
+        """ Update cache when parameters are reset. """
+        GPR.set_parameter_dict(self, d)
         self.update_cache()
-        return r
+
+    def set_state(self, x):
+        """ Update cache when parameters are reset.
+
+            `set_state` is called during `optimize`.
+        """
+        GPR.set_state(self, x)
+        self.update_cache()
 
     @AutoFlow()
     def _compute_cache(self):
