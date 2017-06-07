@@ -66,13 +66,13 @@ class GPRCached(GPR):
         self.cholesky, self.alpha = self._compute_cache()
 
     @AutoFlow((tf.float64, [None, None]))
-    def _cholesky_update(self, x):
+    def _cholesky_update(self, X):
         """ Perform incremental update of Cholesky decomposition by adding
-            data point `x`.
+            data point(s) `X`.
         """
-        kxn = self.kern.K(self.X, x)
-        knn = (self.kern.K(x, x)
-              + tf.eye(tf.shape(x)[0], dtype=np.float64)
+        kxn = self.kern.K(self.X, X)
+        knn = (self.kern.K(X, X)
+              + tf.eye(tf.shape(X)[0], dtype=np.float64)
               * self.likelihood.variance)
 
         L = self.cholesky
@@ -86,17 +86,16 @@ class GPRCached(GPR):
 
         return cholesky
 
-    @AutoFlow((tf.int32,))
-    def _cholesky_downdate(self, i):
-        """ Perform downdate of Cholesky decomposition by removing a single
-            data point at index `i`.
+    @AutoFlow((tf.int32,), (tf.int32,))
+    def _cholesky_downdate(self, i, n=1):
+        """ Perform downdate of Cholesky decomposition by removing n
+            consecutive points data point at index `i`.
         """
         L = self.cholesky
-        n = tf.shape(L)[0]
-        m = n - i - 1
+        m = tf.shape(L)[0] - (i + n)
 
-        Sa = tf.slice(L, begin=[i+1, i], size=[m, 1])
-        Sb = tf.slice(L, begin=[i+1, i+1], size=[m, m])
+        Sa = tf.slice(L, begin=[i+n, i], size=[m, n])
+        Sb = tf.slice(L, begin=[i+n, i+n], size=[m, m])
         R = tf.cholesky(tf.add(
                 tf.matmul(Sa, tf.transpose(Sa)),
                 tf.matmul(Sb, tf.transpose(Sb))
@@ -104,10 +103,10 @@ class GPRCached(GPR):
 
         left = tf.concat([
             tf.slice(L, begin=[0, 0], size=[i, i]),
-            tf.slice(L, begin=[i+1, 0], size=[m, i]),
+            tf.slice(L, begin=[i+n, 0], size=[m, i]),
             ], axis=0)
-        right = tf.concat([tf.zeros([i, m], dtype=tf.float64), R], axis=0)
 
+        right = tf.concat([tf.zeros([i, m], dtype=tf.float64), R], axis=0)
         cholesky = tf.concat([left, right], axis=1, name='gp_cholesky_downdate')
 
         return cholesky
@@ -122,12 +121,12 @@ class GPRCached(GPR):
 
     def set_data_points(self, X, Y):
         """ Reset the data points to arrays `X` and `Y`. Update cache. """
-        assert X.shape == Y.shape
+        assert X.shape[0] == Y.shape[0]
         GPR.__setattr__(self, 'X', X)
         GPR.__setattr__(self, 'Y', Y)
         self.update_cache()
 
-    def add_data_point(self, x, y):
+    def add_data_points(self, x, y):
         """ Add data point (`x`, `y`) to GP and perform update of Cholesky
             decomposition.
         """
@@ -138,16 +137,36 @@ class GPRCached(GPR):
         self.Y.set_data(np.append(self.Y.value, y, axis=0))
         self.alpha = self._alpha_update()
 
-    def remove_data_point(self, index):
-        """ Remove point at `index` from both X and Y, and downdate Cholesky
+    def remove_data_points(self, indexes):
+        """ Remove points at `indexes` from both X and Y, and downdate Cholesky
             decomposition.
         """
-        if not 0 <= index < self.X.shape[0]:
-            raise IndexError('Index {} is out of range.'.format(index))
+        if not hasattr(indexes, '__iter__'):
+            indexes = np.array([indexes])
 
-        self.cholesky = self._cholesky_downdate(index)
-        self.X.set_data(np.delete(self.X.value, index, axis=0))
-        self.Y.set_data(np.delete(self.Y.value, index, axis=0))
+        if not isinstance(indexes, np.ndarray):
+            indexes = np.array(indexes)
+
+        indexes = np.unique(indexes)
+        print(indexes)
+
+        if indexes[0] < 0 or indexes[-1] > self.X.shape[0]:
+            raise IndexError('Indexes out of range {}.'.format(indexes))
+
+        index_grps = np.split(indexes, np.where(np.diff(indexes) != 1)[0] + 1)
+        index_blks = [(g[0], len(g)) for g in reversed(index_grps)]
+
+        # should be able to rewrite `_cholesky_downdate` to do these all at
+        # once efficiently
+        for i, n in index_blks:
+            print(i, n)
+            self.cholesky = self._cholesky_downdate(i, n)
+
+        self.X.set_data(np.delete(self.X.value, indexes, axis=0))
+        self.Y.set_data(np.delete(self.Y.value, indexes, axis=0))
+
+        print(self.X.value.shape)
+        print(self.cholesky.shape)
         self.alpha = self._alpha_update()
 
     def build_predict(self, Xnew, full_cov=False):
