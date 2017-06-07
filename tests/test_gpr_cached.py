@@ -7,16 +7,16 @@ import time
 
 @pytest.fixture
 def data_gen():
-    """ 1-D training data generator. """
+    """ 2-D training data generator. """
     def fn(X):
-        Y = (np.sin(X - 5) + np.sin(X / 2 - 2)
-             + 0.4 * np.sin(X / 5 - 2) + 0.4 * np.sin(X - 3)
-             + 0.2 * np.sin(X / 0.3 - 3))
+        Y = (np.sin(X[:, 0] - 5) + np.sin(X[:, 0] / 2 - 2)
+             + 0.4 * np.sin(X[:, 0] / 5 - 2) * 0.4 * np.sin(X[:, 1] - 3)
+             + 0.2 * np.sin(X[:, 1] / 0.3 - 3))
         return Y
 
     def data(n=1000, low=0, high=100):
-        X = np.random.uniform(low, high, n)[:, np.newaxis]
-        Y = fn(X)
+        X = np.random.uniform(low, high, (n, 2))
+        Y = fn(X)[:, np.newaxis]
         return X, Y
 
     return data
@@ -37,6 +37,8 @@ def test_cache_sync(data_gen):
         parameters, or resetting X, Y
     """
     X, Y = data_gen(1000)
+    print(X.shape)
+    print(Y.shape)
     m = GPRCached(X, Y, kern=gp.kernels.RBF(X.shape[1]),
                   mean_function=gp.mean_functions.Constant(),
                   name='GPRCached')
@@ -90,7 +92,7 @@ def test_cholesky_caching(data_gen):
         """ Call `predict_f` on the provided model for each value of `X` """
         ys = []
         for i in range(len(X)):
-            ys.append(m.predict_f(X[i, :, np.newaxis]))
+            ys.append(m.predict_f(X[np.newaxis, i, :]))
         return np.hstack(ys)
 
     # Run predict step N times
@@ -121,28 +123,32 @@ def test_cholesky_update(data_gen):
     m2.set_parameter_dict(m1.get_parameter_dict())
 
     @time_it
-    def reset_points_n_times(m, X, Y):
+    def reset_points_n_times(m, X, Y, blocks):
         Xall = np.append(m.X.value, X, axis=0)
         Yall = np.append(m.Y.value, Y, axis=0)
         Ls = []
-        start = m.X.value.shape[0]
-        for i in range(start, Xall.shape[0]):
-            m.set_data_points(Xall[:i + 1, :], Yall[:i + 1, :])
+        for i in blocks + m.X.value.shape[0]:
+            m.set_data_points(Xall[:i, :], Yall[:i, :])
             Ls.append(m.cholesky.value)
         return Ls
 
     @time_it
-    def add_point_n_times(m, X, Y):
+    def add_point_n_times(m, X, Y, blocks):
         Ls = []
-        for i, (x, y) in enumerate(zip(X, Y)):
-            m.add_data_point(x, y)
+        i = 0
+        for j in blocks:
+            m.add_data_points(X[i:j, :], Y[i:j, :])
+            i = j
             Ls.append(m.cholesky.value)
         return Ls
 
-    Nn = 50
+    # apply updates for various sizes
+    blocks = np.cumsum([1] * 10 + [2] * 10 + [3] * 10 + list(range(4, 32)) +
+                       [32, 64, 128, 256])
+    Nn = blocks[-1]
     Xnew, Ynew = data_gen(Nn)
-    m1_time, m1_Ls = reset_points_n_times(m1, Xnew, Ynew)
-    m2_time, m2_Ls = add_point_n_times(m2, Xnew, Ynew)
+    m1_time, m1_Ls = reset_points_n_times(m1, Xnew, Ynew, blocks)
+    m2_time, m2_Ls = add_point_n_times(m2, Xnew, Ynew, blocks)
 
     factor = 2.5
     assert m1_time > m2_time * factor
@@ -165,30 +171,35 @@ def test_cholesky_downdate(data_gen):
     m2.set_parameter_dict(m1.get_parameter_dict())
 
     @time_it
-    def remove_point_n_times(m, indexes):
+    def remove_point_n_times(m, index_grps):
         Ls = []
-        for i in indexes:
-            m.remove_data_point(i)
+        for indexes in index_grps:
+            m.remove_data_points(indexes)
             Ls.append(m.cholesky.value)
         return Ls
 
     @time_it
-    def reset_points_n_times(m, indexes):
+    def reset_points_n_times(m, index_grps):
         Ls = []
-        for i in indexes:
-            m.set_data_points(np.delete(m.X.value, i, axis=0),
-                              np.delete(m.X.value, i, axis=0))
+        for indexes in index_grps:
+            m.set_data_points(np.delete(m.X.value, indexes, axis=0),
+                              np.delete(m.X.value, indexes, axis=0))
             Ls.append(m.cholesky.value)
         return Ls
 
-    Nr = 50
-    indexes = np.append(np.array([Np - 1, 0]),
-                        np.random.randint(1, Np - Nr, Nr - 2))
-    m1_time, m1_Ls = reset_points_n_times(m1, indexes)
-    m2_time, m2_Ls = remove_point_n_times(m2, indexes)
+    # Set of indices into X and Y to remove. Some from the beginning, end and
+    # middle, both consecutive and random.
+    index_grps = [[Np-1], [Np-2, Np-3, Np-4], [0], [0, 1, 2],
+                  [Np-9, 0, 1, 2, 3, 4, 99, 100, 101, 250, 249, 278],
+                  list(range(10, 50)), list(range(200, 300)),
+                  np.random.randint(300, 500, 130)]
 
-    #factor = 1
-    #assert m1_time > m2_time * factor
+    m1_time, m1_Ls = reset_points_n_times(m1, index_grps)
+    m2_time, m2_Ls = remove_point_n_times(m2, index_grps)
+
+    # Downdate is not faster than full decomposition
+    #assert m1_time > m2_time
 
     for L1, L2 in zip(m1_Ls, m2_Ls):
         assert np.allclose(L1, L2)
+    
