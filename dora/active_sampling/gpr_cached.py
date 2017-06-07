@@ -78,10 +78,10 @@ class GPRCached(GPR):
         c = tf.matrix_triangular_solve(L, kxn, lower=True)
         d = tf.cholesky(knn - tf.matmul(tf.transpose(c), c))
 
-        cholesky = tf.concat([
-            tf.concat([L, tf.zeros(tf.shape(c), dtype=tf.float64)], axis=1),
-            tf.concat([tf.transpose(c), d], axis=1)
-        ], axis=0, name='gp_cholesky_update')
+        cholesky = tf.concat(0, [
+            tf.concat(1, [L, tf.zeros(tf.shape(c), dtype=tf.float64)]),
+            tf.concat(1, [tf.transpose(c), d])
+        ], name='gp_cholesky_update')
 
         return cholesky
 
@@ -100,13 +100,13 @@ class GPRCached(GPR):
                 tf.matmul(Sb, tf.transpose(Sb))
         ))
 
-        left = tf.concat([
+        left = tf.concat(0, [
             tf.slice(L, begin=[0, 0], size=[i, i]),
             tf.slice(L, begin=[i+n, 0], size=[m, i]),
-            ], axis=0)
+            ])
 
-        right = tf.concat([tf.zeros([i, m], dtype=tf.float64), R], axis=0)
-        cholesky = tf.concat([left, right], axis=1, name='gp_cholesky_downdate')
+        right = tf.concat(0, [tf.zeros([i, m], dtype=tf.float64), R])
+        cholesky = tf.concat(1, [left, right], name='gp_cholesky_downdate')
 
         return cholesky
 
