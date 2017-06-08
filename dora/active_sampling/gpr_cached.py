@@ -125,20 +125,24 @@ class GPRCached(GPR):
         GPR.__setattr__(self, 'Y', Y)
         self.update_cache()
 
-    def add_data_points(self, x, y):
-        """ Add data point (`x`, `y`) to GP and perform update of Cholesky
+    def add_data_points(self, X, Y):
+        """ Add data point(s) (`X`, `Y`) to GP and perform update of Cholesky
             decomposition.
         """
-        x = np.atleast_2d(x)
-        y = np.atleast_2d(y)
-        self.cholesky = self._cholesky_update(x)
-        self.X.set_data(np.append(self.X.value, x, axis=0))
-        self.Y.set_data(np.append(self.Y.value, y, axis=0))
+        X = np.atleast_2d(X)
+        Y = np.atleast_2d(Y)
+        assert X.shape[0] == Y.shape[0]
+
+        self.cholesky = self._cholesky_update(X)
+        self.X.set_data(np.append(self.X.value, X, axis=0))
+        self.Y.set_data(np.append(self.Y.value, Y, axis=0))
         self.alpha = self._alpha_update()
 
     def remove_data_points(self, indexes):
         """ Remove points at `indexes` from both X and Y, and downdate Cholesky
             decomposition.
+
+            Currently not faster than full decomposition calculation.
         """
         if not hasattr(indexes, '__iter__'):
             indexes = np.array([indexes])
@@ -147,7 +151,6 @@ class GPRCached(GPR):
             indexes = np.array(indexes)
 
         indexes = np.unique(indexes)
-        print(indexes)
 
         if indexes[0] < 0 or indexes[-1] > self.X.shape[0]:
             raise IndexError('Indexes out of range {}.'.format(indexes))
@@ -158,14 +161,10 @@ class GPRCached(GPR):
         # should be able to rewrite `_cholesky_downdate` to do these all at
         # once efficiently
         for i, n in index_blks:
-            print(i, n)
             self.cholesky = self._cholesky_downdate(i, n)
 
         self.X.set_data(np.delete(self.X.value, indexes, axis=0))
         self.Y.set_data(np.delete(self.Y.value, indexes, axis=0))
-
-        print(self.X.value.shape)
-        print(self.cholesky.shape)
         self.alpha = self._alpha_update()
 
     def build_predict(self, Xnew, full_cov=False):

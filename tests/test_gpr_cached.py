@@ -42,26 +42,29 @@ def test_cache_sync(data_gen):
     m = GPRCached(X, Y, kern=gp.kernels.RBF(X.shape[1]),
                   mean_function=gp.mean_functions.Constant())
 
+    # optimize
     L0 = m.cholesky.value
     m.optimize()
     L1 = m.cholesky.value
     assert not np.array_equal(L0, L1)
 
+    # set parameters by free state
     new_state = m.get_free_state() + 0.1
     m.set_state(new_state)
     L2 = m.cholesky.value
     assert not np.array_equal(L1, L2)
 
+    # set parameters by dict
     new_params = {k: v + 0.1 for k, v in m.get_parameter_dict().items()}
     m.set_parameter_dict(new_params)
     L3 = m.cholesky.value
     assert not np.array_equal(L2, L3)
 
+    # reset data points
     new_X = m.X.value + 0.1
     new_Y = m.Y.value + 0.1
     with pytest.raises(ValueError):
         m.X = new_X
-
     with pytest.raises(ValueError):
         m.Y = new_Y
 
