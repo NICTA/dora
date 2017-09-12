@@ -2,7 +2,7 @@ language: python
 
 python:
   - "2.7"
-  - "3.4"
+  - "3.6"
 
 addons:
   apt:
@@ -27,7 +27,7 @@ install:
   - pip install codecov unipath requests
   - pip install git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand-0.6.5
   - pip install matplotlib
-  - python setup.py install
+  - pip install -e .
 
 script:
   - py.test --cov=./

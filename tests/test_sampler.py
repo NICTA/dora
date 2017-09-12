@@ -58,7 +58,7 @@ def verify_common_samplers(update_ref_data=False,
     sampler_model : str, optional
         The sampling method to test and verify
     """
-    from demos.demo_samplers_python_api import main
+    from demos.demo_python_api import main
 
     sampler = main(sampler_model=sampler_model)
 
