@@ -55,11 +55,11 @@ or install with ``pip``:
 Refer to `docs/installation.rst <docs/installation.rst>`_ for advanced 
 installation instructions.
 
-Have a look at some of the `demos <demo/>`_, e.g.: 
+Have a look at some of the `demos <demos/>`_, e.g.: 
 
 .. code:: console
 
-   $ python demo/demo_gp_python_api.py
+   $ python demo/demo_python_api.py
 
 The demos include examples of different underlying models (GP and Delaunay),
 and examples of both Python 3 code calling the api directly, and the general
