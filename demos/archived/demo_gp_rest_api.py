@@ -33,69 +33,54 @@ def main():
     server = subprocess.Popen([sys.executable, '../dora/server/server.py'])
     time.sleep(5)
 
-    try:
+    # Set up a sampling problem:
+    target_samples = 100
+    n_train = 20
+    lower = [1., 1.]
+    upper = [3., 3.]
+    acq_name = 'prod_max'
 
-        # Set up a sampling problem:
-        target_samples = 100
-        n_train = 20
-        lower = [1., 1.]
-        upper = [3., 3.]
-        acq_name = 'prod_max'
+    initialiseArgs = {'lower': lower, 'upper': upper,
+                        'acq_name': acq_name,
+                        'n_train': n_train}
 
-        initialiseArgs = {'lower': lower, 'upper': upper,
-                          'acq_name': acq_name,
-                          'n_train': n_train}
+    # Initialise the sampler
+    sampler_info = requests.post('http://localhost:5000/samplers',
+                                    json=initialiseArgs).json()
+    log.info("Model Info: " + str(sampler_info))
 
-        # Initialise the sampler
-        sampler_info = requests.post('http://localhost:5000/samplers',
-                                     json=initialiseArgs).json()
-        log.info("Model Info: " + str(sampler_info))
+    # Set up plotting:
+    plots = {'fig': vv.figure(),
+                'count': 0,
+                'shape': (2, 3)}
+    plot_triggers = [22, 30, 40, 50, 65, target_samples-1]
 
-        # Set up plotting:
-        plots = {'fig': vv.figure(),
-                 'count': 0,
-                 'shape': (2, 3)}
-        plot_triggers = [22, 30, 40, 50, 65, target_samples-1]
+    # Run the active sampling:
+    for i in range(target_samples):
 
-        # Run the active sampling:
-        for i in range(target_samples):
+        log.info('Iteration: %d' % i)
 
-            log.info('Iteration: %d' % i)
+        # post a request to the sampler for a query location
+        req = requests.post(sampler_info['obs_uri'])
+        query_loc = req.json()
 
-            # post a request to the sampler for a query location
-            req = requests.post(sampler_info['obs_uri'])
-            query_loc = req.json()
+        # Evaluate the sampler's query on the forward model
+        characteristic = np.array(query_loc['query'])
+        uid = query_loc['uid']
+        uid, measurement = simulate_measurement_vector(characteristic, uid)
+        # log.info('Generated measurement ' + measurement.__repr__())
 
-            # Evaluate the sampler's query on the forward model
-            characteristic = np.array(query_loc['query'])
-            uid = query_loc['uid']
-            uid, measurement = simulate_measurement_vector(characteristic, uid)
-            # log.info('Generated measurement ' + measurement.__repr__())
+        # Update the sampler with the new observation
+        put_response = requests.put(query_loc['uri'],
+                                    json=measurement.tolist())
 
-            # Update the sampler with the new observation
-            put_response = requests.put(query_loc['uri'],
-                                        json=measurement.tolist())
+        if i in plot_triggers:
+            log.info("Plotting")
+            plot_progress(plots, sampler_info)
+    
+    print('Finished.')
 
-            if i in plot_triggers:
-                log.info("Plotting")
-                plot_progress(plots, sampler_info)
-        
-        print('Finished.')
-
-        # # Retrieve Training Data:
-        # log.info('Retrieving training data')
-        # training_data = requests.get(sampler_info['training_data_uri']).json()
-        # log.info('X:' + str(training_data['X']))
-        # log.info('y:' + str(training_data['y']))
-        # log.info('Virtual X:' + str(training_data['virtual_X']))
-        # log.info('Virtual y:' + str(training_data['virtual_y']))
-
-        vv.use().Run()
-
-    except Exception:
-        etype, evalue, etraceback = sys.exc_info()
-        tb = traceback.extract_tb(etraceback)
-        print(tb.to_dict())
+    vv.use().Run()
 
     server.terminate()
 
