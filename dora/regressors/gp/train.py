@@ -1,5 +1,5 @@
 import numpy as np
-import nlopt as nl
+# import nlopt as nl
 from .types import Folds
 from dora.regressors.gp import predict
 from dora.regressors.gp import linalg
@@ -10,6 +10,7 @@ from scipy.spatial import Delaunay
 import scipy.stats as stats
 from scipy.linalg import solve_triangular
 import scipy.linalg as la
+from scipy.optimize import minimize
 import copy
 
 
@@ -303,31 +304,20 @@ def learn_folds(folds, cov_fn, optParams, optCrition='logMarg', verbose=False):
 
 
 def optimise_hypers(criterion, optParams):
-    objective = lambda theta, grad: criterion(*unpack(theta, unpackinfo))
+    objective = lambda theta : criterion(*unpack(theta, unpackinfo))
     theta_low, _ = pack(optParams.sigma.lowerBound, optParams.noise.lowerBound)
     theta_0, unpackinfo = pack(optParams.sigma.initialVal, optParams.noise.initialVal)
     theta_high, _ = pack(optParams.sigma.upperBound, optParams.noise.upperBound)
 
     nParams = theta_0.shape[0]
-    opt = nl.opt(nl.LN_BOBYQA, nParams)
-    opt.set_lower_bounds(theta_low)
-    opt.set_upper_bounds(theta_high)
-    opt.set_min_objective(objective)
-    opt.set_maxtime(optParams.walltime)
-    if optParams.global_opt is True:
-        opt = nl.opt(nl.G_MLSL_LDS, nParams)
-        local_opt = nl.opt(nl.LN_BOBYQA, nParams)
-        local_opt.set_ftol_rel(1e-4)
-        opt.set_local_optimizer(local_opt)
-    else:
-        opt.set_ftol_rel(1e-6)
 
     assert( (theta_low<=theta_0).all())
     assert( (theta_high>=theta_0).all())
 
-    theta_opt = opt.optimize(theta_0)
-    sigma, noise_sigma = unpack(theta_opt, unpackinfo)
-    opt_val = opt.last_optimum_value()
+    bounds = [a for a in zip(theta_low, theta_high)]
+    theta_opt = minimize(objective, theta_0, method='L-BFGS-B', bounds=bounds)
+    sigma, noise_sigma = unpack(theta_opt.x, unpackinfo)
+    opt_val = theta_opt.fun
     return sigma, noise_sigma, opt_val
 
 
