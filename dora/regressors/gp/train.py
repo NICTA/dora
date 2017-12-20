@@ -1,5 +1,4 @@
 import numpy as np
-# import nlopt as nl
 from .types import Folds
 from dora.regressors.gp import predict
 from dora.regressors.gp import linalg

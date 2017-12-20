@@ -1,8 +1,8 @@
 # Environment file for installing dora using Conda
 name: dora-env
 
-channels:
-  - conda-forge  # required to install nlopt
+# channels:
+#   - conda-forge  # required to install nlopt
 
 dependencies:
   - python=3.5
