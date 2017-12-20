@@ -8,7 +8,6 @@ dependencies:
   - python=3.5
   - numpy
   - scipy
-  - nlopt
   - flask
   - scikit-learn  # required by revrand
   - requests      # required to run demos

@@ -26,11 +26,9 @@ setup(
     dependency_links=[
         'git+https://github.com/nicta/revrand.git@v0.6.5#egg=revrand-0.6.5'],
     extras_require={
-        # 'nonlinear': ['NLopt'],
         'demos': [
             'unipath',
             'requests',
-            # 'bdkd-external'
         ],
     },
     license="Apache Software License 2.0",
