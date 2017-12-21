@@ -11,8 +11,10 @@ def main():
     nQuery = 100
     nDraws = 20
     nDims = 1
+    seed = 100
 
     # Make test dataset:
+    np.random.seed(seed)
     X = np.random.uniform(0, 30, size=(nTrain,nDims))
     X = X[np.argsort(X[:,0])]
     noise = np.random.normal(loc=0.0, scale=0.05, size=(nTrain,1))
@@ -33,7 +35,8 @@ def main():
         # a fun pathological example
         a = h(0.1, 5, 0.1) # We can use the same parameter multiple times!
         b = h(0.1, 5, 0.1) # or just define it inline later
-        return a*k('gaussian', b) + b*k('matern3on2', a)
+        return b*k('matern3on2', a)
+        # return a*k('gaussian', b) + b*k('matern3on2', a)
 
     # We can automatically extract the upper and lower theta vectors
     myKernelFn = gp.compose(mykernel)  # callable covariance underlyingFunction
