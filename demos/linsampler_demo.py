@@ -60,6 +60,7 @@ def main():
         pl.ylabel('f(x)')
         pl.legend(('Ground turth', 'Observations',
                'Most recent observation', 'Predicted mean', 'Predicted 2 standard deviation'))
+        pl.title('Observations after update')
 
         #Visualize the acquisition function
         acq_value, acq_max_ind = sampler.eval_acq(x)

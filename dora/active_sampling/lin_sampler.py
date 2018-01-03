@@ -11,7 +11,7 @@ from dora.active_sampling.base_sampler import Sampler, random_sample
 log = logging.getLogger(__name__)
 
 class BayesianLinear(Sampler):
-    """BayesianLinear Class.
+    """Bayesian linear model.
     Attributes
     ----------
     basisdef: str
@@ -72,12 +72,14 @@ class BayesianLinear(Sampler):
 
         Parameters
         ----------
-        x: ArrayBuffer
+        x: ArrayBuffer (N x D)
           the input feature.
+          N is number of input points, D is dimension of input.
         Returns
         -------
-        theta: numpy.ndarray (#input points, feature)
-              the feature matrix.
+        theta: numpy.ndarray (N x P)
+            the feature matrix.
+            N is number of input points, P is number of features.
         """
         mu = self.basisparams[0]
         s = self.basisparams[1]
@@ -96,9 +98,9 @@ class BayesianLinear(Sampler):
         """
         self.update_y_mean()
         logging.info('Training hyperparameters...')
-        params0 = [10., 10.]
+        params0 = [1., 1.]
         def nLMLcriterion(params):
-            return self.nMLM(params, self.FeatureGen(self.X))
+            return self.nLML(params, self.FeatureGen(self.X))
         newparams = scipy.optimize.minimize(nLMLcriterion,
                                             params0, method="COBYLA")
         logging.info("Done.")
@@ -108,19 +110,20 @@ class BayesianLinear(Sampler):
         return param_list
 
 
-    def nMLM(self, params, theta):
+    def nLML(self, params, theta):
         """Negative log likelihood.
 
         Parameters
         ----------
         params: tuple
                hyperparams of the bayesian linear model.
-        theta: numpy.ndarray
-              the feature matrix.
+        theta: numpy.ndarray (N x P)
+            the feature matrix.
+            N is number of input points, P is number of features.
         Returns
         -------
-        -MLM: float
-             negative log likelihood.
+        -LML: float
+             negative log marginal likelihood.
         """
         alpha = params[0]**2
         beta = params[1]**2
@@ -129,8 +132,8 @@ class BayesianLinear(Sampler):
         L = linalg.cholesky(A, lower=True)
         mn = beta * linalg.solve(A, np.dot(np.transpose(theta), self.y))
         predY = np.dot(theta, mn)
-        MLM = 0.5 * (p * np.log(alpha) + n*np.log(beta) - 2*np.sum(np.log(np.diag(L))) - n*np.log(2*np.pi) - beta * np.sum((self.y-predY)**2) - alpha*np.sum(mn**2))
-        return -MLM
+        LML = 0.5 * (p * np.log(alpha) + n*np.log(beta) - 2*np.sum(np.log(np.diag(L))) - n*np.log(2*np.pi) - beta * np.sum((self.y-predY)**2) - alpha*np.sum(mn**2))
+        return -LML
 
 
     def update_regressors(self):
@@ -146,7 +149,6 @@ class BayesianLinear(Sampler):
         self.regressors = [ ]
         theta = self.FeatureGen(self.X)
         for i_task in range(self.n_tasks):
-            #cache A, mu_w and L
             self.regressors.append(self._compute_AmuL(
                 self.hyperparams[i_task],theta, self.y()[:, i_task]))
 
@@ -191,8 +193,9 @@ class BayesianLinear(Sampler):
                the number of random query points across the search space.
         Returns
         -------
-        xq: numpy.ndarray
+        xq: numpy.ndarray (1 x D)
            the next observation.
+           D is dimension of observation point.
         uid: str
             hexademical ID to identify the next job.
         """
@@ -227,10 +230,12 @@ class BayesianLinear(Sampler):
         ----------
         params: tuple
                params of the bayesian linear model for each task.
-        theta: numpy.ndarray
-              the feature matrix.
-        y: Array Buffer
+        theta: numpy.ndarray (N x P)
+            the feature matrix.
+            N is number of input points, P is number of features.
+        y: Array Buffer (N x 1)
           the target outputs.
+          N is number of points.
         Returns
         -------
         (A, mu_w, L, params): tuple
@@ -251,14 +256,17 @@ class BayesianLinear(Sampler):
         regressor: tuple
                 a tuple (A, mu_w, L, hyperparams)
                 returned by _compute_AmuL.
-        thetaQuery: numpy.ndarray
+        thetaQuery: numpy.ndarray (NQuery x P)
                   the query feature matrix.
+                  NQuery is number of query points, P is number of features.
         Returns
         -------
-        yq_mean: numpy.ndarray
+        yq_mean: numpy.ndarray (NQuery x 1)
                 mean of the posterior distribution.
-        yq_std: numpy.ndarray
+                NQuery is number of query points.
+        yq_std: numpy.ndarray (NQuery x 1)
                 standard deviation of the posterior distribution.
+                NQuery is number of query points.
         """
         A, mu_w, L, params = regressor[:]
         beta = params[1]**2
@@ -273,15 +281,18 @@ class BayesianLinear(Sampler):
 
         Parameters
         ----------
-        Xq: numpy.ndarray
+        Xq: numpy.ndarray (NQuery x D)
            query points.
+           NQuery is number of query points, D is dimension of query point.
         real: bool, optional
         Returns
         -------
-        Yq_mean: numpy.ndarray
+        Yq_mean: numpy.ndarray (NQuery x 1)
                 mean of the prediction at query points.
-        Yq_std: numpy.ndarray
+                NQuery is number of query points.
+        Yq_std: numpy.ndarray (NQuery x 1)
                 standard deviation of the prediction at query points.
+                NQuery is number of query points.
         """
         assert self.hyperparams, "Sampler is not trained yet."
         if real:
@@ -318,12 +329,14 @@ class BayesianLinear(Sampler):
 
         Parameters
         ----------
-        Xq: numpy.ndarray
+        Xq: numpy.ndarray (NQuery x D)
             query points.
+            NQuery is number of query points, D is dimension of query point.
         Returns
         -------
-        yq_acq: numpy.ndarray
+        yq_acq: numpy.ndarray (NQuery x 1)
                 acquisition function value at Xq.
+                NQuery is number of query points.
         np.argmax(yq_acq): int
                           index of the maximum acquisition function value.
         """
