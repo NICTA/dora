@@ -12,7 +12,7 @@ A library for Bayesian active sampling with non-parametric models
 Dora simultaneously builds a non-parametric model of an observable
 process, and directs new measurements to learn about the process. Inherently, 
 it takes actions to improve the model (exploration), and to achieve desired
-goals given its knowledge (exploration).
+goals given its knowledge (exploitation).
 
 The models utilised are non-parametric models such as bilinear interpolation
 of a Delaunay triangulation or Gaussian Process regression. We are building
